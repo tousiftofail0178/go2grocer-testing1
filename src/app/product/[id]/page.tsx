@@ -12,6 +12,7 @@ import { ProductCard } from '@/components/ui/ProductCard';
 import { productApi } from '@/lib/api';
 import { Product } from '@/lib/data';
 import { useCartStore } from '@/store/useCartStore';
+import { useAuthStore } from '@/store/useAuthStore';
 import { generateProductSchema } from '@/lib/seo';
 import styles from './page.module.css';
 
@@ -23,6 +24,7 @@ export default function ProductPage() {
     const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const { addItem, items, updateQuantity } = useCartStore();
+    const { isAuthenticated } = useAuthStore();
 
     useEffect(() => {
         if (!id) return;
@@ -133,7 +135,7 @@ export default function ProductPage() {
 
                         <div className={styles.priceSection}>
                             <div className={styles.prices}>
-                                {product.price !== undefined ? (
+                                {product.price !== undefined && (!product.isPriceHidden || isAuthenticated) ? (
                                     <>
                                         <span className={styles.currentPrice}>৳{product.price}</span>
                                         {product.originalPrice && (
@@ -161,7 +163,7 @@ export default function ProductPage() {
                         </div>
 
                         <div className={styles.actions}>
-                            {product.price !== undefined ? (
+                            {product.price !== undefined && (!product.isPriceHidden || isAuthenticated) ? (
                                 <>
                                     <div className={styles.quantityControl}>
                                         <button className={styles.qtyBtn}><Minus size={18} /></button>

@@ -7,6 +7,7 @@ import { Plus, Star } from 'lucide-react';
 import { Button } from './Button';
 import { Badge } from './Badge';
 import { QuantitySelector } from './QuantitySelector';
+import { useAuthStore } from '@/store/useAuthStore';
 import styles from './ProductCard.module.css';
 import { Product } from '@/lib/data';
 
@@ -23,6 +24,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     quantity = 0,
     onUpdateQuantity
 }) => {
+    const { isAuthenticated } = useAuthStore();
     const discountPercentage = (product.originalPrice && product.price)
         ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
         : 0;
@@ -58,7 +60,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 </div>
 
                 <div className={styles.footer}>
-                    {product.price !== undefined ? (
+                    {/* Show price if: (1) Price exists AND (2) [Not hidden OR User is authenticated] */}
+                    {product.price !== undefined && (!product.isPriceHidden || isAuthenticated) ? (
                         <>
                             <div className={styles.priceWrapper}>
                                 <span className={styles.price}>৳{product.price}</span>
