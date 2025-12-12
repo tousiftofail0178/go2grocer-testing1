@@ -69,6 +69,15 @@ function ShopContent() {
         fetchData();
     }, []);
 
+    // Sync URL category with state when navigation occurs
+    useEffect(() => {
+        if (categoryQuery) {
+            setSelectedCategories([categoryQuery]);
+        } else {
+            setSelectedCategories([]);
+        }
+    }, [categoryQuery]);
+
     // Effect to apply filters sorting whenever filter state changes
     useEffect(() => {
         let result = [...products];

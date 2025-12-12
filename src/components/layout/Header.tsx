@@ -162,7 +162,7 @@ export default function Header() {
                     <ul className={styles.categoryList}>
                         <li className={`${styles.categoryItem} ${styles.active}`}>
                             <Link href="/shop" style={{ textDecoration: 'none', color: 'inherit' }}>
-                                Actions
+                                All
                             </Link>
                         </li>
                         {categories.map((category) => (
