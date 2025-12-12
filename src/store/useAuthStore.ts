@@ -263,12 +263,34 @@ export const useAuthStore = create<AuthState>()(
                     // Simulate API call
                     await new Promise(resolve => setTimeout(resolve, 1000));
 
-                    if (userId === 'B2B_CLIENT_01' && password === 'password123') {
+                    const validUsers: { [key: string]: { role: string, name: string } } = {
+                        'G2G-001': { role: 'Admin', name: 'System Admin' },
+                        'G2G-002': { role: 'Owner', name: 'Business Owner' },
+                        'G2G-003': { role: 'Manager', name: 'Store Manager' },
+                        'B2B_CLIENT_01': { role: 'b2b', name: 'B2B Client 01' } // Keep legacy for now
+                    };
+
+                    if (validUsers[userId] && password === '1234') {
+                        set({
+                            user: {
+                                id: userId.toLowerCase().replace('-', ''),
+                                name: validUsers[userId].name,
+                                phone: '01000000000',
+                                role: validUsers[userId].role.toLowerCase() as User['role']
+                            },
+                            token: `mock-jwt-token-${userId}`,
+                            isAuthenticated: true,
+                            isLoading: false
+                        });
+                        if (typeof window !== 'undefined') {
+                            localStorage.setItem('token', `mock-jwt-token-${userId}`);
+                        }
+                    } else if (userId === 'B2B_CLIENT_01' && password === 'password123') {
                         set({
                             user: {
                                 id: 'b2b-01',
                                 name: 'B2B Client 01',
-                                phone: '01000000000', // Placeholder
+                                phone: '01000000000',
                                 role: 'b2b'
                             },
                             token: 'mock-jwt-token-b2b',

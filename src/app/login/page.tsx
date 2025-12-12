@@ -24,6 +24,26 @@ function LoginForm() {
     const { loginB2B, isLoading, error } = useAuthStore();
     const [userId, setUserId] = useState('');
     const [password, setPassword] = useState('');
+    const [userRole, setUserRole] = useState<string | null>(null);
+
+    // Mock User Roles Data
+    const USER_ROLES: { [key: string]: string } = {
+        'G2G-001': 'Admin',
+        'G2G-002': 'Owner',
+        'G2G-003': 'Manager'
+    };
+
+    const handleUserIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = e.target.value;
+        setUserId(val);
+
+        // Check for role
+        if (USER_ROLES[val]) {
+            setUserRole(USER_ROLES[val]);
+        } else {
+            setUserRole(null);
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -45,15 +65,26 @@ function LoginForm() {
                 {error && <div className={styles.error}>{error}</div>}
 
                 <form onSubmit={handleSubmit} className={styles.form}>
-                    <Input
-                        label="User ID"
-                        placeholder="Enter User ID"
-                        value={userId}
-                        onChange={(e) => setUserId(e.target.value)}
-                        // icon={<UserIcon size={18} />} 
-                        type="text"
-                        required
-                    />
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        <Input
+                            label="User ID"
+                            placeholder="Enter User ID"
+                            value={userId}
+                            onChange={handleUserIdChange}
+                            type="text"
+                            required
+                        />
+                        {userRole && (
+                            <div style={{
+                                fontSize: '0.875rem',
+                                color: 'var(--primary-green)',
+                                fontWeight: 600,
+                                marginLeft: '0.25rem'
+                            }}>
+                                Role: {userRole}
+                            </div>
+                        )}
+                    </div>
                     <Input
                         label="Password"
                         placeholder="Enter Password"

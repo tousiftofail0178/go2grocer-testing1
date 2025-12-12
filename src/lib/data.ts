@@ -24,7 +24,7 @@ export interface User {
     name: string;
     phone: string;
     email?: string;
-    role?: 'consumer' | 'b2b';
+    role?: 'consumer' | 'b2b' | 'admin' | 'owner' | 'manager';
     b2bRole?: 'owner' | 'manager';
 }
 
