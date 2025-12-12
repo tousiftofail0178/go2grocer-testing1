@@ -7,6 +7,7 @@ export const users = pgTable('users', {
     name: text('name').notNull(),
     phone: text('phone').notNull(),
     email: text('email'),
+    address: text('address'), // Added address field
     role: text('role').$type<'admin' | 'owner' | 'manager' | 'consumer' | 'b2b'>().default('consumer'),
     password: text('password'), // Will store hashed password later
     createdAt: timestamp('created_at').defaultNow(),

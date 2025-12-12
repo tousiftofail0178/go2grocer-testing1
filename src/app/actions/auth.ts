@@ -81,3 +81,66 @@ export async function registerB2BUser(data: {
         return { success: false, error: 'Registration failed' };
     }
 }
+
+export async function verifyOtpUser(phone: string) {
+    try {
+        // 1. Find user by phone
+        const foundUsers = await db.select().from(users).where(eq(users.phone, phone));
+        const user = foundUsers[0];
+
+        if (user) {
+            // Return existing user
+            return {
+                success: true,
+                user: {
+                    id: user.userId,
+                    name: user.name,
+                    phone: user.phone,
+                    email: user.email || undefined,
+                    address: user.address || undefined,
+                    role: user.role as User['role'],
+                }
+            };
+        } else {
+            // 2. Create new consumer user if not exists
+            const newUserId = `C-${Date.now()}`; // Simple ID generation
+            await db.insert(users).values({
+                userId: newUserId,
+                name: 'Guest User',
+                phone: phone,
+                role: 'consumer',
+            });
+
+            return {
+                success: true,
+                user: {
+                    id: newUserId,
+                    name: 'Guest User',
+                    phone: phone,
+                    role: 'consumer' as const,
+                }
+            };
+        }
+    } catch (error: any) {
+        console.error('OTP Verification error:', error);
+        return { success: false, error: 'Verification failed' };
+    }
+}
+
+export async function updateUserProfile(userId: string, data: { name?: string; email?: string; phone?: string; address?: string }) {
+    try {
+        await db.update(users)
+            .set({
+                name: data.name,
+                email: data.email,
+                phone: data.phone,
+                address: data.address
+            })
+            .where(eq(users.userId, userId));
+
+        return { success: true };
+    } catch (error: any) {
+        console.error('Profile update error:', error);
+        return { success: false, error: 'Failed to update profile' };
+    }
+}

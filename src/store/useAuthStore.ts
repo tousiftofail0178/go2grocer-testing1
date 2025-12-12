@@ -247,8 +247,14 @@ export const useAuthStore = create<AuthState>()(
             updateProfile: async (data) => {
                 set({ isLoading: true, error: null });
                 try {
-                    // Simulate API call
-                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    const currentUser = get().user;
+                    if (!currentUser) throw new Error('No user logged in');
+
+                    // Call Server Action
+                    const { updateUserProfile } = await import('@/app/actions/auth');
+                    const result = await updateUserProfile(currentUser.id.toString(), data);
+
+                    if (!result.success) throw new Error(result.error);
 
                     set(state => ({
                         user: state.user ? { ...state.user, ...data } : null,
@@ -264,16 +270,32 @@ export const useAuthStore = create<AuthState>()(
             verifyOtp: async (phone: string, otp: string) => {
                 set({ isLoading: true, error: null });
                 try {
-                    const data = await authApi.verifyOtp(phone, otp);
+                    // Call Server Action for DB user lookup/creation
+                    const { verifyOtpUser } = await import('@/app/actions/auth');
+
+                    // Simulate OTP check (mock 123456 as per api.ts or 1234 as per modal?)
+                    // The previous authApi had 123456. The modal has 1234. Let's support both or just assume valid for now since we don't have SMS.
+                    // Ideally check OTP first. 
+                    if (otp !== '1234' && otp !== '123456') throw new Error('Invalid OTP');
+
+                    const result = await verifyOtpUser(phone);
+
+                    if (!result.success || !result.user) {
+                        throw new Error(result.error || 'Verification failed');
+                    }
+
+                    // Mock token since we aren't doing real JWT yet
+                    const token = `mock-token-${result.user.id}`;
+
                     set({
-                        user: data.user,
-                        token: data.token || null,
+                        user: result.user,
+                        token: token,
                         isAuthenticated: true,
                         isLoading: false
                     });
-                    // Store token in localStorage for API interceptor
-                    if (typeof window !== 'undefined' && data.token) {
-                        localStorage.setItem('token', data.token);
+
+                    if (typeof window !== 'undefined') {
+                        localStorage.setItem('token', token);
                     }
                 } catch (error: unknown) {
                     const message = error instanceof Error ? error.message : 'Invalid OTP';
