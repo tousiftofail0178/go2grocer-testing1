@@ -13,7 +13,53 @@ export interface Product {
     isPriceHidden?: boolean; // New flag for visibility control
 }
 
-// ... (Category, User, CartItem interfaces remain unchanged)
+
+export interface Category {
+    id: string;
+    name: string;
+    icon: string; // We'll use Lucide icon names or image paths later
+    slug: string;
+}
+
+export interface User {
+    id: number | string;
+    name: string;
+    phone: string;
+    email?: string;
+    address?: string;
+    role?: 'consumer' | 'b2b' | 'admin' | 'owner' | 'manager';
+    b2bRole?: 'owner' | 'manager';
+}
+
+export interface CartItem extends Product {
+    quantity: number;
+}
+
+export interface BusinessEntity {
+    id: string;
+    name: string;
+    address: string;
+    phone: string;
+    tin?: string;
+    bin?: string;
+    vat?: string;
+    bankName?: string;
+    bankAccount?: string;
+    bankBranch?: string;
+}
+
+export const categories: Category[] = [
+    { id: '1', name: 'Fresh Vegetables', icon: 'Carrot', slug: 'vegetables' },
+    { id: '2', name: 'Fresh Fruits', icon: 'Apple', slug: 'fruits' },
+    { id: '3', name: 'Fish & Meat', icon: 'Fish', slug: 'fish-meat' },
+    { id: '4', name: 'Dairy & Eggs', icon: 'Milk', slug: 'dairy-eggs' },
+    { id: '5', name: 'Rice, Dal & Oil', icon: 'Wheat', slug: 'rice-dal-oil' },
+    { id: '6', name: 'Snacks', icon: 'Cookie', slug: 'snacks' },
+    { id: '7', name: 'Beverages', icon: 'Coffee', slug: 'beverages' },
+    { id: '8', name: 'Baby Care', icon: 'Baby', slug: 'baby-care' },
+    { id: '9', name: 'Cleaning', icon: 'Spray', slug: 'cleaning' },
+    { id: '10', name: 'Home & Kitchen', icon: 'Home', slug: 'home-kitchen' },
+];
 
 export const products: Product[] = [
     // Vegetables
