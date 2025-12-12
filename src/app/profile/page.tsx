@@ -342,7 +342,7 @@ export default function ProfilePage() {
                 </div>
 
                 {/* Conditional Section: Businesses (B2B) vs Addresses (Consumer) */}
-                {['b2b', 'owner', 'manager', 'admin'].includes(user?.role || '') ? (
+                {['b2b', 'owner', 'admin'].includes(user?.role || '') ? (
                     <div className={styles.card}>
                         <div className={styles.cardHeader}>
                             <MapPin size={24} className={styles.icon} />
