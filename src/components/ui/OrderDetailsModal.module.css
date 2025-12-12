@@ -1,0 +1,237 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+}
+
+.modal {
+    background-color: var(--white);
+    border-radius: 1rem;
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    animation: slideIn 0.2s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-grey);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-black);
+    margin-bottom: 0.25rem;
+}
+
+.orderId {
+    color: var(--text-grey);
+    font-size: 0.875rem;
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    color: var(--text-grey);
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    transition: all 0.2s;
+}
+
+.closeButton:hover {
+    background-color: var(--background-grey);
+    color: var(--text-black);
+}
+
+.content {
+    padding: 1.5rem;
+    overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.statusBar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    padding: 1rem;
+    background-color: var(--background-grey);
+    border-radius: 0.75rem;
+}
+
+.statusItem {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.statusLabel {
+    font-size: 0.75rem;
+    color: var(--text-grey);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.statusValue {
+    font-weight: 600;
+    color: var(--text-black);
+}
+
+.statusBadge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: capitalize;
+    color: var(--text-black);
+}
+
+.processing {
+    background-color: #FEF3C7;
+    color: #92400E;
+}
+
+/* Amber 100/800 */
+.delivered {
+    background-color: #D1FAE5;
+    color: #065F46;
+}
+
+/* Emerald 100/800 */
+.cancelled {
+    background-color: #FEE2E2;
+    color: #991B1B;
+}
+
+/* Red 100/800 */
+
+.sectionTitle {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text-black);
+}
+
+.itemsList {
+    border: 1px solid var(--border-grey);
+    border-radius: 0.75rem;
+    overflow: hidden;
+}
+
+.item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-grey);
+}
+
+.item:last-child {
+    border-bottom: none;
+}
+
+.itemInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.itemName {
+    font-weight: 500;
+    color: var(--text-black);
+}
+
+.itemMeta {
+    font-size: 0.875rem;
+    color: var(--text-grey);
+}
+
+.itemRight {
+    text-align: right;
+}
+
+.itemQty {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--text-grey);
+}
+
+.itemPrice {
+    font-weight: 600;
+    color: var(--text-black);
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.detailRow {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.icon {
+    color: var(--primary-green);
+    margin-top: 0.25rem;
+}
+
+.detailText {
+    color: var(--text-black);
+    line-height: 1.5;
+}
+
+.subText {
+    color: var(--text-grey);
+    font-size: 0.875rem;
+}
+
+.footer {
+    padding: 1.5rem;
+    border-top: 1px solid var(--border-grey);
+}
+
+@media (max-width: 640px) {
+    .row {
+        grid-template-columns: 1fr;
+    }
+
+    .statusBar {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+}

@@ -1,0 +1,363 @@
+.container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 4rem;
+}
+
+.topSection {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+}
+
+.gallery {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.mainImageWrapper {
+    position: relative;
+    width: 100%;
+    padding-top: 100%;
+    /* Square */
+    background-color: var(--white);
+    border: 1px solid var(--border-grey);
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.mainImage {
+    object-fit: contain;
+    padding: 2rem;
+}
+
+.badgeWrapper {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+}
+
+.discountBadge {
+    font-size: 0.875rem;
+    padding: 0.375rem 0.75rem;
+}
+
+.thumbnails {
+    display: flex;
+    gap: 1rem;
+}
+
+.thumbnail {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    border: 1px solid var(--border-grey);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: all 0.2s;
+}
+
+.thumbnail.activeThumbnail,
+.thumbnail:hover {
+    border-color: var(--primary-green);
+    opacity: 1;
+}
+
+.thumbnailImage {
+    object-fit: cover;
+}
+
+.info {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.header {
+    border-bottom: 1px solid var(--border-grey);
+    padding-bottom: 1.5rem;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-black);
+    margin-bottom: 0.5rem;
+}
+
+.meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.rating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stars {
+    display: flex;
+    gap: 2px;
+}
+
+.ratingCount {
+    color: var(--text-grey);
+    font-size: 0.875rem;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.sku {
+    color: var(--text-grey);
+    font-size: 0.875rem;
+}
+
+.priceSection {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.prices {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+}
+
+.currentPrice {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-green);
+}
+
+.originalPrice {
+    font-size: 1.25rem;
+    color: var(--text-grey);
+    text-decoration: line-through;
+}
+
+.taxInfo {
+    font-size: 0.875rem;
+    color: var(--success-green);
+}
+
+.variantSection {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.label {
+    font-weight: 600;
+    color: var(--text-black);
+    font-size: 0.9375rem;
+}
+
+.variants {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.variant {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-grey);
+    border-radius: 0.5rem;
+    background: var(--white);
+    color: var(--text-black);
+    font-size: 0.9375rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.variant:hover {
+    border-color: var(--primary-green);
+}
+
+.variant.activeVariant {
+    border-color: var(--primary-green);
+    background-color: rgba(36, 161, 72, 0.05);
+    color: var(--primary-green);
+    font-weight: 600;
+}
+
+.actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.quantityControl {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--border-grey);
+    border-radius: 0.75rem;
+    overflow: hidden;
+}
+
+.qtyBtn {
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--white);
+    border: none;
+    cursor: pointer;
+    color: var(--text-black);
+    transition: background 0.2s;
+}
+
+.qtyBtn:hover {
+    background-color: var(--background-grey);
+}
+
+.qtyValue {
+    width: 2rem;
+    text-align: center;
+    font-weight: 600;
+}
+
+.addToCartBtn {
+    flex: 1;
+    height: 3rem;
+}
+
+.wishlistBtn {
+    width: 3rem;
+    height: 3rem;
+    border: 1px solid var(--border-grey);
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--white);
+    color: var(--text-black);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.wishlistBtn:hover {
+    border-color: var(--error-red);
+    color: var(--error-red);
+}
+
+.features {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding: 1.5rem;
+    background-color: var(--background-grey);
+    border-radius: 1rem;
+}
+
+.feature {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.featureIcon {
+    color: var(--primary-green);
+}
+
+.featureText {
+    display: flex;
+    flex-direction: column;
+}
+
+.featureTitle {
+    font-weight: 600;
+    font-size: 0.9375rem;
+    color: var(--text-black);
+}
+
+.featureDesc {
+    font-size: 0.875rem;
+    color: var(--text-grey);
+}
+
+.tabsSection {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.tabs {
+    display: flex;
+    gap: 2rem;
+    border-bottom: 1px solid var(--border-grey);
+}
+
+.tab {
+    padding: 1rem 0;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-grey);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tab:hover {
+    color: var(--primary-green);
+}
+
+.tab.activeTab {
+    color: var(--primary-green);
+    border-bottom-color: var(--primary-green);
+    font-weight: 600;
+}
+
+.tabContent {
+    color: var(--text-grey);
+    line-height: 1.6;
+    max-width: 800px;
+}
+
+.detailsList {
+    margin-top: 1rem;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.similarSection {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.sectionTitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-black);
+}
+
+.similarGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .topSection {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .features {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,184 @@
+.container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    min-height: 80vh;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-black);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+.card {
+    background-color: var(--white);
+    border: 1px solid var(--border-grey);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+}
+
+.fullWidth {
+    grid-column: 1 / -1;
+}
+
+.cardHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-grey);
+}
+
+.cardHeader h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-black);
+}
+
+.icon {
+    color: var(--primary-green);
+}
+
+.cardContent {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    flex: 1;
+}
+
+.infoRow {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed var(--border-grey);
+}
+
+.infoRow:last-child {
+    border-bottom: none;
+}
+
+.label {
+    color: var(--text-grey);
+    font-weight: 500;
+}
+
+.value {
+    color: var(--text-black);
+    font-weight: 600;
+}
+
+.emptyText {
+    color: var(--text-grey);
+    text-align: center;
+    padding: 1rem;
+}
+
+.addBtn {
+    align-self: center;
+    margin-top: auto;
+}
+
+.tableWrapper {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+}
+
+.table th {
+    text-align: left;
+    padding: 1rem;
+    background-color: var(--background-grey);
+    color: var(--text-grey);
+    font-weight: 600;
+}
+
+.table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-grey);
+    color: var(--text-black);
+}
+
+.status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status.delivered {
+    background-color: rgba(36, 161, 72, 0.1);
+    color: var(--primary-green);
+}
+
+.status.processing {
+    background-color: rgba(255, 206, 58, 0.2);
+    color: #B38B00;
+}
+
+.status.cancelled {
+    background-color: rgba(229, 57, 53, 0.1);
+    color: var(--error-red);
+}
+
+/* Address List */
+.addressList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.addressItem {
+    padding: 0.75rem;
+    background-color: var(--background-grey);
+    border-radius: 0.5rem;
+    border: 1px solid transparent;
+}
+
+.addressLabel {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-black);
+    margin-bottom: 0.25rem;
+}
+
+.addressText {
+    font-size: 0.875rem;
+    color: var(--text-grey);
+    line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+}

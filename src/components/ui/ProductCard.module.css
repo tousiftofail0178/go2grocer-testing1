@@ -1,0 +1,129 @@
+.card {
+    background: var(--white);
+    border: 1px solid var(--border-grey);
+    border-radius: 1rem;
+    overflow: hidden;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+}
+
+.imageWrapper {
+    position: relative;
+    width: 100%;
+    padding-top: 75%;
+    /* 4:3 Aspect Ratio */
+    background-color: #f9f9f9;
+    display: block;
+    cursor: pointer;
+}
+
+.image {
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.card:hover .image {
+    transform: scale(1.05);
+}
+
+.badgeWrapper {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    z-index: 1;
+}
+
+.content {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    gap: 0.5rem;
+}
+
+.header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.nameLink {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+.nameLink:hover .name {
+    color: var(--primary-green);
+}
+
+.name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-black);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    height: 2.5rem;
+    /* Fixed height for 2 lines */
+    transition: color 0.2s ease;
+}
+
+.weight {
+    font-size: 0.875rem;
+    color: var(--text-grey);
+}
+
+.rating {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--text-black);
+    font-weight: 500;
+}
+
+.footer {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.priceWrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.price {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--primary-green);
+}
+
+.originalPrice {
+    font-size: 0.875rem;
+    color: var(--text-grey);
+    text-decoration: line-through;
+}
+
+.action {
+    min-width: 80px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.addButton {
+    border-radius: 2rem;
+    padding: 0.375rem 0.75rem;
+}

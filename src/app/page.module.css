@@ -1,0 +1,434 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  padding-bottom: 4rem;
+}
+
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3rem;
+  padding: 3rem 1rem;
+  background: linear-gradient(to right, #f0fdf4, #ffffff);
+  max-width: 1440px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.heroContent {
+  flex: 1;
+  max-width: 600px;
+}
+
+.heroTitle {
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+  color: var(--text-black);
+}
+
+.highlight {
+  color: var(--primary-green);
+}
+
+.heroSubtitle {
+  font-size: 1.125rem;
+  color: var(--text-grey);
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.heroButtons {
+  display: flex;
+  gap: 1rem;
+}
+
+.heroImageWrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.heroImagePlaceholder {
+  width: 100%;
+  max-width: 500px;
+  height: 350px;
+  background-color: #e2e8f0;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.locationBar {
+  background-color: var(--white);
+  border-top: 1px solid var(--border-grey);
+  border-bottom: 1px solid var(--border-grey);
+  padding: 1rem;
+}
+
+.locationContent {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.locationText {
+  color: var(--text-grey);
+  font-size: 0.9375rem;
+}
+
+.locationSelect {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border-grey);
+  border-radius: 0.5rem;
+  font-size: 0.9375rem;
+  color: var(--text-black);
+  background-color: var(--white);
+  cursor: pointer;
+}
+
+.section {
+  max-width: 1440px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 0 1rem;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-black);
+}
+
+.viewAll {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--primary-green);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  transition: gap 0.2s;
+}
+
+.viewAll:hover {
+  gap: 0.75rem;
+}
+
+.categoriesGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.5rem;
+}
+
+.productsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.5rem;
+}
+
+.featuresSection {
+  background-color: var(--white);
+  padding: 4rem 1rem;
+}
+
+.features {
+  max-width: 1440px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.featureCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+  background-color: var(--background-grey);
+  border-radius: 1rem;
+}
+
+.featureIconWrapper {
+  color: var(--primary-green);
+  margin-bottom: 1rem;
+  background-color: rgba(36, 161, 72, 0.1);
+  padding: 1rem;
+  border-radius: 50%;
+}
+
+.featureTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--text-black);
+}
+
+.featureText {
+  color: var(--text-grey);
+  line-height: 1.5;
+}
+
+.loyaltySection {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  width: 100%;
+}
+
+.loyaltyContent {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  border-radius: 1rem;
+  padding: 2rem 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--white);
+  position: relative;
+  box-shadow: 0 10px 25px -5px rgba(22, 163, 74, 0.4);
+  gap: 2rem;
+}
+
+.loyaltyIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+}
+
+.loyaltyIconMain {
+  fill: #a7f3d0;
+  stroke: #ffffff;
+  stroke-width: 2px;
+  z-index: 2;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+}
+
+.loyaltyIconDecoration {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 70%);
+  border-radius: 50%;
+  z-index: 1;
+}
+
+.loyaltyText {
+  flex: 1;
+}
+
+.loyaltyText h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  color: var(--white);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.loyaltyText p {
+  font-size: 1.125rem;
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 600px;
+}
+
+.loyaltyButtonWrapper {
+  text-decoration: none;
+}
+
+.joinButton {
+  background-color: var(--white);
+  color: #16a34a;
+  /* Darker green for text */
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 9999px;
+  /* Pill shape */
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+}
+
+.joinButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+@media (max-width: 768px) {
+  .loyaltyContent {
+    flex-direction: column;
+    text-align: center;
+    padding: 2rem;
+    gap: 1.5rem;
+  }
+
+  .loyaltyText h2 {
+    font-size: 1.75rem;
+  }
+}
+
+.appSection {
+  padding: 2rem 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.appContent {
+  width: 100%;
+  max-width: 1000px;
+  background-color: var(--white);
+  border-radius: 1.5rem;
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(36, 161, 72, 0.1);
+  /* Subtle green-tinted shadow */
+  border: 1px solid var(--border-grey);
+}
+
+.appTitle {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  color: var(--primary-green);
+}
+
+.appSubtitle {
+  color: var(--text-grey);
+  margin-bottom: 2rem;
+  font-size: 1.125rem;
+}
+
+.appButtons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .hero {
+    flex-direction: column;
+    text-align: center;
+    padding: 2rem 1rem;
+  }
+
+  .heroContent {
+    max-width: 100%;
+  }
+
+  .heroTitle {
+    font-size: 2rem;
+    line-height: 1.3;
+  }
+
+  .heroSubtitle {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .heroButtons {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .heroImagePlaceholder {
+    max-height: 300px;
+    height: 250px;
+  }
+
+  .categoriesGrid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 1rem;
+  }
+
+  .productsGrid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+  }
+
+  .features {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .featureCard {
+    padding: 1.5rem;
+  }
+
+  .loyaltyContent {
+    flex-direction: column;
+    text-align: center;
+    padding: 2rem 1.5rem;
+  }
+
+  .loyaltyTitle {
+    font-size: 1.5rem;
+  }
+
+  .loyaltySubtitle {
+    font-size: 1rem;
+  }
+
+  .loyaltyIcon {
+    display: none;
+  }
+
+  .appTitle {
+    font-size: 1.5rem;
+  }
+
+  .appSubtitle {
+    font-size: 1rem;
+  }
+
+  .appButtons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 480px) {
+  .heroTitle {
+    font-size: 1.75rem;
+  }
+
+  .heroSubtitle {
+    font-size: 0.9375rem;
+  }
+
+  .heroImagePlaceholder {
+    height: 200px;
+  }
+
+  .productsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .categoriesGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

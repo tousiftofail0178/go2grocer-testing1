@@ -1,0 +1,137 @@
+.container {
+    padding-top: 2rem;
+    padding-bottom: 4rem;
+    background-color: var(--background-grey);
+    min-height: 80vh;
+}
+
+.container {
+    padding-bottom: 4rem;
+    background-color: var(--white);
+    min-height: 80vh;
+}
+
+.hero {
+    background-color: var(--white);
+    color: var(--text-black);
+    padding: 3rem 1rem 1rem;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.heroTitle {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+    color: var(--primary-green);
+}
+
+.heroSubtitle {
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+    color: var(--text-grey);
+    line-height: 1.5;
+}
+
+.contentWrapper {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.stepsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-bottom: 4rem;
+}
+
+.stepCard {
+    background: var(--white);
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+    text-align: center;
+}
+
+.stepCard:hover {
+    transform: translateY(-5px);
+}
+
+.stepIcon {
+    width: 64px;
+    height: 64px;
+    background-color: rgba(36, 161, 72, 0.1);
+    color: var(--primary-green);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+}
+
+.stepTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: var(--text-black);
+}
+
+.stepDesc {
+    color: var(--text-grey);
+    line-height: 1.5;
+}
+
+.ctaSection {
+    text-align: center;
+    background: var(--background-grey);
+    padding: 3rem;
+    border-radius: 1rem;
+    margin-bottom: 4rem;
+}
+
+.ctaTitle {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--text-black);
+}
+
+.ctaText {
+    color: var(--text-grey);
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+}
+
+.registerButton {
+    display: inline-block;
+    background-color: var(--primary-green);
+    color: var(--white);
+    font-size: 1.25rem;
+    font-weight: 600;
+    padding: 1rem 3rem;
+    border-radius: 0.75rem;
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+.registerButton:hover {
+    background-color: #1e8e3e;
+}
+
+@media (max-width: 768px) {
+    .heroTitle {
+        font-size: 2rem;
+    }
+
+    .stepsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .ctaSection {
+        padding: 2rem;
+    }
+}

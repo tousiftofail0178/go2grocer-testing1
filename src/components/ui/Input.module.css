@@ -1,0 +1,55 @@
+.inputWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-black);
+}
+
+.inputContainer {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-grey);
+    border-radius: 0.75rem;
+    font-size: 1rem;
+    color: var(--text-black);
+    background-color: var(--white);
+    transition: border-color 0.2s ease;
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 3px rgba(36, 161, 72, 0.1);
+}
+
+.input.hasIcon {
+    padding-left: 2.75rem;
+}
+
+.icon {
+    position: absolute;
+    left: 1rem;
+    color: var(--text-grey);
+    pointer-events: none;
+}
+
+.error {
+    border-color: var(--error-red);
+}
+
+.errorMessage {
+    font-size: 0.75rem;
+    color: var(--error-red);
+}
