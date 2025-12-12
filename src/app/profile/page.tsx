@@ -2,14 +2,16 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, Package, MapPin, LogOut, Loader2 } from 'lucide-react';
+import { User, Package, MapPin, LogOut, Loader2, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useAuthStore } from '@/store/useAuthStore';
 import { orderApi } from '@/lib/api';
 import styles from './page.module.css';
+import { BusinessEntity } from '@/lib/data';
 
 import { AddressModal } from '@/components/ui/AddressModal';
 import { OrderDetailsModal } from '@/components/ui/OrderDetailsModal';
+import { EditBusinessModal } from '@/components/ui/EditBusinessModal';
 import { useOrderStore, Order } from '@/store/useOrderStore';
 
 // Basic modal for editing profile
@@ -266,7 +268,7 @@ const inputStyle = {
 
 export default function ProfilePage() {
     const router = useRouter();
-    const { user, isAuthenticated, logout, addresses, updateProfile, businesses, registerBusiness } = useAuthStore();
+    const { user, isAuthenticated, logout, addresses, updateProfile, businesses, registerBusiness, updateBusiness } = useAuthStore();
     const { orders } = useOrderStore(); // fetch directly from store
     const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -275,6 +277,9 @@ export default function ProfilePage() {
 
     // Business Modal
     const [isBusinessModalOpen, setIsBusinessModalOpen] = useState(false);
+    const [isEditBusinessModalOpen, setIsEditBusinessModalOpen] = useState(false);
+    // Initialize editingBusiness state
+    const [editingBusiness, setEditingBusiness] = useState<BusinessEntity | null>(null);
 
     useEffect(() => {
         if (!isAuthenticated) {

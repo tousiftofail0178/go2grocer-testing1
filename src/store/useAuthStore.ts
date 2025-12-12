@@ -49,13 +49,14 @@ interface AuthState {
     selectAddress: (address: Address) => void;
     selectBusiness: (business: BusinessEntity) => void;
     registerBusiness: (business: Omit<BusinessEntity, 'id'>) => Promise<void>;
+    updateBusiness: (id: string, data: Partial<BusinessEntity>) => Promise<void>;
     sendBusinessRegistrationOtp: () => Promise<void>;
     verifyBusinessRegistrationOtp: (otp: string) => Promise<boolean>;
 }
 
 export const useAuthStore = create<AuthState>()(
     persist(
-        (set) => ({
+        (set, get) => ({
             user: null,
             token: null,
             isAuthenticated: false,
@@ -131,6 +132,29 @@ export const useAuthStore = create<AuthState>()(
                     const message = error instanceof Error ? error.message : 'Invalid OTP';
                     set({ isLoading: false, error: message });
                     return false;
+                }
+            },
+
+            updateBusiness: async (id, data) => {
+                set({ isLoading: true, error: null });
+                try {
+                    // Simulate API call
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+
+                    set(state => ({
+                        businesses: state.businesses.map(b => b.id === id ? { ...b, ...data } : b),
+                        isLoading: false
+                    }));
+                    // If the updated business was selected, update it
+                    const currentSelected = get().selectedBusiness;
+                    if (currentSelected?.id === id) {
+                        set(state => ({
+                            selectedBusiness: { ...currentSelected, ...data }
+                        }));
+                    }
+                } catch (error: unknown) {
+                    set({ error: (error as Error).message, isLoading: false });
+                    throw error;
                 }
             },
 
