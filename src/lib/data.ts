@@ -1,7 +1,7 @@
 export interface Product {
     id: string;
     name: string;
-    price: number;
+    price?: number;
     originalPrice?: number;
     weight: string;
     image: string;
@@ -63,7 +63,7 @@ export const products: Product[] = [
     {
         id: 'v1',
         name: 'Fresh Potato (Gol Alu)',
-        price: 45,
+        // price removed
         originalPrice: 55,
         weight: '1 kg',
         image: '/images/potato.jpg',
