@@ -120,15 +120,15 @@ export default function CheckoutPage() {
                     <div className={styles.authCard} onClick={() => router.push('/login?redirect=/checkout')}>
                         <LogIn size={48} className={styles.iconWrapper} />
                         <h3>Log In</h3>
-                        <p>Login to enjoy our best prices or Login to receive the best prices for your business.</p>
+                        <p>Unlock exclusive savings and manage your business orders seamlessly with our tailored B2B portal.</p>
                         <Button fullWidth>Log In</Button>
                     </div>
 
                     <div className={styles.authCard} onClick={() => router.push('/signup?redirect=/checkout')}>
                         <UserPlus size={48} className={styles.iconWrapper} />
                         <h3>Become a Customer</h3>
-                        <p>Create an account to track orders, save addresses, and earn rewards.</p>
-                        <Button fullWidth variant="secondary">Register Today</Button>
+                        <p>Join us today to unlock exclusive perks, detailed order tracking, and personalized offers designed just for you.</p>
+                        <Button fullWidth>Register Today</Button>
                     </div>
                 </div>
             </div>
