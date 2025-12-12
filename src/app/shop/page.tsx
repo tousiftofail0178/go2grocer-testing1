@@ -12,6 +12,14 @@ import { useCartStore } from '@/store/useCartStore';
 import styles from './page.module.css';
 
 export default function ShopPage() {
+    return (
+        <React.Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', padding: '4rem' }}><Loader2 className="animate-spin" size={40} color="var(--primary-green)" /></div>}>
+            <ShopContent />
+        </React.Suspense>
+    );
+}
+
+function ShopContent() {
     const searchParams = useSearchParams();
     const searchQuery = searchParams.get('search');
     const categoryQuery = searchParams.get('category'); // Get category from URL

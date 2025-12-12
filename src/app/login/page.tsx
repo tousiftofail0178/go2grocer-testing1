@@ -9,6 +9,14 @@ import { useAuthStore } from '@/store/useAuthStore';
 import styles from './page.module.css';
 
 export default function LoginPage() {
+    return (
+        <React.Suspense fallback={<div className="flex justify-center items-center min-h-screen"><Loader2 className="animate-spin" /></div>}>
+            <LoginForm />
+        </React.Suspense>
+    );
+}
+
+function LoginForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const redirectUrl = searchParams.get('redirect') || '/';
