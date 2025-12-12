@@ -347,12 +347,51 @@ export default function ProfilePage() {
                             {businesses?.length > 0 ? (
                                 <div className={styles.addressList}>
                                     {businesses.map((biz) => (
-                                        <div key={biz.id} className={styles.addressItem}>
+                                        <div
+                                            key={biz.id}
+                                            className={styles.addressItem}
+                                            style={{ position: 'relative', paddingRight: '3rem' }}
+                                            onMouseEnter={(e) => {
+                                                const btn = e.currentTarget.querySelector('.edit-btn') as HTMLElement;
+                                                if (btn) btn.style.opacity = '1';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                const btn = e.currentTarget.querySelector('.edit-btn') as HTMLElement;
+                                                if (btn) btn.style.opacity = '0';
+                                            }}
+                                        >
                                             <div className={styles.addressLabel}>{biz.name}</div>
                                             <div className={styles.addressText}>{biz.address}</div>
                                             <div style={{ fontSize: '0.75rem', marginTop: '0.25rem', color: '#666' }}>
                                                 Phone: {biz.phone}
                                             </div>
+                                            <button
+                                                className="edit-btn"
+                                                onClick={() => {
+                                                    setEditingBusiness(biz);
+                                                    setIsEditBusinessModalOpen(true);
+                                                }}
+                                                style={{
+                                                    position: 'absolute',
+                                                    right: '10px',
+                                                    top: '50%',
+                                                    transform: 'translateY(-50%)',
+                                                    background: 'none',
+                                                    border: 'none',
+                                                    cursor: 'pointer',
+                                                    opacity: 0,
+                                                    transition: 'opacity 0.2s',
+                                                    padding: '5px',
+                                                    borderRadius: '50%',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    backgroundColor: '#f0f0f0'
+                                                }}
+                                                title="Edit Business Details"
+                                            >
+                                                <Pencil size={16} color="var(--primary-green)" />
+                                            </button>
                                         </div>
                                     ))}
                                 </div>
@@ -367,14 +406,6 @@ export default function ProfilePage() {
                                     onClick={() => setIsBusinessModalOpen(true)}
                                 >
                                     Add New Business
-                                </Button>
-                                <Button
-                                    variant="secondary"
-                                    size="small"
-                                    className={styles.addBtn}
-                                    onClick={() => alert('Edit Current Details functionality coming soon!')}
-                                >
-                                    Edit Current Details
                                 </Button>
                             </div>
                         </div>
@@ -490,6 +521,13 @@ export default function ProfilePage() {
                 onRegister={registerBusiness}
                 sendOtp={useAuthStore.getState().sendBusinessRegistrationOtp}
                 verifyOtp={useAuthStore.getState().verifyBusinessRegistrationOtp}
+            />
+
+            <EditBusinessModal
+                isOpen={isEditBusinessModalOpen}
+                onClose={() => setIsEditBusinessModalOpen(false)}
+                business={editingBusiness}
+                onSave={updateBusiness}
             />
         </div>
     );
