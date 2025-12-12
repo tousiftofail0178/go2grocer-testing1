@@ -330,14 +330,16 @@ export default function ProfilePage() {
                             <span className={styles.label}>Address:</span>
                             <span className={styles.value}>{user?.address || 'Not set'}</span>
                         </div>
-                        <Button
-                            variant="secondary"
-                            size="small"
-                            className={styles.addBtn}
-                            onClick={() => setIsEditProfileOpen(true)}
-                        >
-                            Edit Details
-                        </Button>
+                        {user?.role !== 'manager' && (
+                            <Button
+                                variant="secondary"
+                                size="small"
+                                className={styles.addBtn}
+                                onClick={() => setIsEditProfileOpen(true)}
+                            >
+                                Edit Details
+                            </Button>
+                        )}
                     </div>
                 </div>
 
@@ -415,7 +417,7 @@ export default function ProfilePage() {
                             </div>
                         </div>
                     </div>
-                ) : (
+                ) : user?.role === 'manager' ? null : (
                     <div className={styles.card}>
                         <div className={styles.cardHeader}>
                             <MapPin size={24} className={styles.icon} />
