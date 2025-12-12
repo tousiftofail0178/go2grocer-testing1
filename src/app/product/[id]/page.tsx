@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import Image from 'next/image';
 import Script from 'next/script';
 import { Star, Truck, ShieldCheck, RefreshCw, Minus, Plus, Heart, Loader2 } from 'lucide-react';
@@ -140,9 +141,13 @@ export default function ProductPage() {
                                         )}
                                     </>
                                 ) : (
-                                    <span className={styles.currentPrice} style={{ fontSize: '1.2rem', color: 'var(--text-grey)' }}>
-                                        Check App for Price
-                                    </span>
+                                    <div style={{ padding: '0.5rem 0' }}>
+                                        <Link href="/login">
+                                            <Button variant="secondary">
+                                                Sign up/Login for Price
+                                            </Button>
+                                        </Link>
+                                    </div>
                                 )}
                             </div>
                             <span className={styles.taxInfo}>Inclusive of all taxes</span>
@@ -172,8 +177,12 @@ export default function ProductPage() {
                                     </Button>
                                 </>
                             ) : (
-                                <div style={{ width: '100%', padding: '1rem', background: '#f5f5f5', borderRadius: '0.5rem', textAlign: 'center', color: '#666' }}>
-                                    This item is currently not available for online ordering.
+                                <div style={{ width: '100%' }}>
+                                    {/* Placeholder or alternative CTA if needed, but the login button is above */}
+                                    {/* Maybe duplicate the login button or leave empty to rely on the price section CTA */}
+                                    <Link href="/login" style={{ width: '100%' }}>
+                                        <Button fullWidth>Login to Order</Button>
+                                    </Link>
                                 </div>
                             )}
                             <button className={styles.wishlistBtn}><Heart size={20} /></button>

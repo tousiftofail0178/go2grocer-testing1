@@ -58,44 +58,48 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 </div>
 
                 <div className={styles.footer}>
-                    <div className={styles.priceWrapper}>
-                        {product.price !== undefined ? (
-                            <>
+                    {product.price !== undefined ? (
+                        <>
+                            <div className={styles.priceWrapper}>
                                 <span className={styles.price}>৳{product.price}</span>
                                 {product.originalPrice && (
                                     <span className={styles.originalPrice}>৳{product.originalPrice}</span>
                                 )}
-                            </>
-                        ) : (
-                            <span className={styles.price} style={{ fontSize: '0.9rem', color: 'var(--text-grey)' }}>
-                                Check App for Price
-                            </span>
-                        )}
-                    </div>
-
-                    <div className={styles.action}>
-                        {product.price !== undefined ? (
-                            quantity > 0 ? (
-                                <QuantitySelector
-                                    quantity={quantity}
-                                    onIncrease={() => onUpdateQuantity?.(quantity + 1)}
-                                    onDecrease={() => onUpdateQuantity?.(quantity - 1)}
-                                    size="small"
-                                />
-                            ) : (
-                                <Button
-                                    variant="secondary"
-                                    size="small"
-                                    className={styles.addButton}
-                                    onClick={() => onAdd?.(product)}
-                                    disabled={!product.inStock}
-                                >
-                                    <Plus size={16} />
-                                    Add
-                                </Button>
-                            )
-                        ) : null}
-                    </div>
+                            </div>
+                            <div className={styles.action}>
+                                {quantity > 0 ? (
+                                    <QuantitySelector
+                                        quantity={quantity}
+                                        onIncrease={() => onUpdateQuantity?.(quantity + 1)}
+                                        onDecrease={() => onUpdateQuantity?.(quantity - 1)}
+                                        size="small"
+                                    />
+                                ) : (
+                                    <Button
+                                        variant="secondary"
+                                        size="small"
+                                        className={styles.addButton}
+                                        onClick={() => onAdd?.(product)}
+                                        disabled={!product.inStock}
+                                    >
+                                        <Plus size={16} />
+                                        Add
+                                    </Button>
+                                )}
+                            </div>
+                        </>
+                    ) : (
+                        <Link href="/login" style={{ width: '100%' }}>
+                            <Button
+                                variant="secondary"
+                                size="small"
+                                fullWidth
+                                style={{ fontSize: '0.8rem', padding: '0.3rem' }}
+                            >
+                                Login for Price
+                            </Button>
+                        </Link>
+                    )}
                 </div>
             </div>
         </div>

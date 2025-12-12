@@ -75,7 +75,7 @@ export const products: Product[] = [
     {
         id: 'v2',
         name: 'Deshi Onion (Peyaj)',
-        price: 90,
+        // price removed
         weight: '1 kg',
         image: '/images/onion.jpg',
         rating: 4.5,
@@ -106,7 +106,7 @@ export const products: Product[] = [
     {
         id: 'f1',
         name: 'Premium Banana (Sagor Kola)',
-        price: 120,
+        // price removed
         weight: '1 Dozen',
         image: '/images/banana.jpg',
         rating: 4.6,
@@ -149,7 +149,7 @@ export const products: Product[] = [
     {
         id: 'fm3',
         name: 'Beef (Bone-in)',
-        price: 750,
+        // price removed
         weight: '1 kg',
         image: '/images/beef.jpg',
         rating: 4.9,
@@ -160,7 +160,7 @@ export const products: Product[] = [
     {
         id: 's1',
         name: 'Miniket Rice (Premium)',
-        price: 75,
+        // price removed
         weight: '1 kg',
         image: '/images/rice.jpg',
         rating: 4.8,
