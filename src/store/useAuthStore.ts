@@ -220,7 +220,43 @@ export const useAuthStore = create<AuthState>()(
                 }
             },
 
-            // ... (keep updateProfile, verifyOtp etc as is or mock)
+            updateProfile: async (data) => {
+                set({ isLoading: true, error: null });
+                try {
+                    // Simulate API call
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+
+                    set(state => ({
+                        user: state.user ? { ...state.user, ...data } : null,
+                        isLoading: false
+                    }));
+                } catch (error: unknown) {
+                    const message = error instanceof Error ? error.message : 'Failed to update profile';
+                    set({ isLoading: false, error: message });
+                    throw error;
+                }
+            },
+
+            verifyOtp: async (phone: string, otp: string) => {
+                set({ isLoading: true, error: null });
+                try {
+                    const data = await authApi.verifyOtp(phone, otp);
+                    set({
+                        user: data.user,
+                        token: data.token || null,
+                        isAuthenticated: true,
+                        isLoading: false
+                    });
+                    // Store token in localStorage for API interceptor
+                    if (typeof window !== 'undefined' && data.token) {
+                        localStorage.setItem('token', data.token);
+                    }
+                } catch (error: unknown) {
+                    const message = error instanceof Error ? error.message : 'Invalid OTP';
+                    set({ isLoading: false, error: message });
+                    throw error;
+                }
+            },
 
             loginB2B: async (userId, password) => {
                 set({ isLoading: true, error: null });
