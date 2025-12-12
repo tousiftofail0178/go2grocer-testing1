@@ -16,12 +16,16 @@ import { useOrderStore, Order } from '@/store/useOrderStore';
 const EditProfileModal = ({ isOpen, onClose, user, onSave }: any) => {
     const [name, setName] = useState(user?.name || '');
     const [email, setEmail] = useState(user?.email || '');
+    const [phone, setPhone] = useState(user?.phone || '');
+    const [address, setAddress] = useState(user?.address || '');
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (isOpen && user) {
             setName(user.name || '');
             setEmail(user.email || '');
+            setPhone(user.phone || '');
+            setAddress(user.address || '');
         }
     }, [isOpen, user]);
 
@@ -29,7 +33,7 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }: any) => {
         e.preventDefault();
         setLoading(true);
         try {
-            await onSave({ name, email });
+            await onSave({ name, email, phone, address });
             onClose();
         } catch (error) {
             console.error(error);
@@ -63,10 +67,32 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }: any) => {
                         />
                     </div>
                     <div>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem' }}>Phone</label>
+                        <input
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            style={{
+                                width: '100%', padding: '0.75rem', borderRadius: '0.5rem',
+                                border: '1px solid var(--border-grey)'
+                            }}
+                        />
+                    </div>
+                    <div>
                         <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem' }}>Email</label>
                         <input
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
+                            style={{
+                                width: '100%', padding: '0.75rem', borderRadius: '0.5rem',
+                                border: '1px solid var(--border-grey)'
+                            }}
+                        />
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem' }}>Address</label>
+                        <input
+                            value={address}
+                            onChange={(e) => setAddress(e.target.value)}
                             style={{
                                 width: '100%', padding: '0.75rem', borderRadius: '0.5rem',
                                 border: '1px solid var(--border-grey)'
@@ -295,6 +321,10 @@ export default function ProfilePage() {
                             <span className={styles.label}>Email:</span>
                             <span className={styles.value}>{user?.email || 'Not set'}</span>
                         </div>
+                        <div className={styles.infoRow}>
+                            <span className={styles.label}>Address:</span>
+                            <span className={styles.value}>{user?.address || 'Not set'}</span>
+                        </div>
                         <Button
                             variant="secondary"
                             size="small"
@@ -307,11 +337,11 @@ export default function ProfilePage() {
                 </div>
 
                 {/* Conditional Section: Businesses (B2B) vs Addresses (Consumer) */}
-                {user?.role === 'b2b' ? (
+                {['b2b', 'owner', 'manager', 'admin'].includes(user?.role || '') ? (
                     <div className={styles.card}>
                         <div className={styles.cardHeader}>
                             <MapPin size={24} className={styles.icon} />
-                            <h2>Registered Businesses</h2>
+                            <h2>My Businesses</h2>
                         </div>
                         <div className={styles.cardContent}>
                             {businesses?.length > 0 ? (
@@ -329,14 +359,24 @@ export default function ProfilePage() {
                             ) : (
                                 <p className={styles.emptyText}>No businesses registered yet.</p>
                             )}
-                            <Button
-                                variant="secondary"
-                                size="small"
-                                className={styles.addBtn}
-                                onClick={() => setIsBusinessModalOpen(true)}
-                            >
-                                Register New Business
-                            </Button>
+                            <div style={{ display: 'flex', gap: '10px', marginTop: '1rem' }}>
+                                <Button
+                                    variant="primary"
+                                    size="small"
+                                    className={styles.addBtn}
+                                    onClick={() => setIsBusinessModalOpen(true)}
+                                >
+                                    Add New Business
+                                </Button>
+                                <Button
+                                    variant="secondary"
+                                    size="small"
+                                    className={styles.addBtn}
+                                    onClick={() => alert('Edit Current Details functionality coming soon!')}
+                                >
+                                    Edit Current Details
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 ) : (
