@@ -24,13 +24,14 @@ export default function Header() {
     const [guestLocation, setGuestLocation] = React.useState<string>('');
 
     // Determine what to show in the location/business picker
-    const isB2B = user?.role === 'b2b';
-    const pickerLabel = isB2B ? 'Shop for Business' : 'Delivering to';
+    const businessRoles = ['b2b', 'owner', 'manager', 'admin'];
+    const isBusinessUser = user?.role && businessRoles.includes(user.role);
+    const pickerLabel = 'Delivering to';
 
     // Display value logic
     let pickerValue = 'Select Location';
-    if (isB2B) {
-        pickerValue = selectedBusiness ? selectedBusiness.name : 'Select Business';
+    if (isBusinessUser) {
+        pickerValue = selectedBusiness ? selectedBusiness.name : (user?.name ? `${user.name}'s Business` : 'Select Business');
     } else if (isAuthenticated) {
         pickerValue = selectedAddress
             ? selectedAddress.fullAddress.substring(0, 20) + (selectedAddress.fullAddress.length > 20 ? '...' : '')
@@ -41,7 +42,7 @@ export default function Header() {
     }
 
     const handlePickerClick = () => {
-        if (isB2B) {
+        if (isBusinessUser) {
             setIsBusinessModalOpen(true);
         } else if (isAuthenticated) {
             setIsAddressModalOpen(true);
