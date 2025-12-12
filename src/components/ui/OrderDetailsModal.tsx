@@ -57,7 +57,7 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ isOpen, on
                                     </div>
                                     <div className={styles.itemRight}>
                                         <span className={styles.itemQty}>x{item.quantity}</span>
-                                        <span className={styles.itemPrice}>৳{item.price * item.quantity}</span>
+                                        <span className={styles.itemPrice}>৳{(item.price || 0) * item.quantity}</span>
                                     </div>
                                 </div>
                             ))}

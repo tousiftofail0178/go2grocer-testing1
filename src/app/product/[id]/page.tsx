@@ -62,7 +62,7 @@ export default function ProductPage() {
 
     const productSchema = generateProductSchema({
         name: product.name,
-        price: product.price,
+        price: product.price || 0,
         image: product.image,
         rating: product.rating,
         reviewCount: 128,
@@ -132,9 +132,17 @@ export default function ProductPage() {
 
                         <div className={styles.priceSection}>
                             <div className={styles.prices}>
-                                <span className={styles.currentPrice}>৳{product.price}</span>
-                                {product.originalPrice && (
-                                    <span className={styles.originalPrice}>৳{product.originalPrice}</span>
+                                {product.price !== undefined ? (
+                                    <>
+                                        <span className={styles.currentPrice}>৳{product.price}</span>
+                                        {product.originalPrice && (
+                                            <span className={styles.originalPrice}>৳{product.originalPrice}</span>
+                                        )}
+                                    </>
+                                ) : (
+                                    <span className={styles.currentPrice} style={{ fontSize: '1.2rem', color: 'var(--text-grey)' }}>
+                                        Check App for Price
+                                    </span>
                                 )}
                             </div>
                             <span className={styles.taxInfo}>Inclusive of all taxes</span>
@@ -148,18 +156,26 @@ export default function ProductPage() {
                         </div>
 
                         <div className={styles.actions}>
-                            <div className={styles.quantityControl}>
-                                <button className={styles.qtyBtn}><Minus size={18} /></button>
-                                <span className={styles.qtyValue}>1</span>
-                                <button className={styles.qtyBtn}><Plus size={18} /></button>
-                            </div>
-                            <Button
-                                className={styles.addToCartBtn}
-                                fullWidth
-                                onClick={() => product && addItem(product)}
-                            >
-                                Add to Cart
-                            </Button>
+                            {product.price !== undefined ? (
+                                <>
+                                    <div className={styles.quantityControl}>
+                                        <button className={styles.qtyBtn}><Minus size={18} /></button>
+                                        <span className={styles.qtyValue}>1</span>
+                                        <button className={styles.qtyBtn}><Plus size={18} /></button>
+                                    </div>
+                                    <Button
+                                        className={styles.addToCartBtn}
+                                        fullWidth
+                                        onClick={() => product && addItem(product)}
+                                    >
+                                        Add to Cart
+                                    </Button>
+                                </>
+                            ) : (
+                                <div style={{ width: '100%', padding: '1rem', background: '#f5f5f5', borderRadius: '0.5rem', textAlign: 'center', color: '#666' }}>
+                                    This item is currently not available for online ordering.
+                                </div>
+                            )}
                             <button className={styles.wishlistBtn}><Heart size={20} /></button>
                         </div>
 

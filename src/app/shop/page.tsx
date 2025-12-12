@@ -95,10 +95,10 @@ function ShopContent() {
 
         // Price Filter
         if (minPrice) {
-            result = result.filter(p => p.price >= Number(minPrice));
+            result = result.filter(p => (p.price || 0) >= Number(minPrice));
         }
         if (maxPrice) {
-            result = result.filter(p => p.price <= Number(maxPrice));
+            result = result.filter(p => (p.price || 0) <= Number(maxPrice));
         }
 
         // Availability Filter
@@ -107,16 +107,16 @@ function ShopContent() {
         }
 
         if (onSaleOnly) {
-            result = result.filter(p => (p.discount && p.discount > 0) || (p.originalPrice && p.originalPrice > p.price));
+            result = result.filter(p => (p.discount && p.discount > 0) || (p.originalPrice && p.originalPrice > (p.price || 0)));
         }
 
         // Sort Logic
         switch (sortBy) {
             case 'price-low':
-                result.sort((a, b) => a.price - b.price);
+                result.sort((a, b) => (a.price || 0) - (b.price || 0));
                 break;
             case 'price-high':
-                result.sort((a, b) => b.price - a.price);
+                result.sort((a, b) => (b.price || 0) - (a.price || 0));
                 break;
             case 'newest':
                 // Assuming newer items have higher IDs or appear later if no date field

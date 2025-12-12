@@ -314,7 +314,7 @@ export default function CheckoutPage() {
                         {items.map((item) => (
                             <div key={item.id} className={styles.summaryItem}>
                                 <span>{item.quantity} x {item.name}</span>
-                                <span>৳{item.price * item.quantity}</span>
+                                <span>৳{(item.price || 0) * item.quantity}</span>
                             </div>
                         ))}
                     </div>

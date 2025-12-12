@@ -68,7 +68,7 @@ export default function CartPage() {
                                         }
                                     }}
                                 />
-                                <div className={styles.itemTotal}>৳{item.price * item.quantity}</div>
+                                <div className={styles.itemTotal}>৳{(item.price || 0) * item.quantity}</div>
                                 <button
                                     className={styles.removeBtn}
                                     onClick={() => removeItem(item.id)}
