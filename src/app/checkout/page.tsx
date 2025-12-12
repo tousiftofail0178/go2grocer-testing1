@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { MapPin, Clock, CreditCard, Banknote, Loader2, User, LogIn, UserPlus } from 'lucide-react';
+import { MapPin, Clock, CreditCard, Banknote, Loader2, LogIn, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useCartStore } from '@/store/useCartStore';
@@ -18,7 +18,6 @@ export default function CheckoutPage() {
     const { addOrder } = useOrderStore();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
-    const [isGuestMode, setIsGuestMode] = useState(false);
     const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
 
     // Form State
@@ -58,12 +57,12 @@ export default function CheckoutPage() {
     };
 
     const handleSubmit = async () => {
-        if (!isAuthenticated && !isGuestMode) {
-            // Should not happen due to UI flow, but guard anyway
+        if (!isAuthenticated) {
+            // Should not happen due to UI flow
             return;
         }
 
-        const addressToUse = isAuthenticated ? selectedAddress?.fullAddress : formData.address;
+        const addressToUse = selectedAddress?.fullAddress;
 
         if (!addressToUse || !formData.phone || (!isAuthenticated && !formData.name)) {
             setError('Please fill in all required fields');
@@ -113,7 +112,7 @@ export default function CheckoutPage() {
     }
 
     // AUTH CHOICE SCREEN
-    if (!isAuthenticated && !isGuestMode) {
+    if (!isAuthenticated) {
         return (
             <div className={styles.container}>
                 <h1 className={styles.title}>How would you like to checkout?</h1>
@@ -121,22 +120,15 @@ export default function CheckoutPage() {
                     <div className={styles.authCard} onClick={() => router.push('/login?redirect=/checkout')}>
                         <LogIn size={48} className={styles.iconWrapper} />
                         <h3>Log In</h3>
-                        <p>Already have an account? Log in to access your saved addresses and loyalty points.</p>
+                        <p>Login to enjoy our best prices or Login to receive the best prices for your business.</p>
                         <Button fullWidth>Log In</Button>
                     </div>
 
                     <div className={styles.authCard} onClick={() => router.push('/signup?redirect=/checkout')}>
                         <UserPlus size={48} className={styles.iconWrapper} />
-                        <h3>Sign Up</h3>
+                        <h3>Become a Customer</h3>
                         <p>Create an account to track orders, save addresses, and earn rewards.</p>
-                        <Button fullWidth variant="secondary">Sign Up</Button>
-                    </div>
-
-                    <div className={styles.authCard} onClick={() => setIsGuestMode(true)}>
-                        <User size={48} className={styles.iconWrapper} />
-                        <h3>Guest Checkout</h3>
-                        <p>Checkout quickly without creating an account. You can create one later.</p>
-                        <Button fullWidth variant="ghost">Continue as Guest</Button>
+                        <Button fullWidth variant="secondary">Register Today</Button>
                     </div>
                 </div>
             </div>
@@ -159,73 +151,37 @@ export default function CheckoutPage() {
                             <h2 className={styles.sectionTitle}>Delivery Information</h2>
                         </div>
 
-                        {/* If Authenticated, show nice address selector */}
-                        {isAuthenticated ? (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                <div className={styles.formGrid}>
-                                    <Input
-                                        label="Full Name"
-                                        name="name"
-                                        value={formData.name}
-                                        onChange={handleInputChange}
-                                    />
-                                    <Input
-                                        label="Phone Number"
-                                        name="phone"
-                                        value={formData.phone}
-                                        onChange={handleInputChange}
-                                    />
-                                </div>
-                                <div className={styles.selectedAddress}>
-                                    <div className={styles.addressDetails}>
-                                        <span className={styles.addressLabel}>
-                                            <MapPin size={16} /> {selectedAddress?.label || 'Delivery Address'}
-                                        </span>
-                                        <span className={styles.addressText}>{selectedAddress?.fullAddress || 'No address selected'}</span>
-                                    </div>
-                                    <button
-                                        className={styles.changeBtn}
-                                        onClick={() => setIsAddressModalOpen(true)}
-                                    >
-                                        Change / Add
-                                    </button>
-                                </div>
-                            </div>
-                        ) : (
-                            /* Guest Form */
+                        {/* Authenticated Address Selector */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             <div className={styles.formGrid}>
                                 <Input
                                     label="Full Name"
                                     name="name"
-                                    placeholder="Enter your name"
                                     value={formData.name}
                                     onChange={handleInputChange}
                                 />
                                 <Input
                                     label="Phone Number"
                                     name="phone"
-                                    placeholder="01XXXXXXXXX"
                                     value={formData.phone}
                                     onChange={handleInputChange}
                                 />
-                                <Input
-                                    label="Address"
-                                    name="address"
-                                    placeholder="House, Road, Area"
-                                    className={styles.fullWidth}
-                                    value={formData.address}
-                                    onChange={handleInputChange}
-                                />
-                                <Input
-                                    label="Area/Thana"
-                                    name="area"
-                                    placeholder="e.g. Nasirabad"
-                                    value={formData.area}
-                                    onChange={handleInputChange}
-                                />
-                                <Input label="City" defaultValue="Chittagong" disabled />
                             </div>
-                        )}
+                            <div className={styles.selectedAddress}>
+                                <div className={styles.addressDetails}>
+                                    <span className={styles.addressLabel}>
+                                        <MapPin size={16} /> {selectedAddress?.label || 'Delivery Address'}
+                                    </span>
+                                    <span className={styles.addressText}>{selectedAddress?.fullAddress || 'No address selected'}</span>
+                                </div>
+                                <button
+                                    className={styles.changeBtn}
+                                    onClick={() => setIsAddressModalOpen(true)}
+                                >
+                                    Change / Add
+                                </button>
+                            </div>
+                        </div>
                     </section>
 
                     {/* Delivery Time and Payment sections remain largely the same */}
