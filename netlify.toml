@@ -5,11 +5,7 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# Enable Gzip and Brotli Compression
-[[headers]]
-  for = "/*"
-  [headers.values]
-    Content-Encoding = "br"
+
 
 # Cache static assets (JS, CSS, Images) for 1 year
 [[headers]]
