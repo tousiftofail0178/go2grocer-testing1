@@ -234,7 +234,7 @@ export async function POST(req: Request) {
         });
 
         const blobKey = `invoice-${order_id}-${Date.now()}.pdf`;
-        await store.set(blobKey, pdfBytes);
+        await store.set(blobKey, pdfBytes as any);
 
         // 4. Update DB
         const invoiceId = crypto.randomUUID();
