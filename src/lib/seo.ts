@@ -11,7 +11,7 @@ export interface SEOConfig {
 
 const defaultConfig = {
     siteName: 'Go2Grocer',
-    domain: 'https://go2grocer.com', // Update with actual domain
+    domain: 'https://go2grocer.netlify.app',
     defaultImage: '/og-image.png',
     twitterHandle: '@go2grocer',
 };
@@ -30,7 +30,7 @@ export function generateMetadata(config: SEOConfig): Metadata {
     const fullUrl = url ? `${defaultConfig.domain}${url}` : defaultConfig.domain;
     const fullImage = image.startsWith('http') ? image : `${defaultConfig.domain}${image}`;
 
-    // Use correct OpenGraph type (website or article only)
+    // Use correct OpenGraph type
     const ogType: 'website' | 'article' = type === 'product' ? 'website' : type === 'article' ? 'article' : 'website';
 
     return {
@@ -84,6 +84,9 @@ export function generateMetadata(config: SEOConfig): Metadata {
         alternates: {
             canonical: fullUrl,
         },
+        verification: {
+            google: 'your-google-verification-code', // Placeholder
+        }
     };
 }
 
@@ -124,7 +127,7 @@ export function generateOrganizationSchema() {
         '@type': 'Organization',
         name: 'Go2Grocer',
         url: defaultConfig.domain,
-        logo: `${defaultConfig.domain}/logo.png`,
+        logo: `${defaultConfig.domain}/icon.png`,
         description: 'Fresh groceries delivered to your doorstep in Chittagong, Bangladesh',
         address: {
             '@type': 'PostalAddress',

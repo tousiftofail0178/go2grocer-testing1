@@ -1,6 +1,6 @@
 
 import { db } from '../src/db';
-import { users, products } from '../src/db/schema';
+import { users, products, businesses } from '../src/db/schema';
 import { products as mockProducts } from '../src/lib/data';
 import * as dotenv from 'dotenv';
 import { eq } from 'drizzle-orm';
@@ -23,6 +23,35 @@ async function seed() {
         console.log('✅ Users created.');
     } else {
         console.log('ℹ️ Users already exist.');
+    }
+
+    // 1.5 Seed Businesses for G2G-002
+    console.log('Creating businesses for G2G-002...');
+    const existingBusinesses = await db.select().from(businesses).where(eq(businesses.userId, 'G2G-002'));
+    if (existingBusinesses.length === 0) {
+        await db.insert(businesses).values([
+            {
+                userId: 'G2G-002',
+                name: 'Barcode',
+                address: 'Muradpur',
+                phone: '01705667747'
+            },
+            {
+                userId: 'G2G-002',
+                name: 'Errante',
+                address: 'Badshah Miah petrol pump',
+                phone: '01785997748'
+            },
+            {
+                userId: 'G2G-002',
+                name: 'Broast',
+                address: 'Lalkhan Bazaar',
+                phone: '01785887746'
+            }
+        ]);
+        console.log('✅ Businesses created for G2G-002.');
+    } else {
+        console.log('ℹ️ Businesses already exist.');
     }
 
     // 2. Seed Products

@@ -71,3 +71,13 @@
     font-size: 0.75rem;
     color: var(--text-grey);
 }
+
+@media (max-width: 480px) {
+    .card {
+        padding: 1.5rem;
+    }
+
+    .title {
+        font-size: 1.5rem;
+    }
+}

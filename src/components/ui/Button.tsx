@@ -3,7 +3,7 @@ import styles from './Button.module.css';
 import { Loader2 } from 'lucide-react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-    variant?: 'primary' | 'secondary' | 'ghost';
+    variant?: 'primary' | 'secondary' | 'ghost' | 'outline';
     fullWidth?: boolean;
     size?: 'default' | 'small';
     isLoading?: boolean;

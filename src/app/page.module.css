@@ -426,9 +426,13 @@
 
   .productsGrid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    /* Reduced from default 1.5rem/1rem */
   }
 
   .categoriesGrid {
     grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    /* Reduced gap */
   }
 }

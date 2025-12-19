@@ -2,7 +2,7 @@
 'use server';
 
 import { db } from '@/db';
-import { users } from '@/db/schema';
+import { users, businesses } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { User } from '@/lib/data';
 
@@ -22,6 +22,9 @@ export async function authenticateUser(userId: string, passwordAttempt: string) 
             return { success: false, error: 'Invalid password' };
         }
 
+        // 2.5 Fetch Businesses (if any)
+        const userBusinesses = await db.select().from(businesses).where(eq(businesses.userId, user.userId));
+
         // 3. Keep legacy mapping for client-side structure if needed, or simple return
         // Returning data matching the User interface
         const authenticatedUser: User = {
@@ -32,7 +35,7 @@ export async function authenticateUser(userId: string, passwordAttempt: string) 
             role: user.role as User['role'],
         };
 
-        return { success: true, user: authenticatedUser };
+        return { success: true, user: authenticatedUser, businesses: userBusinesses };
 
     } catch (error: any) {
         console.error('Login error:', error);

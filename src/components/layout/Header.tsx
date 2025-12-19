@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Search, MapPin, ShoppingCart, Menu, User, LogOut, UserPlus } from 'lucide-react';
+import { Search, MapPin, ShoppingCart, User, LogOut, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useCartStore } from '@/store/useCartStore';
@@ -17,7 +17,6 @@ export default function Header() {
     const { user, isAuthenticated, logout, selectedAddress, selectedBusiness } = useAuthStore();
     const { getTotalItems } = useCartStore();
     const cartCount = getTotalItems();
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
     const [isAddressModalOpen, setIsAddressModalOpen] = React.useState(false);
     const [isBusinessModalOpen, setIsBusinessModalOpen] = React.useState(false);
     const [isLocationModalOpen, setIsLocationModalOpen] = React.useState(false);
@@ -57,7 +56,7 @@ export default function Header() {
                 <div className={styles.topBar}>
                     <div className={styles.container}>
                         <span className={styles.offerText}>
-                            Free delivery on orders above ৳500 | Delivery in 30-60 minutes in Chittagong
+                            Your business, our headache. You order we deliver 🚚
                         </span>
                     </div>
                 </div>
@@ -67,9 +66,6 @@ export default function Header() {
                         <div className={styles.wrapper}>
                             {/* Logo & Mobile Menu */}
                             <div className={styles.left}>
-                                <button className={styles.mobileMenu} onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-                                    <Menu size={24} />
-                                </button>
                                 <Link href="/" className={styles.logo}>
                                     Go<span className={styles.logoAccent}>2</span>Grocer
                                 </Link>
@@ -97,23 +93,6 @@ export default function Header() {
 
                             {/* Actions */}
                             <div className={styles.actions}>
-                                <div
-                                    className={styles.location}
-                                    onClick={handlePickerClick}
-                                    role="button"
-                                    tabIndex={0}
-                                >
-                                    <MapPin size={20} className={styles.locationIcon} />
-                                    <div className={styles.locationText}>
-                                        <span className={styles.locationLabel}>{pickerLabel}</span>
-                                        <span className={styles.locationValue}>
-                                            {pickerValue}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div className={styles.divider} />
-
                                 {/* Account */}
                                 {isAuthenticated ? (
                                     <div className={styles.accountWrapper}>
@@ -121,6 +100,18 @@ export default function Header() {
                                             <User size={20} />
                                             <span className={styles.accountText}>{user?.name || 'Profile'}</span>
                                         </Link>
+
+                                        {/* Admin Dashboard Link - Only for G2G-001 or System Admin */}
+                                        {(user?.id === 'G2G-001' || user?.name === 'System Admin') && (
+                                            <>
+                                                <div className={styles.divider} />
+                                                <Link href="/admin" className={styles.accountLink} title="Admin Dashboard">
+                                                    <span style={{ fontWeight: 600, color: 'var(--primary-green)' }}>Dashboard</span>
+                                                </Link>
+                                            </>
+                                        )}
+
+                                        <div className={styles.divider} />
                                         <button
                                             onClick={() => {
                                                 logout();
@@ -133,23 +124,31 @@ export default function Header() {
                                         </button>
                                     </div>
                                 ) : (
-                                    <Link href="/become-customer" className={styles.signupLink}>
-                                        <div className={styles.signupIconWrapper}>
-                                            <UserPlus size={24} color="#24a148" />
-                                        </div>
-                                        <div className={styles.signupTextContainer}>
-                                            <span className={styles.signupTopText}>Become a customer</span>
-                                            <span className={styles.signupBottomText}>Register today!</span>
-                                        </div>
-                                    </Link>
+                                    <div className={styles.authWrapper}>
+                                        <Link href="/login" style={{ textDecoration: 'none' }}>
+                                            <button className={styles.loginBtn}>
+                                                Login
+                                            </button>
+                                        </Link>
+
+                                        <div className={styles.divider} />
+
+                                        <Link href="/become-customer" className={styles.customerLink}>
+                                            <UserPlus size={28} className={styles.customerIcon} />
+                                            <div className={styles.customerTexts}>
+                                                <span className={styles.cLabel}>Become a customer</span>
+                                                <span className={styles.cAction}>Register today!</span>
+                                            </div>
+                                        </Link>
+                                    </div>
                                 )}
 
                                 {/* Cart */}
                                 <Link href="/cart">
-                                    <Button variant="primary" className={styles.cartButton}>
-                                        <ShoppingCart size={20} />
+                                    <div className={styles.cartButton} role="button" aria-label="Cart">
+                                        <ShoppingCart size={22} />
                                         {cartCount > 0 && <span className={styles.cartBadge}>{cartCount}</span>}
-                                    </Button>
+                                    </div>
                                 </Link>
                             </div>
                         </div>

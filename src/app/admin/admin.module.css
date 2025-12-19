@@ -1,0 +1,523 @@
+/* Admin Layout */
+.adminContainer {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f1f2f4;
+    /* Light gray background */
+    font-family: -apple-system, BlinkMacSystemFont, "San Francisco", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+}
+
+/* Sidebar */
+/* Sidebar */
+.sidebar {
+    width: 260px;
+    background-color: #ebebeb;
+    /* Light gray background like standard admin panels */
+    border-right: 1px solid #dcdcdc;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    transition: width 0.3s ease;
+}
+
+.sidebarHeader {
+    height: 60px;
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    /* No border for cleaner look, just spacing */
+    margin-bottom: 0.5rem;
+}
+
+.nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.navSection {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.navDivider {
+    height: 1px;
+    background-color: #e1e3e5;
+    margin: 0.75rem 0;
+}
+
+.navSectionTitle {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #6d7175;
+    font-weight: 600;
+    padding: 0.5rem 0.75rem;
+    letter-spacing: 0.05em;
+    margin: 0;
+}
+
+.sidebarFooter {
+    padding: 1rem 0.8rem;
+    border-top: 1px solid #e1e1e1;
+}
+
+/* Nav Items */
+.navItemContainer {
+    display: flex;
+    flex-direction: column;
+}
+
+.navLink {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #4a4a4a;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    min-height: 36px;
+    position: relative;
+    user-select: none;
+}
+
+.navLink:hover {
+    background-color: rgba(230, 230, 230, 0.8);
+    color: #1a1a1a;
+}
+
+.navLink.active {
+    background-color: #e3e3e3;
+    /* Slightly darker than hover for active */
+    color: #1a1a1a;
+    font-weight: 600;
+}
+
+.navIconWrapper {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.75rem;
+    color: #5c5f62;
+}
+
+.navLink:hover .navIconWrapper,
+.navLink.active .navIconWrapper {
+    color: #1a1a1a;
+}
+
+.navLabel {
+    flex: 1;
+}
+
+.navBadge {
+    font-size: 0.7rem;
+    background: #e4e5e7;
+    padding: 0px 6px;
+    border-radius: 10px;
+    color: #444;
+    font-weight: 600;
+    margin-right: 0.5rem;
+}
+
+.navChevron {
+    color: #999;
+    display: flex;
+    align-items: center;
+}
+
+/* Submenu Animation */
+.subMenu {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.3s ease-out;
+}
+
+.subMenuOpen {
+    grid-template-rows: 1fr;
+}
+
+.subMenuInner {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.subNavLink {
+    padding: 0.4rem 0.75rem 0.4rem 2.75rem;
+    /* Indented text */
+    text-decoration: none;
+    color: #6d7175;
+    font-size: 0.85rem;
+    border-radius: 6px;
+    transition: color 0.2s;
+    position: relative;
+}
+
+.subNavLink:hover {
+    color: #1a1a1a;
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+.subNavLink.subActive {
+    color: #1a1a1a;
+    font-weight: 500;
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.subNavLink::before {
+    content: '';
+    position: absolute;
+    left: 26px;
+    /* Align with parent icon center approximately */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: #ccc;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.subNavLink:hover::before,
+.subNavLink.subActive::before {
+    opacity: 1;
+    background-color: #666;
+}
+
+/* Sales Channel specific styling */
+.channelIcon {
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    border: 1px solid #dcdcdc;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: 700;
+    color: #666;
+    margin-right: 0.75rem;
+}
+
+.externalLinkIcon {
+    font-size: 10px;
+    color: #999;
+    margin-left: auto;
+}
+
+/* Main Content */
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.topBar {
+    height: 56px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e1e3e5;
+    display: flex;
+    align-items: center;
+    padding: 0 2rem;
+    justify-content: space-between;
+}
+
+.pageHeader {
+    padding: 2rem;
+    padding-bottom: 1rem;
+}
+
+.pageTitle {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0;
+}
+
+.contentContainer {
+    padding: 0 2rem 4rem;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* Dashboard Cards */
+.cardGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.card {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 1.25rem;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
+    border: 1px solid #dcdcdc;
+    display: flex;
+    flex-direction: column;
+}
+
+.cardTitle {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #6d7175;
+    margin-bottom: 0.5rem;
+}
+
+.cardValue {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.setupGuide {
+    background: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
+    border: 1px solid #dcdcdc;
+    margin-bottom: 2rem;
+}
+
+.guideHeader {
+    padding: 1.25rem;
+    border-bottom: 1px solid #e1e3e5;
+    background-color: #fcfcfc;
+}
+
+.guideTitle {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.guideContent {
+    padding: 1.25rem;
+}
+
+/* Utilities */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.6rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-left: auto;
+}
+
+.badge.success {
+    background-color: #e4f7e5;
+    color: #00702d;
+}
+
+.badge.warning {
+    background-color: #fff4e5;
+    color: #663c00;
+}
+
+.badge.grey {
+    background-color: #ebebeb;
+    color: #4a4a4a;
+}
+
+/* Tabs */
+.tabs {
+    display: flex;
+    gap: 1rem;
+    border-bottom: 1px solid #e1e3e5;
+    margin-bottom: 1rem;
+    padding: 0 1rem;
+}
+
+.tab {
+    padding: 0.75rem 0;
+    font-size: 0.9rem;
+    color: #6d7175;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.tab:hover {
+    color: #1a1a1a;
+}
+
+.tab.active {
+    color: #1a1a1a;
+    border-bottom-color: #1a1a1a;
+    font-weight: 600;
+}
+
+/* Tables */
+.tableContainer {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.table th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    color: #666;
+    border-bottom: 1px solid #e1e3e5;
+}
+
+.table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #f1f1f1;
+    color: #333;
+}
+
+.table tr:hover td {
+    background-color: #fafafa;
+}
+
+/* Filters */
+.filterBar {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e1e3e5;
+}
+
+.filterBtn {
+    background: #fff;
+    border: 1px solid #babfc3;
+    padding: 0.4rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    color: #444;
+}
+
+/* Forms & Inputs */
+.formSection {
+    background: #fff;
+    border: 1px solid #dcdcdc;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.formHeader {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.formContent {
+    padding: 1rem;
+}
+
+.inputField {
+    width: 100%;
+    padding: 0.6rem;
+    border: 1px solid #dcdcdc;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+}
+
+.primaryBtn {
+    background: #1a1a1a;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.secondaryBtn {
+    background: #fff;
+    color: #333;
+    border: 1px solid #babfc3;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+/* Layout for Split Forms */
+.splitLayout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+/* Form Utilities */
+.formGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.inputGroup {
+    margin-bottom: 1.25rem;
+}
+
+.label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 0.35rem;
+    color: #303030;
+}
+
+.helpText {
+    font-size: 0.8rem;
+    color: #6d7175;
+    margin-top: 0.25rem;
+}
+
+.checkboxGroup {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+}
+
+.checkboxGroup input {
+    margin-top: 0.15rem;
+}
+
+.checkboxLabel {
+    font-size: 0.9rem;
+    color: #303030;
+    line-height: 1.4;
+}
+
+.sectionHeader {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #1a1a1a;
+}

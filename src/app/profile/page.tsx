@@ -280,6 +280,50 @@ export default function ProfilePage() {
     const [isEditBusinessModalOpen, setIsEditBusinessModalOpen] = useState(false);
     // Initialize editingBusiness state
     const [editingBusiness, setEditingBusiness] = useState<BusinessEntity | null>(null);
+    const [generatingInvoice, setGeneratingInvoice] = useState<string | null>(null);
+
+    const handleViewInvoice = async (order: Order) => {
+        setGeneratingInvoice(order.id);
+        try {
+            // Check if exists
+            const checkRes = await fetch(`/api/invoices/${order.id}`, { method: 'HEAD' });
+            if (checkRes.ok) {
+                window.open(`/api/invoices/${order.id}?t=${Date.now()}`, '_blank');
+                return;
+            }
+
+            // If not found, generate it
+            const genRes = await fetch('/api/generate-invoice', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    order_id: order.id,
+                    customer: {
+                        name: order.shippingAddress.name,
+                        email: user?.email || 'guest@example.com',
+                        address: order.shippingAddress.address,
+                        phone: order.shippingAddress.phone
+                    },
+                    items: order.items.map(i => ({
+                        name: i.name,
+                        price: i.price,
+                        quantity: i.quantity
+                    }))
+                })
+            });
+
+            if (genRes.ok) {
+                window.open(`/api/invoices/${order.id}?t=${Date.now()}`, '_blank');
+            } else {
+                alert('Failed to generate invoice. Please try again.');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Error accessing invoice system.');
+        } finally {
+            setGeneratingInvoice(null);
+        }
+    };
 
     useEffect(() => {
         if (!isAuthenticated) {
@@ -481,16 +525,30 @@ export default function ProfilePage() {
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="small"
-                                                        onClick={() => {
-                                                            setSelectedOrder(order);
-                                                            setIsOrderModalOpen(true);
-                                                        }}
-                                                    >
-                                                        View
-                                                    </Button>
+                                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="small"
+                                                            onClick={() => {
+                                                                setSelectedOrder(order);
+                                                                setIsOrderModalOpen(true);
+                                                            }}
+                                                        >
+                                                            View
+                                                        </Button>
+                                                        <Button
+                                                            variant="secondary"
+                                                            size="small"
+                                                            onClick={() => handleViewInvoice(order)}
+                                                            disabled={generatingInvoice === order.id}
+                                                        >
+                                                            {generatingInvoice === order.id ? (
+                                                                <Loader2 className="animate-spin" size={16} />
+                                                            ) : (
+                                                                'Invoice'
+                                                            )}
+                                                        </Button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}

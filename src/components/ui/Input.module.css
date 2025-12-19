@@ -26,6 +26,11 @@
     color: var(--text-black);
     background-color: var(--white);
     transition: border-color 0.2s ease;
+    /* iOS Fixes */
+    touch-action: manipulation;
+    -webkit-user-select: text;
+    user-select: text;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .input:focus {

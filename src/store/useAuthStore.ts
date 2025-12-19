@@ -311,8 +311,19 @@ export const useAuthStore = create<AuthState>()(
                     const result = await authenticateUser(userId, password);
 
                     if (result.success && result.user) {
+                        // Map DB businesses to BusinessEntity (transform id to string)
+                        const mappedBusinesses: BusinessEntity[] = (result.businesses || []).map((b: any) => ({
+                            id: b.id.toString(),
+                            name: b.name,
+                            address: b.address,
+                            phone: b.phone,
+                            tin: b.tin || undefined,
+                            bin: b.bin || undefined,
+                        }));
+
                         set({
                             user: result.user,
+                            businesses: mappedBusinesses,
                             token: `mock-jwt-token-${result.user.id}`,
                             isAuthenticated: true,
                             isLoading: false

@@ -45,3 +45,22 @@ export const orderItems = pgTable('order_items', {
     quantity: integer('quantity').notNull(),
     priceAtPurchase: integer('price_at_purchase'),
 });
+
+export const businesses = pgTable('businesses', {
+    id: serial('id').primaryKey(),
+    userId: text('user_id').references(() => users.userId), // References text userId
+    name: text('name').notNull(),
+    address: text('address').notNull(),
+    phone: text('phone').notNull(),
+    tin: text('tin'),
+    bin: text('bin'),
+    createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const invoices = pgTable('invoices', {
+    id: text('id').primaryKey(), // using UUID string
+    orderId: text('order_id').notNull(),
+    customerEmail: text('customer_email').notNull(),
+    blobKey: text('blob_key').notNull(),
+    createdAt: timestamp('created_at').defaultNow(),
+});

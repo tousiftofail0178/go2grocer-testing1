@@ -92,6 +92,27 @@ export default function CheckoutPage() {
             };
 
             addOrder(newOrder);
+
+            // Trigger PDF generation in background
+            fetch('/api/generate-invoice', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    order_id: orderId,
+                    customer: {
+                        name: formData.name,
+                        email: user?.email || 'guest',
+                        address: addressToUse,
+                        phone: formData.phone
+                    },
+                    items: items.map(i => ({
+                        name: i.name,
+                        price: i.price,
+                        quantity: i.quantity
+                    }))
+                })
+            }).catch(err => console.error('Bg Invoice Gen Error:', err));
+
             clearCart();
             router.push(`/order-confirmation?orderId=${orderId}`);
         } catch (err) {
@@ -196,21 +217,14 @@ export default function CheckoutPage() {
                                 onClick={() => setFormData({ ...formData, deliveryTime: 'express' })}
                             >
                                 <span className={styles.slotLabel}>Express</span>
-                                <span className={styles.slotTime}>30-60 mins</span>
+                                <span className={styles.slotTime}>Same Day Delivery</span>
                             </button>
                             <button
-                                className={`${styles.timeSlot} ${formData.deliveryTime === 'slot1' ? styles.activeSlot : ''}`}
-                                onClick={() => setFormData({ ...formData, deliveryTime: 'slot1' })}
+                                className={`${styles.timeSlot} ${formData.deliveryTime === 'standard' ? styles.activeSlot : ''}`}
+                                onClick={() => setFormData({ ...formData, deliveryTime: 'standard' })}
                             >
-                                <span className={styles.slotLabel}>Today</span>
-                                <span className={styles.slotTime}>2:00 PM - 4:00 PM</span>
-                            </button>
-                            <button
-                                className={`${styles.timeSlot} ${formData.deliveryTime === 'slot2' ? styles.activeSlot : ''}`}
-                                onClick={() => setFormData({ ...formData, deliveryTime: 'slot2' })}
-                            >
-                                <span className={styles.slotLabel}>Today</span>
-                                <span className={styles.slotTime}>5:00 PM - 7:00 PM</span>
+                                <span className={styles.slotLabel}>Standard</span>
+                                <span className={styles.slotTime}>Next Day Delivery</span>
                             </button>
                         </div>
                     </section>

@@ -12,7 +12,7 @@ interface AddressModalProps {
 }
 
 export const AddressModal: React.FC<AddressModalProps> = ({ isOpen, onClose }) => {
-    const { addresses, selectedAddress, addAddress, selectAddress } = useAuthStore();
+    const { addresses, selectedAddress, addAddress, selectAddress, businesses } = useAuthStore();
     const [isAdding, setIsAdding] = useState(false);
     const [newLabel, setNewLabel] = useState('');
     const [newAddress, setNewAddress] = useState('');
@@ -45,36 +45,77 @@ export const AddressModal: React.FC<AddressModalProps> = ({ isOpen, onClose }) =
                 {!isAdding ? (
                     <div className={styles.listContent}>
                         <div className={styles.list}>
-                            {addresses.map((addr) => (
-                                <div
-                                    key={addr.id}
-                                    className={`${styles.item} ${selectedAddress?.id === addr.id ? styles.selected : ''}`}
-                                    onClick={() => {
-                                        selectAddress(addr);
-                                        onClose();
-                                    }}
-                                >
-                                    <div className={styles.iconWrapper}>
-                                        <MapPin size={20} />
-                                    </div>
-                                    <div className={styles.details}>
-                                        <span className={styles.label}>{addr.label}</span>
-                                        <span className={styles.address}>{addr.fullAddress}</span>
-                                    </div>
-                                    {selectedAddress?.id === addr.id && (
-                                        <Check size={20} className={styles.checkIcon} />
-                                    )}
+                            {/* B2B Businesses Section */}
+                            {businesses && businesses.length > 0 && (
+                                <div style={{ marginBottom: '1.5rem' }}>
+                                    <h4 style={{ fontSize: '0.875rem', color: '#666', marginBottom: '0.5rem' }}>Registered Businesses</h4>
+                                    {businesses.map((biz) => (
+                                        <div
+                                            key={`biz-${biz.id}`}
+                                            className={`${styles.item} ${selectedAddress?.id === `biz-${biz.id}` ? styles.selected : ''}`}
+                                            onClick={() => {
+                                                selectAddress({
+                                                    id: `biz-${biz.id}`,
+                                                    label: biz.name,
+                                                    fullAddress: biz.address
+                                                });
+                                                onClose();
+                                            }}
+                                        >
+                                            <div className={styles.iconWrapper}>
+                                                <MapPin size={20} />
+                                            </div>
+                                            <div className={styles.details}>
+                                                <span className={styles.label}>{biz.name}</span>
+                                                <span className={styles.address}>{biz.address}</span>
+                                            </div>
+                                            {selectedAddress?.id === `biz-${biz.id}` && (
+                                                <Check size={20} className={styles.checkIcon} />
+                                            )}
+                                        </div>
+                                    ))}
+                                    <div className={styles.divider} style={{ margin: '1rem 0', height: '1px', background: '#eee' }}></div>
                                 </div>
-                            ))}
+                            )}
+
+                            {/* Saved Addresses - Only show if no businesses are registered (Consumer flow) */}
+                            {(!businesses || businesses.length === 0) && addresses.length > 0 && (
+                                <>
+                                    <h4 style={{ fontSize: '0.875rem', color: '#666', marginBottom: '0.5rem' }}>Saved Addresses</h4>
+                                    {addresses.map((addr) => (
+                                        <div
+                                            key={addr.id}
+                                            className={`${styles.item} ${selectedAddress?.id === addr.id ? styles.selected : ''}`}
+                                            onClick={() => {
+                                                selectAddress(addr);
+                                                onClose();
+                                            }}
+                                        >
+                                            <div className={styles.iconWrapper}>
+                                                <MapPin size={20} />
+                                            </div>
+                                            <div className={styles.details}>
+                                                <span className={styles.label}>{addr.label}</span>
+                                                <span className={styles.address}>{addr.fullAddress}</span>
+                                            </div>
+                                            {selectedAddress?.id === addr.id && (
+                                                <Check size={20} className={styles.checkIcon} />
+                                            )}
+                                        </div>
+                                    ))}
+                                </>
+                            )}
                         </div>
-                        <Button
-                            className={styles.addNewBtn}
-                            variant="secondary"
-                            onClick={() => setIsAdding(true)}
-                            icon={<Plus size={18} />}
-                        >
-                            Add New Address
-                        </Button>
+                        {(!businesses || businesses.length === 0) && (
+                            <Button
+                                className={styles.addNewBtn}
+                                variant="secondary"
+                                onClick={() => setIsAdding(true)}
+                                icon={<Plus size={18} />}
+                            >
+                                Add New Address
+                            </Button>
+                        )}
                     </div>
                 ) : (
                     <form onSubmit={handleAdd} className={styles.form}>
