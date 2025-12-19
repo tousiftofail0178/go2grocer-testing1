@@ -97,29 +97,29 @@ export default function NewCustomerPage() {
 
                     {/* Customer Overview */}
                     <div className={styles.card}>
-                        <div className={styles.formSection}>
-                            <h2 className={styles.cardTitle}>Customer overview</h2>
+                        <div className={styles.formContent}>
+                            <h2 className={styles.sectionHeader}>Customer overview</h2>
 
-                            <div className={styles.inputGroup}>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                    <div>
-                                        <label className={styles.label}>First name</label>
-                                        <input
-                                            className={styles.inputField}
-                                            name="firstName"
-                                            value={formData.firstName}
-                                            onChange={handleChange}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className={styles.label}>Last name</label>
-                                        <input
-                                            className={styles.inputField}
-                                            name="lastName"
-                                            value={formData.lastName}
-                                            onChange={handleChange}
-                                        />
-                                    </div>
+                            <div className={styles.formGrid}>
+                                <div className={styles.inputGroup}>
+                                    <label className={styles.label}>First name</label>
+                                    <input
+                                        className={styles.inputField}
+                                        name="firstName"
+                                        placeholder="e.g. John"
+                                        value={formData.firstName}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                                <div className={styles.inputGroup}>
+                                    <label className={styles.label}>Last name</label>
+                                    <input
+                                        className={styles.inputField}
+                                        name="lastName"
+                                        placeholder="e.g. Doe"
+                                        value={formData.lastName}
+                                        onChange={handleChange}
+                                    />
                                 </div>
                             </div>
 
@@ -136,40 +136,42 @@ export default function NewCustomerPage() {
                                 <div className={styles.helpText}>This customer will receive notifications in this language.</div>
                             </div>
 
-                            <div className={styles.inputGroup}>
-                                <label className={styles.label}>Email</label>
-                                <input
-                                    className={styles.inputField}
-                                    name="email"
-                                    type="email"
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                />
-                            </div>
-
-                            <div className={styles.inputGroup}>
-                                <label className={styles.label}>Phone number</label>
-                                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                    <div style={{ width: 80, border: '1px solid #ccc', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff' }}>🇧🇪</div>
+                            <div className={styles.formGrid}>
+                                <div className={styles.inputGroup}>
+                                    <label className={styles.label}>Email</label>
                                     <input
                                         className={styles.inputField}
-                                        name="phone"
-                                        style={{ marginTop: 0 }}
-                                        value={formData.phone}
+                                        name="email"
+                                        type="email"
+                                        value={formData.email}
                                         onChange={handleChange}
                                     />
                                 </div>
+
+                                <div className={styles.inputGroup}>
+                                    <label className={styles.label}>Phone number</label>
+                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                        <div style={{ width: 60, border: '1px solid #dcdcdc', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f9fafb', fontSize: '1.2rem' }}>🇧🇪</div>
+                                        <input
+                                            className={styles.inputField}
+                                            name="phone"
+                                            style={{ marginTop: 0 }}
+                                            value={formData.phone}
+                                            onChange={handleChange}
+                                        />
+                                    </div>
+                                </div>
                             </div>
 
-                            <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                <label style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                                    <input type="checkbox" name="marketingEmail" checked={formData.marketingEmail} onChange={handleChange} />
-                                    <span style={{ fontSize: '0.9rem' }}>Customer agreed to receive marketing emails.</span>
-                                </label>
-                                <label style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                                    <input type="checkbox" name="marketingSMS" checked={formData.marketingSMS} onChange={handleChange} />
-                                    <span style={{ fontSize: '0.9rem' }}>Customer agreed to receive SMS marketing text messages.</span>
-                                </label>
+                            <div style={{ marginTop: '0.5rem' }}>
+                                <div className={styles.checkboxGroup}>
+                                    <input type="checkbox" id="mEmail" name="marketingEmail" checked={formData.marketingEmail} onChange={handleChange} />
+                                    <label htmlFor="mEmail" className={styles.checkboxLabel}>Customer agreed to receive marketing emails.</label>
+                                </div>
+                                <div className={styles.checkboxGroup}>
+                                    <input type="checkbox" id="mSMS" name="marketingSMS" checked={formData.marketingSMS} onChange={handleChange} />
+                                    <label htmlFor="mSMS" className={styles.checkboxLabel}>Customer agreed to receive SMS marketing text messages.</label>
+                                </div>
                             </div>
 
                             <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #eee', fontSize: '0.85rem', color: '#666' }}>
@@ -180,41 +182,65 @@ export default function NewCustomerPage() {
 
                     {/* Default Address */}
                     <div className={styles.card}>
-                        <div className={styles.formSection}>
-                            <h2 className={styles.cardTitle}>Default address</h2>
-                            <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '1rem' }}>The primary address of this customer</p>
+                        <div className={styles.formContent}>
+                            <h2 className={styles.sectionHeader}>Default address</h2>
+                            <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '1rem', marginTop: '-0.5rem' }}>The primary address of this customer</p>
 
-                            <button type="button" style={{ width: '100%', padding: '0.75rem', border: '1px solid #ddd', borderRadius: 4, background: '#fff', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
-                                <span>Add address</span>
-                                <span>›</span>
-                            </button>
+                            <div className={styles.formGrid}>
+                                <div className={styles.inputGroup}>
+                                    <label className={styles.label}>Country</label>
+                                    <select className={styles.inputField} style={{ background: '#fff' }} defaultValue="Belgium">
+                                        <option>Belgium</option>
+                                        <option>France</option>
+                                        <option>Germany</option>
+                                    </select>
+                                </div>
+                                <div className={styles.inputGroup}>
+                                    <label className={styles.label}>City</label>
+                                    <input className={styles.inputField} name="address.city" value={formData.address.city} onChange={handleAddressChange} />
+                                </div>
+                            </div>
+
+                            <div className={styles.inputGroup}>
+                                <label className={styles.label}>Address</label>
+                                <input className={styles.inputField} name="address.address1" value={formData.address.address1} onChange={handleAddressChange} />
+                            </div>
+
+                            <div className={styles.formGrid}>
+                                <div className={styles.inputGroup}>
+                                    <label className={styles.label}>Postal Code</label>
+                                    <input className={styles.inputField} name="address.postalCode" value={formData.address.postalCode} onChange={handleAddressChange} />
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     {/* Tax Details */}
                     <div className={styles.card}>
-                        <div className={styles.formSection}>
-                            <h2 className={styles.cardTitle}>Tax details</h2>
+                        <div className={styles.formContent}>
+                            <h2 className={styles.sectionHeader}>Tax details</h2>
 
-                            <div className={styles.inputGroup}>
-                                <label className={styles.label}>VAT number</label>
-                                <input className={styles.inputField} name="tax.vatNumber" value={formData.tax.vatNumber} onChange={handleChange} />
-                                <div className={styles.helpText}>Valid VAT numbers apply the <a href="#" style={{ color: '#007ace' }}>reverse charge</a> exemption</div>
-                            </div>
+                            <div className={styles.formGrid}>
+                                <div className={styles.inputGroup}>
+                                    <label className={styles.label}>VAT number</label>
+                                    <input className={styles.inputField} name="tax.vatNumber" value={formData.tax.vatNumber} onChange={handleChange} />
+                                    <div className={styles.helpText}>Valid VAT numbers apply the <a href="#" style={{ color: '#007ace' }}>reverse charge</a> exemption</div>
+                                </div>
 
-                            <div className={styles.inputGroup}>
-                                <label className={styles.label}>Tax settings</label>
-                                <select className={styles.inputField} style={{ background: '#fff' }}>
-                                    <option>Collect tax</option>
-                                    <option>Don't collect tax</option>
-                                </select>
+                                <div className={styles.inputGroup}>
+                                    <label className={styles.label}>Tax settings</label>
+                                    <select className={styles.inputField} style={{ background: '#fff' }}>
+                                        <option>Collect tax</option>
+                                        <option>Don't collect tax</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     {/* Actions */}
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '1rem' }}>
-                        <button type="submit" className={styles.primaryBtn} disabled={loading}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '0.5rem' }}>
+                        <button type="submit" className={styles.primaryBtn} disabled={loading} style={{ padding: '0.75rem 1.5rem', fontSize: '0.9rem' }}>
                             {loading ? 'Saving...' : 'Save'}
                         </button>
                     </div>
@@ -229,7 +255,14 @@ export default function NewCustomerPage() {
                             <label className={styles.label} style={{ marginBottom: 0 }}>Notes</label>
                             <Edit2 size={14} color="#666" style={{ cursor: 'pointer' }} />
                         </div>
-                        <div style={{ fontSize: '0.9rem', color: '#666' }}>
+                        <textarea
+                            className={styles.inputField}
+                            placeholder="Add a note..."
+                            rows={3}
+                            name="notes"
+                            style={{ resize: 'none', fontFamily: 'inherit' }}
+                        />
+                        <div style={{ fontSize: '0.85rem', color: '#888', marginTop: '0.5rem' }}>
                             Notes are private and won't be shared with the customer.
                         </div>
                     </div>
@@ -239,7 +272,7 @@ export default function NewCustomerPage() {
                             <label className={styles.label} style={{ marginBottom: 0 }}>Tags</label>
                             <Edit2 size={14} color="#666" style={{ cursor: 'pointer' }} />
                         </div>
-                        <input className={styles.inputField} placeholder="" name="tags" />
+                        <input className={styles.inputField} placeholder="e.g. VIP, Wholesale" name="tags" />
                     </div>
 
                 </div>
