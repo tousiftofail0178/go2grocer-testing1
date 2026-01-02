@@ -1,0 +1,128 @@
+.container {
+    background-color: white;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #f3f4f6;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+
+.title {
+    font-size: 1.125rem;
+    font-weight: bold;
+    color: #111827;
+}
+
+.viewAllLink {
+    font-size: 0.875rem;
+    color: #3b82f6;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-weight: 500;
+}
+
+.viewAllLink:hover {
+    color: #2563eb;
+}
+
+.tableWrapper {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table thead tr {
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.table th {
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+    padding-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.table tbody tr {
+    border-bottom: 1px solid #f9fafb;
+    transition: background-color 0.2s;
+}
+
+.table tbody tr:hover {
+    background-color: #f9fafb;
+}
+
+.table td {
+    padding: 1rem 0;
+}
+
+.orderLink {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #3b82f6;
+    text-decoration: none;
+}
+
+.orderLink:hover {
+    color: #2563eb;
+}
+
+.customerName {
+    font-size: 0.875rem;
+    color: #111827;
+}
+
+.orderTotal {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #111827;
+}
+
+.statusBadge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    width: fit-content;
+}
+
+.statusPending {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.statusProcessing {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.statusFulfilled {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.statusCancelled {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.orderDate {
+    font-size: 0.875rem;
+    color: #6b7280;
+}

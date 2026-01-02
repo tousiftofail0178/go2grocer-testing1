@@ -27,6 +27,13 @@ interface AuthState {
     loginB2B: (userId: string, password: string) => Promise<void>;
     signup: (data: { name: string; email: string; phone: string }) => Promise<void>;
     signupB2B: (data: {
+        // Step 1: Personal details
+        firstName?: string;
+        lastName?: string;
+        dateOfBirth?: string;
+        nidPassportNumber?: string;
+        nidPassportImageUrl?: string;
+        // Step 2: Business details
         businessName: string;
         userId: string;
         password: string;
@@ -40,6 +47,15 @@ interface AuthState {
         bankName?: string;
         bankAccount?: string;
         bankBranch?: string;
+        // Step 3: Manager fields
+        managerFirstName?: string;
+        managerLastName?: string;
+        managerEmail?: string;
+        managerPhone?: string;
+        managerPassword?: string;
+        managerDateOfBirth?: string;
+        managerNidPassportNumber?: string;
+        managerNidPassportImageUrl?: string;
     }) => Promise<void>;
     updateProfile: (data: { name: string; email: string }) => Promise<void>;
     verifyOtp: (phone: string, otp: string) => Promise<void>;
@@ -212,31 +228,74 @@ export const useAuthStore = create<AuthState>()(
                 try {
                     // Import dynamically to avoid server-on-client issues if not careful, 
                     // though Next.js handles 'use server' imports well usually.
-                    const { registerB2BUser } = await import('@/app/actions/auth');
+                    const { registerOwnerStep1, registerBusinessStep2, registerManagerStep3 } = await import('@/app/actions/auth');
 
-                    const result = await registerB2BUser({
-                        businessName: data.businessName,
-                        userId: data.userId,
+                    // Extract name parts from contactName
+                    const nameParts = (data.contactName || '').split(' ');
+                    const firstName = nameParts[0] || 'Business';
+                    const lastName = nameParts.slice(1).join(' ') || 'Owner';
+
+                    // STEP 1: Create owner account
+                    const step1Result = await registerOwnerStep1({
+                        email: data.email,
                         password: data.password,
                         phone: data.phone,
-                        email: data.email,
-                        role: 'owner', // Defaulting for signup form
+                        firstName,
+                        lastName,
+                        // Include Step 1 personal details
+                        dateOfBirth: data.dateOfBirth,
+                        nidPassportNumber: data.nidPassportNumber,
+                        nidPassportImageUrl: data.nidPassportImageUrl,
                     });
 
-                    if (!result.success || !result.user) {
-                        throw new Error(result.error);
+                    if (!step1Result.success || !step1Result.user) {
+                        throw new Error(step1Result.error || 'Step 1 failed');
                     }
 
-                    set({
-                        user: result.user,
-                        token: `mock-jwt-token-${result.user.id}`,
-                        isAuthenticated: true,
-                        isLoading: false
+                    // STEP 2: Create business application
+                    const step2Result = await registerBusinessStep2({
+                        userId: step1Result.user.id,
+                        businessName: data.businessName,
+                        address: data.address,
+                        bin: data.bin,
+                        tin: data.tin,
+                        vat: data.vat,
+                        bankName: data.bankName,
+                        bankAccount: data.bankAccount,
+                        bankBranch: data.bankBranch,
                     });
 
-                    if (typeof window !== 'undefined') {
-                        localStorage.setItem('token', `mock-jwt-token-${result.user.id}`);
+                    if (!step2Result.success) {
+                        throw new Error(step2Result.error || 'Step 2 failed');
                     }
+
+                    // ✅ CRITICAL: Save applicationId & userId for Step 3 frontend
+                    if (typeof window !== 'undefined' && step2Result.applicationId && step1Result.user.id) {
+                        localStorage.setItem('pendingApplicationId', step2Result.applicationId.toString());
+                        localStorage.setItem('pendingUserId', step1Result.user.id.toString());
+                        console.log('✅ Saved applicationId to localStorage:', step2Result.applicationId);
+                    }
+
+                    // STEP 3: Complete registration with manager data
+                    const step3Result = await registerManagerStep3({
+                        userId: step1Result.user.id,
+                        applicationId: step2Result.applicationId,
+                        // Pass manager details from form
+                        managerFirstName: data.managerFirstName,
+                        managerLastName: data.managerLastName,
+                        managerEmail: data.managerEmail,
+                        managerPhone: data.managerPhone,
+                        managerPassword: data.managerPassword,
+                        managerDateOfBirth: data.managerDateOfBirth,
+                        managerNidPassportNumber: data.managerNidPassportNumber,
+                        managerNidPassportImageUrl: data.managerNidPassportImageUrl,
+                    });
+
+                    if (!step3Result.success) {
+                        throw new Error(step3Result.error || 'Step 3 failed');
+                    }
+
+                    set({ isLoading: false, error: null });
                 } catch (error: unknown) {
                     const message = error instanceof Error ? error.message : 'Failed to register business';
                     set({ isLoading: false, error: message });
@@ -311,33 +370,38 @@ export const useAuthStore = create<AuthState>()(
                     const result = await authenticateUser(userId, password);
 
                     if (result.success && result.user) {
-                        // Map DB businesses to BusinessEntity (transform id to string)
-                        const mappedBusinesses: BusinessEntity[] = (result.businesses || []).map((b: any) => ({
-                            id: b.id.toString(),
-                            name: b.name,
-                            address: b.address,
-                            phone: b.phone,
-                            tin: b.tin || undefined,
-                            bin: b.bin || undefined,
-                        }));
+                        // Map DB businesses to BusinessEntity (transform id to string safely)
+                        const mappedBusinesses: BusinessEntity[] = (result.businesses || [])
+                            .filter((b: any) => b && b.businessId) // Filter out invalid entries
+                            .map((b: any) => ({
+                                id: b.businessId.toString(),
+                                name: b.businessName || '',
+                                address: b.address || '',
+                                phone: b.phoneNumber || '',
+                                tin: b.tradeLicenseNumber || undefined,
+                                bin: b.taxCertificateNumber || undefined,
+                            }));
 
                         set({
                             user: result.user,
                             businesses: mappedBusinesses,
                             token: `mock-jwt-token-${result.user.id}`,
                             isAuthenticated: true,
-                            isLoading: false
+                            isLoading: false,
+                            error: null
                         });
-                        if (typeof window !== 'undefined') {
-                            localStorage.setItem('token', `mock-jwt-token-${result.user.id}`);
-                        }
                     } else {
-                        throw new Error(result.error || 'Invalid User ID or Password');
+                        // Set error state instead of throwing
+                        set({
+                            isLoading: false,
+                            error: result.error || 'Invalid User ID or Password',
+                            isAuthenticated: false
+                        });
                     }
                 } catch (error: unknown) {
                     const message = error instanceof Error ? error.message : 'Login failed';
-                    set({ isLoading: false, error: message });
-                    throw error;
+                    // Set error state instead of throwing
+                    set({ isLoading: false, error: message, isAuthenticated: false });
                 }
             },
 
@@ -362,3 +426,5 @@ export const useAuthStore = create<AuthState>()(
         }
     )
 );
+
+

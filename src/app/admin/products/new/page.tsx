@@ -3,208 +3,381 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Save, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { createProduct } from '@/app/actions/products';
+import { ArrowLeft, Save, Loader2, Plus, Trash2, AlertTriangle } from 'lucide-react';
+import { createB2BProduct } from '@/app/actions/createB2BProduct';
+import styles from '../../admin.module.css';
 
-export default function NewProductPage() {
+interface Variant {
+    id: string;
+    skuBarcode: string;
+    packSizeLabel: string;
+    baseUnit: string;
+    baseWeightGrams: number;
+    costPrice: number;
+    sellingPrice: number;
+    stockQuantity: number;
+}
+
+export default function NewB2BProductPage() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
-    const [formData, setFormData] = useState({
+    const [error, setError] = useState<string | null>(null);
+
+    // Parent product data
+    const [parentData, setParentData] = useState({
         name: '',
-        price: '',
-        originalPrice: '',
-        weight: '',
-        image: '',
-        category: 'Fresh Vegetables',
-        inStock: true,
-        isNew: false,
-        discount: ''
+        categoryId: 0,
+        baseImageUrl: '',
+        descriptionHtml: ''
     });
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value, type } = e.target;
-
-        if (type === 'checkbox') {
-            const checked = (e.target as HTMLInputElement).checked;
-            setFormData(prev => ({ ...prev, [name]: checked }));
-        } else {
-            setFormData(prev => ({ ...prev, [name]: value }));
+    // Variants array
+    const [variants, setVariants] = useState<Variant[]>([
+        {
+            id: crypto.randomUUID(),
+            skuBarcode: '',
+            packSizeLabel: '',
+            baseUnit: 'kg',
+            baseWeightGrams: 0,
+            costPrice: 0,
+            sellingPrice: 0,
+            stockQuantity: 0
         }
+    ]);
+
+    const handleParentChange = (field: string, value: any) => {
+        setParentData(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleVariantChange = (id: string, field: keyof Variant, value: any) => {
+        setVariants(prev => prev.map(v =>
+            v.id === id ? { ...v, [field]: value } : v
+        ));
+    };
+
+    const addVariant = () => {
+        setVariants(prev => [...prev, {
+            id: crypto.randomUUID(),
+            skuBarcode: '',
+            packSizeLabel: '',
+            baseUnit: 'kg',
+            baseWeightGrams: 0,
+            costPrice: 0,
+            sellingPrice: 0,
+            stockQuantity: 0
+        }]);
+    };
+
+    const removeVariant = (id: string) => {
+        if (variants.length === 1) {
+            alert('At least one variant is required');
+            return;
+        }
+        setVariants(prev => prev.filter(v => v.id !== id));
+    };
+
+    const calculateMargin = (cost: number, selling: number): number => {
+        if (selling <= 0) return 0;
+        return ((selling - cost) / selling) * 100;
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError(null);
         setIsLoading(true);
 
         try {
-            const res = await createProduct(formData);
-            if (res.success) {
+            const result = await createB2BProduct({
+                parent: {
+                    name: parentData.name,
+                    categoryId: parentData.categoryId || undefined,
+                    baseImageUrl: parentData.baseImageUrl,
+                    descriptionHtml: parentData.descriptionHtml || undefined
+                },
+                variants: variants.map(v => ({
+                    skuBarcode: v.skuBarcode,
+                    packSizeLabel: v.packSizeLabel,
+                    baseUnit: v.baseUnit,
+                    baseWeightGrams: Number(v.baseWeightGrams),
+                    costPrice: Number(v.costPrice),
+                    sellingPrice: Number(v.sellingPrice),
+                    stockQuantity: Number(v.stockQuantity)
+                }))
+            });
+
+            if (result.success) {
                 router.push('/admin/products');
             } else {
-                alert('Failed to create product: ' + res.error);
+                setError(result.error || 'Failed to create product');
             }
-        } catch (error) {
-            console.error(error);
-            alert('An error occurred');
+        } catch (err: any) {
+            setError(err.message || 'An error occurred');
         } finally {
             setIsLoading(false);
         }
     };
 
     return (
-        <div className="p-6 max-w-3xl mx-auto">
-            <div className="mb-6">
-                <Link href="/admin/products" className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-4 transition-colors">
-                    <ArrowLeft size={16} className="mr-2" />
+        <div className={styles.pageContainer}>
+            <div className={styles.pageHeader}>
+                <Link href="/admin/products" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: '#4A4A4A', textDecoration: 'none', marginBottom: '1rem' }}>
+                    <ArrowLeft size={16} />
                     Back to Products
                 </Link>
-                <h1 className="text-2xl font-bold text-gray-900">Add New Product</h1>
+                <h1 className={styles.pageTitle}>Create B2B Product</h1>
+                <p style={{ color: '#6d7175', marginTop: '0.5rem' }}>Create a product with multiple pack size variants</p>
             </div>
 
-            <div className="bg-white rounded-lg shadow p-6">
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Name */}
-                        <div className="col-span-2">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
-                            <Input
-                                placeholder="e.g. Fresh Potato"
-                                name="name"
-                                value={formData.name}
-                                onChange={handleChange}
-                                required
-                            />
+            <div className={styles.contentContainer}>
+                <form onSubmit={handleSubmit}>
+                    {/* Parent Product Section */}
+                    <div className={styles.card} style={{ marginBottom: '1.5rem' }}>
+                        <div style={{ borderBottom: '1px solid #E0E3EB', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
+                            <h2 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#111' }}>Parent Product Information</h2>
+                            <p style={{ fontSize: '0.875rem', color: '#6d7175', marginTop: '0.25rem' }}>Shared across all variants</p>
                         </div>
 
-                        {/* Price */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Price (Tk)</label>
-                            <Input
-                                type="number"
-                                placeholder="0"
-                                name="price"
-                                value={formData.price}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-
-                        {/* Original Price */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Original Price (Tk)</label>
-                            <Input
-                                type="number"
-                                placeholder="0"
-                                name="originalPrice"
-                                value={formData.originalPrice}
-                                onChange={handleChange}
-                            />
-                        </div>
-
-                        {/* Weight */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Weight / Unit</label>
-                            <Input
-                                placeholder="e.g. 1kg, 500g, 1pc"
-                                name="weight"
-                                value={formData.weight}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-
-                        {/* Category */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                            <select
-                                name="category"
-                                value={formData.category}
-                                onChange={handleChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                            >
-                                <option>Fresh Vegetables</option>
-                                <option>Fresh Fruits</option>
-                                <option>Fish & Meat</option>
-                                <option>Dairy & Eggs</option>
-                                <option>Rice, Dal & Oil</option>
-                                <option>Snacks</option>
-                                <option>Beverages</option>
-                                <option>Baby Care</option>
-                                <option>Cleaning</option>
-                                <option>Home & Kitchen</option>
-                            </select>
-                        </div>
-
-                        {/* Discount */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Discount %</label>
-                            <Input
-                                type="number"
-                                placeholder="0"
-                                name="discount"
-                                value={formData.discount}
-                                onChange={handleChange}
-                            />
-                        </div>
-
-                        {/* Image URL */}
-                        <div className="col-span-2">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
-                            <Input
-                                placeholder="https://..."
-                                name="image"
-                                value={formData.image}
-                                onChange={handleChange}
-                                required
-                            />
-                            <p className="text-xs text-gray-500 mt-1">Provide a direct link to the product image.</p>
-                        </div>
-
-                        {/* Toggles */}
-                        <div className="col-span-2 flex items-center gap-6 pt-2">
-                            <label className="inline-flex items-center cursor-pointer">
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }}>
+                            <div>
+                                <label className={styles.label}>Product Name *</label>
                                 <input
-                                    type="checkbox"
-                                    name="inStock"
-                                    checked={formData.inStock}
-                                    onChange={handleChange}
-                                    className="rounded text-green-600 focus:ring-green-500 mr-2 h-5 w-5 border-gray-300"
+                                    type="text"
+                                    className={styles.inputField}
+                                    placeholder="e.g. Fresh Potato - Gol Alu"
+                                    value={parentData.name}
+                                    onChange={(e) => handleParentChange('name', e.target.value)}
+                                    required
                                 />
-                                <span className="text-sm font-medium text-gray-900">In Stock</span>
-                            </label>
+                            </div>
 
-                            <label className="inline-flex items-center cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    name="isNew"
-                                    checked={formData.isNew}
-                                    onChange={handleChange}
-                                    className="rounded text-green-600 focus:ring-green-500 mr-2 h-5 w-5 border-gray-300"
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                <div>
+                                    <label className={styles.label}>Category ID</label>
+                                    <input
+                                        type="number"
+                                        className={styles.inputField}
+                                        placeholder="Optional"
+                                        value={parentData.categoryId || ''}
+                                        onChange={(e) => handleParentChange('categoryId', parseInt(e.target.value) || 0)}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className={styles.label}>Base Image URL *</label>
+                                    <input
+                                        type="text"
+                                        className={styles.inputField}
+                                        placeholder="/images/potato.jpg"
+                                        value={parentData.baseImageUrl}
+                                        onChange={(e) => handleParentChange('baseImageUrl', e.target.value)}
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className={styles.label}>Description (HTML)</label>
+                                <textarea
+                                    className={styles.inputField}
+                                    rows={3}
+                                    placeholder="Optional product description"
+                                    value={parentData.descriptionHtml}
+                                    onChange={(e) => handleParentChange('descriptionHtml', e.target.value)}
                                 />
-                                <span className="text-sm font-medium text-gray-900">Mark as New</span>
-                            </label>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="flex justify-end pt-4 border-t mt-6">
+                    {/* Variants Section */}
+                    <div className={styles.card}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #E0E3EB', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
+                            <div>
+                                <h2 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#111' }}>Product Variants</h2>
+                                <p style={{ fontSize: '0.875rem', color: '#6d7175', marginTop: '0.25rem' }}>Add different pack sizes and pricing</p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={addVariant}
+                                className={styles.primaryBtn}
+                                style={{ padding: '0.5rem 1rem' }}
+                            >
+                                <Plus size={16} style={{ marginRight: '0.5rem' }} />
+                                Add Variant
+                            </button>
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            {variants.map((variant, index) => {
+                                const margin = calculateMargin(variant.costPrice, variant.sellingPrice);
+                                const isLowMargin = margin < 5 && margin > 0;
+
+                                return (
+                                    <div key={variant.id} style={{ border: '1px solid #E0E3EB', borderRadius: '4px', padding: '1rem', background: isLowMargin ? '#fff5f5' : 'white' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                            <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#4A4A4A' }}>Variant {index + 1}</h3>
+                                            <button
+                                                type="button"
+                                                onClick={() => removeVariant(variant.id)}
+                                                style={{ background: 'none', border: 'none', color: '#c00', cursor: 'pointer', padding: '0.25rem' }}
+                                                disabled={variants.length === 1}
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
+
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem' }}>
+                                            <div>
+                                                <label className={styles.label} style={{ fontSize: '0.75rem' }}>SKU Barcode *</label>
+                                                <input
+                                                    type="text"
+                                                    className={styles.inputField}
+                                                    placeholder="POT-50KG"
+                                                    value={variant.skuBarcode}
+                                                    onChange={(e) => handleVariantChange(variant.id, 'skuBarcode', e.target.value)}
+                                                    required
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label className={styles.label} style={{ fontSize: '0.75rem' }}>Pack Size Label *</label>
+                                                <input
+                                                    type="text"
+                                                    className={styles.inputField}
+                                                    placeholder="50kg Sack"
+                                                    value={variant.packSizeLabel}
+                                                    onChange={(e) => handleVariantChange(variant.id, 'packSizeLabel', e.target.value)}
+                                                    required
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label className={styles.label} style={{ fontSize: '0.75rem' }}>Base Unit *</label>
+                                                <select
+                                                    className={styles.inputField}
+                                                    value={variant.baseUnit}
+                                                    onChange={(e) => handleVariantChange(variant.id, 'baseUnit', e.target.value)}
+                                                    required
+                                                >
+                                                    <option value="kg">kg</option>
+                                                    <option value="g">g</option>
+                                                    <option value="pc">pc</option>
+                                                    <option value="bottle">bottle</option>
+                                                    <option value="liter">liter</option>
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label className={styles.label} style={{ fontSize: '0.75rem' }}>Weight (grams) *</label>
+                                                <input
+                                                    type="number"
+                                                    className={styles.inputField}
+                                                    placeholder="50000"
+                                                    value={variant.baseWeightGrams || ''}
+                                                    onChange={(e) => handleVariantChange(variant.id, 'baseWeightGrams', parseInt(e.target.value) || 0)}
+                                                    required
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label className={styles.label} style={{ fontSize: '0.75rem' }}>Cost Price (৳) *</label>
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    className={styles.inputField}
+                                                    placeholder="1100.00"
+                                                    value={variant.costPrice || ''}
+                                                    onChange={(e) => handleVariantChange(variant.id, 'costPrice', parseFloat(e.target.value) || 0)}
+                                                    required
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label className={styles.label} style={{ fontSize: '0.75rem' }}>Selling Price (৳) *</label>
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    className={styles.inputField}
+                                                    placeholder="1250.00"
+                                                    value={variant.sellingPrice || ''}
+                                                    onChange={(e) => handleVariantChange(variant.id, 'sellingPrice', parseFloat(e.target.value) || 0)}
+                                                    required
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label className={styles.label} style={{ fontSize: '0.75rem' }}>Stock Quantity *</label>
+                                                <input
+                                                    type="number"
+                                                    className={styles.inputField}
+                                                    placeholder="450"
+                                                    value={variant.stockQuantity || ''}
+                                                    onChange={(e) => handleVariantChange(variant.id, 'stockQuantity', parseInt(e.target.value) || 0)}
+                                                    required
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label className={styles.label} style={{ fontSize: '0.75rem' }}>Margin</label>
+                                                <div style={{
+                                                    padding: '0.5rem',
+                                                    background: isLowMargin ? '#ffebeb' : '#f1f2f4',
+                                                    borderRadius: '4px',
+                                                    fontWeight: 700,
+                                                    color: isLowMargin ? '#c00' : '#24A148',
+                                                    fontSize: '0.875rem',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '0.5rem',
+                                                    marginTop: '0.25rem'
+                                                }}>
+                                                    {isLowMargin && <AlertTriangle size={14} />}
+                                                    {margin.toFixed(2)}%
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {isLowMargin && (
+                                            <div style={{ marginTop: '0.75rem', padding: '0.5rem', background: '#ffebeb', borderRadius: '4px', fontSize: '0.75rem', color: '#c00', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <AlertTriangle size={12} />
+                                                Warning: Margin below 5% - this will trigger procurement restrictions
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Error Display */}
+                    {error && (
+                        <div style={{ marginTop: '1rem', padding: '1rem', background: '#ffebeb', border: '1px solid #ffcaca', borderRadius: '4px', color: '#c00' }}>
+                            {error}
+                        </div>
+                    )}
+
+                    {/* Submit Button */}
+                    <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
                         <Link href="/admin/products">
-                            <Button variant="outline" className="mr-3" type="button">Cancel</Button>
+                            <button type="button" className={styles.secondaryBtn}>Cancel</button>
                         </Link>
-                        <Button type="submit" disabled={isLoading}>
+                        <button
+                            type="submit"
+                            className={styles.primaryBtn}
+                            disabled={isLoading}
+                            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                        >
                             {isLoading ? (
                                 <>
-                                    <Loader2 className="animate-spin mr-2" size={18} />
-                                    Saving...
+                                    <Loader2 className="animate-spin" size={16} />
+                                    Creating...
                                 </>
                             ) : (
                                 <>
-                                    <Save className="mr-2" size={18} />
+                                    <Save size={16} />
                                     Create Product
                                 </>
                             )}
-                        </Button>
+                        </button>
                     </div>
                 </form>
             </div>

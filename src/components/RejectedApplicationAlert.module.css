@@ -1,0 +1,69 @@
+.alertBanner {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-left: 4px solid #f59e0b;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    box-shadow: 0 4px 6px rgba(245, 158, 11, 0.1);
+}
+
+.alertIcon {
+    flex-shrink: 0;
+    color: #d97706;
+}
+
+.alertContent {
+    flex: 1;
+}
+
+.alertTitle {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #92400e;
+    margin: 0 0 0.75rem 0;
+}
+
+.alertReason {
+    font-size: 0.9375rem;
+    color: #78350f;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.5;
+}
+
+.alertReason strong {
+    font-weight: 600;
+}
+
+.alertInstruction {
+    font-size: 0.875rem;
+    color: #92400e;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.resubmitButton {
+    background-color: #f59e0b;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.resubmitButton:hover {
+    background-color: #d97706;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(245, 158, 11, 0.2);
+}
+
+.resubmitButton:active {
+    transform: translateY(0);
+}

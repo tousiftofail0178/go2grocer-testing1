@@ -48,6 +48,25 @@
     text-align: center;
 }
 
+.pendingAlert {
+    background-color: #d1fae5;
+    border: 1px solid #6ee7b7;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.pendingAlert p {
+    margin: 0.25rem 0;
+    color: #065f46;
+    font-size: 0.875rem;
+}
+
+.pendingAlert p:first-child {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
 .backLink {
     background: none;
     border: none;

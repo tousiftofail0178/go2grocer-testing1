@@ -1,0 +1,87 @@
+.actionsContainer {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.actionButton {
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    border: none;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.actionButton:hover {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+.actionBlue {
+    background-color: #3b82f6;
+}
+
+.actionBlue:hover {
+    background-color: #2563eb;
+}
+
+.actionGreen {
+    background-color: #10b981;
+}
+
+.actionGreen:hover {
+    background-color: #059669;
+}
+
+.actionPurple {
+    background-color: #8b5cf6;
+}
+
+.actionPurple:hover {
+    background-color: #7c3aed;
+}
+
+.actionOrange {
+    background-color: #f59e0b;
+}
+
+.actionOrange:hover {
+    background-color: #d97706;
+}
+
+.actionTeal {
+    background-color: #14b8a6;
+}
+
+.actionTeal:hover {
+    background-color: #0d9488;
+}
+
+.actionIndigo {
+    background-color: #6366f1;
+}
+
+.actionIndigo:hover {
+    background-color: #4f46e5;
+}
+
+@media (max-width: 768px) {
+    .actionsContainer {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .actionButton {
+        width: 100%;
+        justify-content: center;
+    }
+}

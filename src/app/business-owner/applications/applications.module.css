@@ -1,0 +1,237 @@
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 0.5rem 0;
+}
+
+.subtitle {
+    font-size: 1rem;
+    color: #666;
+    margin: 0;
+}
+
+.primaryButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.primaryButton:hover {
+    background: #059669;
+}
+
+.loading {
+    text-align: center;
+    padding: 4rem;
+    color: #666;
+}
+
+.emptyState {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: #f9fafb;
+    border-radius: 12px;
+}
+
+.emptyIcon {
+    color: #d1d5db;
+    margin-bottom: 1rem;
+}
+
+.emptyState h3 {
+    font-size: 1.25rem;
+    color: #374151;
+    margin: 0.5rem 0;
+}
+
+.emptyState p {
+    color: #6b7280;
+    margin: 0 0 1.5rem 0;
+}
+
+.applicationsList {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.applicationCard {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.2s;
+}
+
+.applicationCard:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.cardHeader {
+    padding: 1.5rem;
+    background: #f9fafb;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.businessIcon {
+    width: 48px;
+    height: 48px;
+    background: #10b981;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+}
+
+.headerInfo {
+    flex: 1;
+}
+
+.businessName {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0;
+}
+
+.legalName {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0.25rem 0 0 0;
+}
+
+.statusBadge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.badgeVerified {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.badgePending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.badgeRejected {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.statusIconVerified {
+    color: #10b981;
+}
+
+.statusIconPending {
+    color: #f59e0b;
+}
+
+.statusIconRejected {
+    color: #ef4444;
+}
+
+.cardBody {
+    padding: 1.5rem;
+}
+
+.infoGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.infoItem {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.875rem;
+    color: #374151;
+}
+
+.infoItem svg {
+    color: #10b981;
+    flex-shrink: 0;
+}
+
+.metaInfo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #f3f4f6;
+}
+
+.metaInfo small {
+    font-size: 0.75rem;
+    color: #9ca3af;
+}
+
+.pendingNote {
+    padding: 0.75rem 1.5rem;
+    background: #fffbeb;
+    border-top: 1px solid #fef3c7;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #92400e;
+    font-size: 0.875rem;
+}
+
+.pendingNote svg {
+    flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .primaryButton {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .cardHeader {
+        flex-wrap: wrap;
+    }
+
+    .infoGrid {
+        grid-template-columns: 1fr;
+    }
+}

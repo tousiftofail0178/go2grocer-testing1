@@ -269,7 +269,11 @@ const inputStyle = {
 export default function ProfilePage() {
     const router = useRouter();
     const { user, isAuthenticated, logout, addresses, updateProfile, businesses, registerBusiness, updateBusiness } = useAuthStore();
-    const { orders } = useOrderStore(); // fetch directly from store
+
+    // Fetch orders from database instead of local storage
+    const [orders, setOrders] = useState<Order[]>([]);
+    const [isLoadingOrders, setIsLoadingOrders] = useState(false);
+
     const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
@@ -281,6 +285,33 @@ export default function ProfilePage() {
     // Initialize editingBusiness state
     const [editingBusiness, setEditingBusiness] = useState<BusinessEntity | null>(null);
     const [generatingInvoice, setGeneratingInvoice] = useState<string | null>(null);
+
+    // Fetch orders from database
+    useEffect(() => {
+        const fetchOrders = async () => {
+            if (!user?.id) return;
+
+            setIsLoadingOrders(true);
+            try {
+                const response = await fetch(`/api/orders?userId=${user.id}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    setOrders(data.orders || []);
+                } else {
+                    console.error('Failed to fetch orders:', data.error);
+                }
+            } catch (error) {
+                console.error('Error fetching orders:', error);
+            } finally {
+                setIsLoadingOrders(false);
+            }
+        };
+
+        if (isAuthenticated && user) {
+            fetchOrders();
+        }
+    }, [isAuthenticated, user]);
 
     const handleViewInvoice = async (order: Order) => {
         setGeneratingInvoice(order.id);
@@ -374,7 +405,7 @@ export default function ProfilePage() {
                             <span className={styles.label}>Address:</span>
                             <span className={styles.value}>{user?.address || 'Not set'}</span>
                         </div>
-                        {user?.role !== 'manager' && (
+                        {!['business_manager', 'business_owner'].includes(user?.role || '') && (
                             <Button
                                 variant="secondary"
                                 size="small"
@@ -461,7 +492,7 @@ export default function ProfilePage() {
                             </div>
                         </div>
                     </div>
-                ) : user?.role === 'manager' ? null : (
+                ) : ['business_owner', 'business_manager'].includes(user?.role || '') ? null : (
                     <div className={styles.card}>
                         <div className={styles.cardHeader}>
                             <MapPin size={24} className={styles.icon} />

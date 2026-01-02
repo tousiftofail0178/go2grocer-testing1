@@ -1,136 +1,210 @@
 "use client";
 
-import React from 'react';
-import styles from './admin.module.css';
-import { ArrowRight, CheckCircle2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { DollarSign, ShoppingCart, Users, Package, TrendingUp, AlertCircle } from 'lucide-react';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useRouter } from 'next/navigation';
+import MetricCard from '@/components/dashboard/MetricCard';
+import QuickActions from '@/components/dashboard/QuickActions';
+import RecentOrdersTable from '@/components/dashboard/RecentOrdersTable';
+import TopProductsList from '@/components/dashboard/TopProductsList';
+import styles from './dashboard.module.css';
 
 export default function AdminDashboard() {
+    const { user } = useAuthStore();
+    const router = useRouter();
+    const [currentTime, setCurrentTime] = useState('');
+
+    useEffect(() => {
+        // Check authentication
+        if (!user) {
+            router.push('/login');
+            return;
+        }
+
+        // Update time every second
+        const updateTime = () => {
+            const now = new Date();
+            setCurrentTime(now.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }));
+        };
+
+        updateTime();
+        const interval = setInterval(updateTime, 1000);
+
+        return () => clearInterval(interval);
+    }, [user, router]);
+
+    // Mock metrics - these will be replaced with real data from API
+    const metrics = {
+        revenue: {
+            total: 24500,
+            trend: { value: 12.5, isPositive: true }
+        },
+        orders: {
+            total: 18,
+            trend: { value: 8.3, isPositive: true }
+        },
+        customers: {
+            total: 32,
+            subtitle: 'Currently online'
+        },
+        products: {
+            total: 156,
+            lowStock: 8
+        }
+    };
+
     return (
-        <div>
-            <div className={styles.pageHeader}>
-                <h1 className={styles.pageTitle}>Home</h1>
+        <div className={styles.dashboardContainer}>
+            {/* Header */}
+            <div className={styles.header}>
+                <div className={styles.headerTop}>
+                    <div className={styles.welcomeText}>
+                        <h1>Welcome back, {user?.name || 'Admin'}! 👋</h1>
+                        <p>{currentTime}</p>
+                    </div>
+                    <QuickActions />
+                </div>
             </div>
 
-            <div className={styles.contentContainer}>
+            {/* Key Metrics */}
+            <div className={styles.metricsGrid}>
+                <MetricCard
+                    title="Total Revenue"
+                    value={`Tk ${metrics.revenue.total.toLocaleString()}`}
+                    icon={DollarSign}
+                    trend={metrics.revenue.trend}
+                    iconColor="#10b981"
+                    iconBgColor="#d1fae5"
+                    onClick={() => router.push('/admin/analytics')}
+                />
+                <MetricCard
+                    title="Total Orders"
+                    value={metrics.orders.total}
+                    icon={ShoppingCart}
+                    trend={metrics.orders.trend}
+                    subtitle="4 to fulfill"
+                    iconColor="#3b82f6"
+                    iconBgColor="#dbeafe"
+                    onClick={() => router.push('/admin/orders')}
+                />
+                <MetricCard
+                    title="Active Sessions"
+                    value={metrics.customers.total}
+                    icon={Users}
+                    subtitle={metrics.customers.subtitle}
+                    iconColor="#8b5cf6"
+                    iconBgColor="#ede9fe"
+                    onClick={() => router.push('/admin/customers')}
+                />
+                <MetricCard
+                    title="Products"
+                    value={metrics.products.total}
+                    icon={Package}
+                    subtitle={`${metrics.products.lowStock} low stock items`}
+                    iconColor="#f59e0b"
+                    iconBgColor="#fef3c7"
+                    onClick={() => router.push('/admin/products')}
+                />
+            </div>
 
-                {/* Metric Cards */}
-                <div className={styles.cardGrid}>
-                    <div className={styles.card}>
-                        <div className={styles.cardTitle}>Total Sales</div>
-                        <div className={styles.cardValue}>Tk 24,500.00</div>
-                        <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '0.5rem' }}>
-                            +12% from yesterday
+            {/* Charts Section */}
+            <div className={styles.chartsSection}>
+                {/* Sales Overview Chart - Placeholder */}
+                <div style={{ backgroundColor: 'white', borderRadius: '0.75rem', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #f3f4f6' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                        <div>
+                            <h3 style={{ fontSize: '1.125rem', fontWeight: 'bold', color: '#111827', margin: 0 }}>Sales Overview</h3>
+                            <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: '0.25rem 0 0 0' }}>Monthly revenue trends</p>
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <button style={{ padding: '0.375rem 0.75rem', fontSize: '0.75rem', fontWeight: 500, backgroundColor: '#dbeafe', color: '#1e40af', borderRadius: '0.5rem', border: 'none', cursor: 'pointer' }}>
+                                Daily
+                            </button>
+                            <button style={{ padding: '0.375rem 0.75rem', fontSize: '0.75rem', fontWeight: 500, color: '#6b7280', backgroundColor: 'transparent', borderRadius: '0.5rem', border: 'none', cursor: 'pointer' }}>
+                                Weekly
+                            </button>
+                            <button style={{ padding: '0.375rem 0.75rem', fontSize: '0.75rem', fontWeight: 500, color: '#6b7280', backgroundColor: 'transparent', borderRadius: '0.5rem', border: 'none', cursor: 'pointer' }}>
+                                Monthly
+                            </button>
                         </div>
                     </div>
 
-                    <div className={styles.card}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <div className={styles.cardTitle}>Total Orders</div>
-                            <span className={styles.badge}>5 new</span>
-                        </div>
-                        <div className={styles.cardValue}>18</div>
-                        <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '0.5rem' }}>
-                            4 to fulfill
-                        </div>
-                    </div>
-
-                    <div className={styles.card}>
-                        <div className={styles.cardTitle}>Active Sessions</div>
-                        <div className={styles.cardValue}>32</div>
-                        <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '0.5rem' }}>
-                            Currently online
+                    <div style={{ height: '16rem', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #eff6ff 0%, #f5f3ff 100%)', borderRadius: '0.5rem', border: '2px dashed #e5e7eb' }}>
+                        <div style={{ textAlign: 'center' }}>
+                            <TrendingUp size={48} color="#9ca3af" style={{ margin: '0 auto 0.5rem auto' }} />
+                            <p style={{ fontSize: '0.875rem', color: '#6b7280', fontWeight: 500, margin: 0 }}>Sales Chart Coming Soon</p>
+                            <p style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.25rem' }}>Integrate with Recharts or Chart.js</p>
                         </div>
                     </div>
                 </div>
 
-                {/* Setup Guide / Getting Started */}
-                <div className={styles.setupGuide}>
-                    <div className={styles.guideHeader}>
-                        <h2 className={styles.guideTitle}>Setup Guide</h2>
-                        <p style={{ margin: '0.5rem 0 0', fontSize: '0.9rem', color: '#666' }}>
-                            Use this personalized guide to get your store up and running.
+                {/* Order Status Breakdown */}
+                <div style={{ backgroundColor: 'white', borderRadius: '0.75rem', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #f3f4f6' }}>
+                    <div style={{ marginBottom: '1.5rem' }}>
+                        <h3 style={{ fontSize: '1.125rem', fontWeight: 'bold', color: '#111827', margin: 0 }}>Order Status</h3>
+                        <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: '0.25rem 0 0 0' }}>Current order distribution</p>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', backgroundColor: '#fef3c7', borderRadius: '0.5rem', border: '1px solid #fde68a' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <div style={{ width: '0.75rem', height: '0.75rem', borderRadius: '9999px', backgroundColor: '#f59e0b' }}></div>
+                                <span style={{ fontWeight: 500, color: '#111827' }}>Pending</span>
+                            </div>
+                            <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#111827' }}>5</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', backgroundColor: '#dbeafe', borderRadius: '0.5rem', border: '1px solid #bfdbfe' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <div style={{ width: '0.75rem', height: '0.75rem', borderRadius: '9999px', backgroundColor: '#3b82f6' }}></div>
+                                <span style={{ fontWeight: 500, color: '#111827' }}>Processing</span>
+                            </div>
+                            <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#111827' }}>8</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', backgroundColor: '#d1fae5', borderRadius: '0.5rem', border: '1px solid #a7f3d0' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <div style={{ width: '0.75rem', height: '0.75rem', borderRadius: '9999px', backgroundColor: '#10b981' }}></div>
+                                <span style={{ fontWeight: 500, color: '#111827' }}>Fulfilled</span>
+                            </div>
+                            <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#111827' }}>4</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', backgroundColor: '#fee2e2', borderRadius: '0.5rem', border: '1px solid #fecaca' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <div style={{ width: '0.75rem', height: '0.75rem', borderRadius: '9999px', backgroundColor: '#ef4444' }}></div>
+                                <span style={{ fontWeight: 500, color: '#111827' }}>Cancelled</span>
+                            </div>
+                            <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#111827' }}>1</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Bottom Section */}
+            <div className={styles.bottomSection}>
+                <RecentOrdersTable />
+                <TopProductsList />
+            </div>
+
+            {/* Low Stock Alert */}
+            {metrics.products.lowStock > 0 && (
+                <div className={styles.alertBox}>
+                    <AlertCircle color="#c2410c" size={20} style={{ flexShrink: 0, marginTop: '0.125rem' }} />
+                    <div className={styles.alertText}>
+                        <p>Low Stock Alert</p>
+                        <p>
+                            {metrics.products.lowStock} products are running low on stock.
+                            <a href="/admin/products">View products</a>
                         </p>
                     </div>
-                    <div className={styles.guideContent}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-
-                            {/* Step 1 - Done */}
-                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start', opacity: 0.6 }}>
-                                <CheckCircle2 color="green" size={24} />
-                                <div>
-                                    <div style={{ fontWeight: 500, textDecoration: 'line-through' }}>Add your first product</div>
-                                    <div style={{ fontSize: '0.9rem', color: '#666' }}>You've added products to your store.</div>
-                                </div>
-                            </div>
-
-                            {/* Step 2 - Active */}
-                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-                                <div style={{ width: 24, height: 24, borderRadius: '50%', border: '2px dashed #999', flexShrink: 0 }}></div>
-                                <div style={{ flex: 1 }}>
-                                    <div style={{ fontWeight: 600 }}>Customize your online store</div>
-                                    <div style={{ fontSize: '0.9rem', color: '#666', margin: '0.25rem 0' }}>
-                                        Choose a theme and add your logo, colors, and images to reflect your brand.
-                                    </div>
-                                    <button style={{
-                                        marginTop: '0.5rem',
-                                        padding: '0.5rem 1rem',
-                                        background: '#1a1a1a',
-                                        color: '#fff',
-                                        borderRadius: '6px',
-                                        border: 'none',
-                                        cursor: 'pointer',
-                                        fontWeight: 500
-                                    }}>
-                                        Customize theme
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Step 3 - Pending */}
-                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-                                <div style={{ width: 24, height: 24, borderRadius: '50%', border: '2px solid #e1e3e5', flexShrink: 0 }}></div>
-                                <div>
-                                    <div style={{ fontWeight: 500, color: '#444' }}>Add a custom domain</div>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
                 </div>
-
-                {/* Recent Activity */}
-                <div className={styles.card}>
-                    <div className={styles.cardTitle} style={{ marginBottom: '1rem' }}>Recent Orders</div>
-                    <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
-                        <thead>
-                            <tr style={{ borderBottom: '1px solid #eee' }}>
-                                <th style={{ padding: '0.5rem', fontSize: '0.85rem', color: '#666' }}>Order</th>
-                                <th style={{ padding: '0.5rem', fontSize: '0.85rem', color: '#666' }}>Date</th>
-                                <th style={{ padding: '0.5rem', fontSize: '0.85rem', color: '#666' }}>Customer</th>
-                                <th style={{ padding: '0.5rem', fontSize: '0.85rem', color: '#666' }}>Total</th>
-                                <th style={{ padding: '0.5rem', fontSize: '0.85rem', color: '#666' }}>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td style={{ padding: '0.75rem 0.5rem' }}>#1024</td>
-                                <td style={{ padding: '0.75rem 0.5rem', color: '#666' }}>Today at 4:30 pm</td>
-                                <td style={{ padding: '0.75rem 0.5rem' }}>Farhan Ahmed</td>
-                                <td style={{ padding: '0.75rem 0.5rem' }}>Tk 1,200.00</td>
-                                <td style={{ padding: '0.75rem 0.5rem' }}><span className={styles.badge} style={{ background: '#fff4e5', color: '#663c00' }}>Pending</span></td>
-                            </tr>
-                            <tr>
-                                <td style={{ padding: '0.75rem 0.5rem' }}>#1023</td>
-                                <td style={{ padding: '0.75rem 0.5rem', color: '#666' }}>Yesterday</td>
-                                <td style={{ padding: '0.75rem 0.5rem' }}>Rubaba Islam</td>
-                                <td style={{ padding: '0.75rem 0.5rem' }}>Tk 450.00</td>
-                                <td style={{ padding: '0.75rem 0.5rem' }}><span className={styles.badge} style={{ background: '#fff4e5', color: '#663c00' }}>Pending</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-            </div>
+            )}
         </div>
     );
 }

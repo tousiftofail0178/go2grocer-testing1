@@ -29,19 +29,19 @@ export default function EditProductPage() {
 
     useEffect(() => {
         const load = async () => {
-            const res = await getProduct(id);
+            const res = await getProduct(parseInt(id));
             if (res.success && res.product) {
                 const p = res.product;
                 setFormData({
                     name: p.name,
-                    price: p.price?.toString() || '',
-                    originalPrice: p.originalPrice?.toString() || '',
-                    weight: p.weight,
-                    image: p.image,
-                    category: p.category,
-                    inStock: p.inStock ?? true,
-                    isNew: p.isNew ?? false,
-                    discount: p.discount?.toString() || ''
+                    price: '', // V2 doesn't have price in globalCatalog, it's in vendor inventories
+                    originalPrice: '',
+                    weight: p.baseUnit,
+                    image: p.baseImageUrl,
+                    category: p.categoryId?.toString() || 'Fresh Vegetables',
+                    inStock: (p.stockQuantity || 0) > 0,
+                    isNew: false,
+                    discount: ''
                 });
             } else {
                 alert('Product not found');
@@ -68,7 +68,7 @@ export default function EditProductPage() {
         setIsSaving(true);
 
         try {
-            const res = await updateProduct(id, formData);
+            const res = await updateProduct(parseInt(id), formData);
             if (res.success) {
                 router.push('/admin/products');
             } else {

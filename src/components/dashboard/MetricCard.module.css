@@ -1,0 +1,77 @@
+.card {
+    background-color: white;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #f3f4f6;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    transform: translateY(-4px);
+    cursor: pointer;
+}
+
+.cardContent {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.cardInfo {
+    flex: 1;
+}
+
+.cardTitle {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #6b7280;
+    margin-bottom: 0.25rem;
+}
+
+.cardValue {
+    font-size: 1.875rem;
+    font-weight: bold;
+    color: #111827;
+    margin-bottom: 0.5rem;
+}
+
+.cardTrend {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.trendValue {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.trendPositive {
+    color: #059669;
+}
+
+.trendNegative {
+    color: #dc2626;
+}
+
+.trendSubtitle {
+    font-size: 0.75rem;
+    color: #9ca3af;
+}
+
+.cardSubtitle {
+    font-size: 0.875rem;
+    color: #9ca3af;
+}
+
+.iconContainer {
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    transition: transform 0.2s;
+}
+
+.iconContainer:hover {
+    transform: scale(1.1);
+}

@@ -48,12 +48,32 @@ function LoginForm() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!userId || !password) return;
-        try {
-            await loginB2B(userId, password);
-            router.push(redirectUrl);
-        } catch (err) {
-            console.error(err);
+
+        await loginB2B(userId, password);
+
+        // Only redirect if login was successful (no error in state)
+        const { user, error: loginError } = useAuthStore.getState();
+
+        if (!loginError && user?.role) {
+            // Role-based redirects
+            switch (user.role) {
+                case 'admin':
+                case 'g2g_operations':
+                case 'g2g_social_media':
+                    // Admin roles go to admin dashboard
+                    router.push('/admin');
+                    break;
+                case 'business_owner':
+                case 'business_manager':
+                    // Business users go to main shopping page
+                    router.push('/');
+                    break;
+                default:
+                    // Consumer and others go to homepage
+                    router.push(redirectUrl);
+            }
         }
+        // If there's an error, it will be displayed via the error state from the store
     };
 
     return (
@@ -61,6 +81,14 @@ function LoginForm() {
             <div className={styles.card}>
                 <h1 className={styles.title}>B2B Client Login</h1>
                 <p className={styles.subtitle}>Enter your User ID and Password to continue</p>
+
+                {/* Pending approval message */}
+                {searchParams.get('message') === 'pending' && (
+                    <div className={styles.pendingAlert}>
+                        <p><strong>✅ Registration Successful!</strong></p>
+                        <p>Your account is pending admin approval. You'll be able to login once verified.</p>
+                    </div>
+                )}
 
                 {error && <div className={styles.error}>{error}</div>}
 

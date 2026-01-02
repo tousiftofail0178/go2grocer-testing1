@@ -18,7 +18,8 @@ import {
     Search,
     ChevronDown,
     ChevronRight,
-    ExternalLink
+    ExternalLink,
+    Building2
 } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import styles from './admin.module.css';
@@ -100,7 +101,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 return;
             }
 
-            const isAdmin = user?.id === 'G2G-001' || user?.name === 'System Admin';
+            // Allow multiple admin roles
+            const adminRoles = ['admin', 'g2g_operations', 'g2g_social_media'];
+            const isAdmin = user?.role && adminRoles.includes(user.role);
 
             if (!isAdmin) {
                 router.push('/');
@@ -140,77 +143,120 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }, [searchQuery]);
 
     const navItems = [
-        { name: 'Home', href: '/admin', icon: LayoutDashboard },
+        { name: 'Home', href: '/admin', icon: LayoutDashboard, permission: null },
         {
             name: 'Orders',
             href: '/admin/orders',
             icon: ShoppingBag,
             badge: 5,
+            permission: 'manage_orders',
             subItems: [
-                { name: 'Drafts', href: '/admin/orders/drafts' },
-                { name: 'Abandoned checkouts', href: '/admin/orders/abandoned' }
+                { name: 'Drafts', href: '/admin/orders/drafts', permission: 'manage_orders' },
+                { name: 'Abandoned checkouts', href: '/admin/orders/abandoned', permission: 'manage_orders' }
             ]
         },
         {
             name: 'Products',
             href: '/admin/products',
             icon: Package,
+            permission: 'manage_products',
             subItems: [
-                { name: 'Collections', href: '/admin/products/collections' },
-                { name: 'Inventory', href: '/admin/products/inventory' },
-                { name: 'Purchase orders', href: '/admin/products/purchase-orders' },
-                { name: 'Transfers', href: '/admin/products/transfers' },
-                { name: 'Gift cards', href: '/admin/products/gift-cards' }
+                { name: 'Collections', href: '/admin/products/collections', permission: 'manage_products' },
+                { name: 'Inventory', href: '/admin/products/inventory', permission: 'manage_products' },
+                { name: 'Purchase orders', href: '/admin/products/purchase-orders', permission: 'manage_products' },
+                { name: 'Transfers', href: '/admin/products/transfers', permission: 'manage_products' },
+                { name: 'Gift cards', href: '/admin/products/gift-cards', permission: 'manage_products' }
             ]
         },
         {
             name: 'Customers',
             href: '/admin/customers',
             icon: Users,
+            permission: 'manage_customers',
             subItems: [
-                { name: 'Segments', href: '/admin/customers/segments' }
+                { name: 'Segments', href: '/admin/customers/segments', permission: 'manage_customers' }
+            ]
+        },
+        {
+            name: 'Business Entities',
+            href: '/admin/businesses',
+            icon: Building2,
+            permission: 'manage_businesses',
+            subItems: [
+                { name: 'All Businesses', href: '/admin/businesses', permission: 'manage_businesses' },
+                { name: 'Registrations', href: '/admin/registrations', permission: 'manage_businesses' },
+                { name: 'Rejected Applications', href: '/admin/registrations/rejected', permission: 'manage_businesses' },
             ]
         },
         {
             name: 'Content',
             href: '/admin/content',
             icon: FileText,
+            permission: 'manage_content',
             subItems: [
-                { name: 'Metaobjects', href: '/admin/content/metaobjects' },
-                { name: 'Files', href: '/admin/content/files' },
-                { name: 'Menus', href: '/admin/content/menus' },
-                { name: 'Blog posts', href: '/admin/content/blog-posts' }
+                { name: 'Metaobjects', href: '/admin/content/metaobjects', permission: 'manage_content' },
+                { name: 'Files', href: '/admin/content/files', permission: 'manage_content' },
+                { name: 'Menus', href: '/admin/content/menus', permission: 'manage_content' },
+                { name: 'Blog posts', href: '/admin/content/blog-posts', permission: 'manage_content' }
             ]
         },
         {
             name: 'Markets',
             href: '/admin/markets',
             icon: Globe,
+            permission: null, // Admin-only feature
             subItems: [
-                { name: 'Catalogs', href: '/admin/markets/catalogs' }
+                { name: 'Catalogs', href: '/admin/markets/catalogs', permission: null }
             ]
         },
-        { name: 'Finance', href: '/admin/finance', icon: Wallet },
+        { name: 'Finance', href: '/admin/finance', icon: Wallet, permission: 'view_finance' },
         {
             name: 'Analytics',
             href: '/admin/analytics',
             icon: BarChart3,
+            permission: 'view_analytics',
             subItems: [
-                { name: 'Reports', href: '/admin/analytics/reports' },
-                { name: 'Live View', href: '/admin/analytics/live' }
+                { name: 'Reports', href: '/admin/analytics/reports', permission: 'view_analytics' },
+                { name: 'Live View', href: '/admin/analytics/live', permission: 'view_analytics' }
             ]
         },
         {
             name: 'Marketing',
             href: '/admin/marketing',
             icon: BarChart3,
+            permission: 'manage_marketing',
             subItems: [
-                { name: 'Campaigns', href: '/admin/marketing/campaigns' },
-                { name: 'Automations', href: '/admin/marketing/automations' }
+                { name: 'Campaigns', href: '/admin/marketing/campaigns', permission: 'manage_marketing' },
+                { name: 'Automations', href: '/admin/marketing/automations', permission: 'manage_marketing' }
             ]
         },
-        { name: 'Discounts', href: '/admin/discounts', icon: Package }
+        { name: 'Discounts', href: '/admin/discounts', icon: Package, permission: 'manage_discounts' }
     ];
+
+    // Filter nav items based on user role
+    const filteredNavItems = React.useMemo(() => {
+        if (user?.role === 'admin') {
+            return navItems; // Admin gets everything
+        }
+
+        const rolePermissions: Record<string, string[]> = {
+            g2g_operations: ['manage_orders', 'manage_businesses'],
+            g2g_social_media: ['manage_products', 'manage_content', 'manage_discounts', 'manage_marketing', 'manage_businesses'],
+        };
+
+        const userPermissions = rolePermissions[user?.role || ''] || [];
+
+        return navItems.filter(item => {
+            // Home is always visible
+            if (item.name === 'Home') return true;
+
+            // If no permission specified, it's admin-only (hide it)
+            if (!item.permission) return false;
+
+            // Check if user has required permission
+            return userPermissions.includes(item.permission);
+        });
+    }, [user?.role]);
 
     if (!isAuthorized) {
         return (
@@ -232,7 +278,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
                 <nav className={styles.nav}>
                     <div className={styles.navSection}>
-                        {navItems.map((item) => {
+                        {filteredNavItems.map((item) => {
                             const Icon = item.icon;
                             // Check if this item is currently active (top level or child)
                             const isCurrentRoute = pathname === item.href;

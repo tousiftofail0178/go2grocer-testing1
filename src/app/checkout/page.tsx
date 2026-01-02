@@ -19,6 +19,11 @@ export default function CheckoutPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
+    const [businessProfile, setBusinessProfile] = useState<any>(null);
+    const [isLoadingBusiness, setIsLoadingBusiness] = useState(false);
+
+    // Check if user is a business customer
+    const isBusinessCustomer = user?.role === 'business_owner' || user?.role === 'business_manager';
 
     // Form State
     const [formData, setFormData] = useState({
@@ -30,21 +35,52 @@ export default function CheckoutPage() {
         paymentMethod: 'cod'
     });
 
+    // Fetch business profile for business customers
+    useEffect(() => {
+        const fetchBusinessProfile = async () => {
+            if (isAuthenticated && isBusinessCustomer && user?.id) {
+                setIsLoadingBusiness(true);
+                try {
+                    const response = await fetch(`/api/business-profile?userId=${user.id}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        setBusinessProfile(data.profile);
+                    }
+                } catch (error) {
+                    console.error('Error fetching business profile:', error);
+                } finally {
+                    setIsLoadingBusiness(false);
+                }
+            }
+        };
+
+        fetchBusinessProfile();
+    }, [isAuthenticated, isBusinessCustomer, user?.id]);
+
     // Sync form data with user/address state
     useEffect(() => {
         if (isAuthenticated) {
-            setFormData(prev => ({
-                ...prev,
-                name: user?.name || '',
-                phone: user?.phone || '',
-                // If we have a selected address, use its details
-                // Note: basic address structure might need parsing if we split area/address
-                // For now, we'll map fullAddress to address and clear area or assume it's part of it
-                address: selectedAddress?.fullAddress || '',
-                area: '' // specific area field might be redundant if fullAddress covers it
-            }));
+            if (isBusinessCustomer && businessProfile) {
+                // For business customers, use business profile data
+                setFormData(prev => ({
+                    ...prev,
+                    name: businessProfile.businessName || '',
+                    phone: businessProfile.phoneNumber || '',
+                    address: businessProfile.legalName || '', // Use legal name as address placeholder
+                    area: ''
+                }));
+            } else {
+                // For regular customers, use customer profile
+                setFormData(prev => ({
+                    ...prev,
+                    name: user?.name || '',
+                    phone: user?.phone || '',
+                    address: selectedAddress?.fullAddress || '',
+                    area: ''
+                }));
+            }
         }
-    }, [isAuthenticated, user, selectedAddress]);
+    }, [isAuthenticated, user, selectedAddress, isBusinessCustomer, businessProfile]);
 
     const subtotal = getTotalPrice();
     const FREE_DELIVERY_THRESHOLD = 3000;
@@ -58,11 +94,18 @@ export default function CheckoutPage() {
 
     const handleSubmit = async () => {
         if (!isAuthenticated) {
-            // Should not happen due to UI flow
             return;
         }
 
-        const addressToUse = selectedAddress?.fullAddress;
+        let addressToUse;
+
+        if (isBusinessCustomer && businessProfile) {
+            // For business customers, use business legal name as address
+            addressToUse = businessProfile.legalName || businessProfile.businessName;
+        } else {
+            // For regular customers, use selected address
+            addressToUse = selectedAddress?.fullAddress;
+        }
 
         if (!addressToUse || !formData.phone || (!isAuthenticated && !formData.name)) {
             setError('Please fill in all required fields');
@@ -73,7 +116,35 @@ export default function CheckoutPage() {
         setError('');
 
         try {
-            const orderId = Math.floor(100000 + Math.random() * 900000).toString();
+            // Save order to database via API
+            const response = await fetch('/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: user?.id, // UUID
+                    items: items,
+                    total: total,
+                    deliveryFee: deliveryFee,
+                    shippingAddress: {
+                        address: addressToUse || '',
+                        area: formData.area || '',
+                        city: 'Chittagong',
+                        phone: formData.phone,
+                        name: formData.name
+                    },
+                    paymentMethod: formData.paymentMethod
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to create order');
+            }
+
+            const orderId = data.orderId;
+
+            // Also add to local store for backward compatibility
             const newOrder = {
                 id: orderId,
                 date: new Date().toISOString().split('T')[0],
@@ -180,28 +251,54 @@ export default function CheckoutPage() {
                                     name="name"
                                     value={formData.name}
                                     onChange={handleInputChange}
+                                    disabled={isBusinessCustomer}
                                 />
                                 <Input
                                     label="Phone Number"
                                     name="phone"
                                     value={formData.phone}
                                     onChange={handleInputChange}
+                                    disabled={isBusinessCustomer}
                                 />
                             </div>
-                            <div className={styles.selectedAddress}>
-                                <div className={styles.addressDetails}>
-                                    <span className={styles.addressLabel}>
-                                        <MapPin size={16} /> {selectedAddress?.label || 'Delivery Address'}
-                                    </span>
-                                    <span className={styles.addressText}>{selectedAddress?.fullAddress || 'No address selected'}</span>
+
+                            {isBusinessCustomer ? (
+                                // Business customers see their business info (no change option)
+                                <div className={styles.selectedAddress}>
+                                    <div className={styles.addressDetails}>
+                                        <span className={styles.addressLabel}>
+                                            <MapPin size={16} /> Delivery Address
+                                        </span>
+                                        <span className={styles.addressText}>
+                                            {isLoadingBusiness ? (
+                                                'Loading business information...'
+                                            ) : (
+                                                <>
+                                                    <strong>{businessProfile?.businessName || 'N/A'}</strong>
+                                                    <br />
+                                                    {businessProfile?.legalName || 'Legal name not available'}
+                                                </>
+                                            )}
+                                        </span>
+                                    </div>
                                 </div>
-                                <button
-                                    className={styles.changeBtn}
-                                    onClick={() => setIsAddressModalOpen(true)}
-                                >
-                                    Change / Add
-                                </button>
-                            </div>
+                            ) : (
+                                // Regular customers can change/add address
+                                <div className={styles.selectedAddress}>
+                                    <div className={styles.addressDetails}>
+                                        <span className={styles.addressLabel}>
+                                            <MapPin size={16} /> {selectedAddress?.label || 'Delivery Address'}
+                                        </span>
+                                        <span className={styles.addressText}>{selectedAddress?.fullAddress || 'No address selected'}</span>
+                                    </div>
+                                    <button
+                                        className={styles.changeBtn}
+                                        onClick={() => setIsAddressModalOpen(true)}
+                                    >
+                                        Change / Add
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </section>
 

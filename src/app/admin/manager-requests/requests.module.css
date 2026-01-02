@@ -1,0 +1,175 @@
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.header {
+    margin-bottom: 2rem;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 0.5rem 0;
+}
+
+.subtitle {
+    font-size: 1rem;
+    color: #666;
+    margin: 0;
+}
+
+.loading {
+    text-align: center;
+    padding: 4rem;
+    color: #666;
+}
+
+.emptyState {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: #f9fafb;
+    border-radius: 12px;
+}
+
+.emptyIcon {
+    color: #d1d5db;
+    margin-bottom: 1rem;
+}
+
+.emptyState h3 {
+    font-size: 1.25rem;
+    color: #374151;
+    margin: 0.5rem 0;
+}
+
+.emptyState p {
+    color: #6b7280;
+    margin: 0;
+}
+
+.requestsTable {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.requestsTable table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.requestsTable thead {
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.requestsTable th {
+    padding: 1rem;
+    text-align: left;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.requestsTable td {
+    padding: 1rem;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.managerInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.managerInfo .name {
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 0.25rem;
+}
+
+.contact {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.businessInfo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.requesterInfo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.date {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.approveButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.approveButton:hover {
+    background: #059669;
+}
+
+.approveButton:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+}
+
+.rejectButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.rejectButton:hover {
+    background: #dc2626;
+}
+
+.rejectButton:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+}

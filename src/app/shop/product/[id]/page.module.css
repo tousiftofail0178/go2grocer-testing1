@@ -1,0 +1,302 @@
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    font-size: 0.875rem;
+    color: var(--text-grey);
+}
+
+.breadcrumb a {
+    color: var(--text-grey);
+    text-decoration: none;
+}
+
+.breadcrumb a:hover {
+    color: var(--primary-green);
+}
+
+.breadcrumbSeparator {
+    color: var(--border-grey);
+}
+
+.productGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    margin-bottom: 3rem;
+}
+
+.imageSection {
+    position: relative;
+}
+
+.mainImage {
+    position: relative;
+    width: 100%;
+    padding-top: 100%;
+    background: #f9f9f9;
+    border-radius: 1rem;
+    overflow: hidden;
+    border: 1px solid var(--border-grey);
+}
+
+.badge {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1;
+}
+
+.infoSection {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.category {
+    font-size: 0.875rem;
+    color: var(--primary-green);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-black);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.packSize {
+    font-size: 1.125rem;
+    color: var(--text-grey);
+    font-weight: 500;
+}
+
+.rating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stars {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.ratingText {
+    font-size: 0.875rem;
+    color: var(--text-grey);
+}
+
+.priceSection {
+    background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+    border: 2px solid var(--primary-green);
+    border-radius: 1rem;
+    padding: 1.5rem;
+}
+
+.priceRow {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.currentPrice {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--primary-green);
+}
+
+.originalPrice {
+    font-size: 1.25rem;
+    color: var(--text-grey);
+    text-decoration: line-through;
+}
+
+.savings {
+    font-size: 0.875rem;
+    color: var(--primary-green);
+    font-weight: 600;
+}
+
+.stockInfo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 0;
+    border-top: 1px solid var(--border-grey);
+    border-bottom: 1px solid var(--border-grey);
+}
+
+.inStock {
+    color: var(--primary-green);
+    font-weight: 600;
+}
+
+.outOfStock {
+    color: #dc2626;
+    font-weight: 600;
+}
+
+.sku {
+    font-size: 0.875rem;
+    color: var(--text-grey);
+}
+
+.actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.quantityControls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border: 2px solid var(--border-grey);
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+}
+
+.quantityButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-grey);
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.quantityButton:hover {
+    color: var(--primary-green);
+}
+
+.quantityButton:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.quantity {
+    font-size: 1.25rem;
+    font-weight: 700;
+    min-width: 3rem;
+    text-align: center;
+}
+
+.addToCartButton {
+    flex: 1;
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
+}
+
+.description {
+    margin-top: 3rem;
+    padding-top: 3rem;
+    border-top: 2px solid var(--border-grey);
+}
+
+.sectionTitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--text-black);
+}
+
+.descriptionText {
+    color: var(--text-grey);
+    line-height: 1.6;
+    font-size: 1rem;
+}
+
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
+}
+
+.error {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.errorTitle {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-black);
+    margin-bottom: 1rem;
+}
+
+.errorText {
+    color: var(--text-grey);
+    margin-bottom: 2rem;
+}
+
+/* Guest Access Box Styles */
+.guestAccessBox {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-top: 1rem;
+}
+
+.guestAccessHeading {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-black);
+    margin: 0 0 0.75rem 0;
+}
+
+.guestAccessText {
+    color: var(--text-grey);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    margin: 0 0 1.5rem 0;
+}
+
+.guestAccessActions {
+    display: flex;
+    gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .productGrid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .title {
+        font-size: 1.5rem;
+    }
+
+    .currentPrice {
+        font-size: 2rem;
+    }
+
+    .actions {
+        flex-direction: column;
+    }
+
+    .quantityControls,
+    .addToCartButton {
+        width: 100%;
+    }
+
+    .guestAccessActions {
+        flex-direction: column;
+    }
+}

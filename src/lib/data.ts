@@ -10,15 +10,28 @@ export interface Product {
     inStock: boolean;
     isNew?: boolean;
     discount?: number;
-    isPriceHidden?: boolean; // New flag for visibility control
+    isPriceHidden?: boolean;
+    // B2B Database fields
+    globalProductId?: number | string;
+    baseImageUrl?: string;
+    baseUnit?: string;
+    unit?: string;
+    categoryId?: number;
+    packSizeLabel?: string;
+    sellingPrice?: string | number;
+    costPrice?: string | number;
+    stockQuantity?: number;
 }
 
 
 export interface Category {
     id: string;
     name: string;
-    icon: string; // We'll use Lucide icon names or image paths later
+    icon: string;
     slug: string;
+    // B2B Database fields
+    categoryId?: number;
+    taxCode?: string;
 }
 
 export interface User {
@@ -27,7 +40,7 @@ export interface User {
     phone: string;
     email?: string;
     address?: string;
-    role?: 'consumer' | 'b2b' | 'admin' | 'owner' | 'manager';
+    role?: 'consumer' | 'b2b' | 'admin' | 'owner' | 'manager' | 'g2g_operations' | 'g2g_social_media' | 'business_owner' | 'business_manager';
     b2bRole?: 'owner' | 'manager';
 }
 

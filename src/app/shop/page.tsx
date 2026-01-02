@@ -48,19 +48,15 @@ function ShopContent() {
         const fetchData = async () => {
             try {
                 const [productsData, categoriesData] = await Promise.all([
-                    productApi.getProducts(),
-                    productApi.getCategories()
+                    fetch('/api/products').then(res => res.json()),
+                    fetch('/api/categories').then(res => res.json())
                 ]);
-                const prods = Array.isArray(productsData) ? productsData : productsData.data || [];
-                setProducts(prods);
-                setFilteredProducts(prods); // Initialize filtered list
-                setCategories(Array.isArray(categoriesData) ? categoriesData : categoriesData.data || []);
+                setProducts(productsData);
+                setFilteredProducts(productsData);
+                setCategories(categoriesData);
             } catch (err) {
                 console.error('Failed to fetch shop data:', err);
-                const { products: mockProducts, categories: mockCategories } = await import('@/lib/data');
-                setProducts(mockProducts);
-                setFilteredProducts(mockProducts);
-                setCategories(mockCategories);
+                setError('Failed to load products');
             } finally {
                 setIsLoading(false);
             }
@@ -88,9 +84,9 @@ function ShopContent() {
             result = result.filter(p => p.name.toLowerCase().includes(query));
         }
 
-        // Category Filter
+        // Category Filter - use categoryId instead of slug
         if (selectedCategories.length > 0) {
-            result = result.filter(p => selectedCategories.includes(p.category));
+            result = result.filter(p => selectedCategories.includes(String(p.categoryId || p.category)));
         }
 
         // Price Filter
@@ -185,12 +181,12 @@ function ShopContent() {
                         <h3 className={styles.filterTitle}>Categories</h3>
                         <div className={styles.filterList}>
                             {categories.map((category) => (
-                                <label key={category.id} className={styles.checkboxLabel}>
+                                <label key={category.categoryId} className={styles.checkboxLabel}>
                                     <input
                                         type="checkbox"
                                         className={styles.checkbox}
-                                        checked={selectedCategories.includes(category.slug)}
-                                        onChange={() => handleCategoryChange(category.slug)}
+                                        checked={selectedCategories.includes(String(category.categoryId))}
+                                        onChange={() => handleCategoryChange(String(category.categoryId))}
                                     />
                                     <span>{category.name}</span>
                                 </label>
@@ -275,8 +271,19 @@ function ShopContent() {
                                 const cartItem = items.find(item => item.id === product.id);
                                 return (
                                     <ProductCard
-                                        key={product.id}
-                                        product={product}
+                                        key={product.globalProductId}
+                                        product={{
+                                            ...product,
+                                            id: String(product.globalProductId),
+                                            name: product.name,
+                                            // FIX: Use baseImageUrl and provide a fallback
+                                            image: product.baseImageUrl ? product.baseImageUrl : "/images/placeholder.jpg",
+                                            price: Number(product.sellingPrice),
+                                            unit: product.packSizeLabel || product.baseUnit,
+                                            // Default values for missing fields
+                                            discount: 0,
+                                            rating: 5
+                                        }}
                                         onAdd={addItem}
                                         quantity={cartItem?.quantity || 0}
                                         onUpdateQuantity={(qty) => updateQuantity(product.id, qty)}

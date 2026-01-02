@@ -5,11 +5,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Grid, ShoppingCart, User } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
+import { useAuthStore } from '@/store/useAuthStore';
 import styles from './MobileNav.module.css';
 
 export const MobileNav: React.FC = () => {
     const pathname = usePathname();
     const { getTotalItems } = useCartStore();
+    const { user } = useAuthStore();
     const cartCount = getTotalItems();
 
     const isActive = (path: string) => pathname === path;
@@ -34,7 +36,18 @@ export const MobileNav: React.FC = () => {
                 <span>Cart</span>
             </Link>
 
-            <Link href="/profile" className={`${styles.item} ${isActive('/profile') ? styles.active : ''}`}>
+            <Link
+                href={
+                    user?.role === 'business_owner' ? '/business-owner' :
+                        user?.role === 'business_manager' ? '/business-manager' :
+                            '/profile'
+                }
+                className={`${styles.item} ${isActive(
+                    user?.role === 'business_owner' ? '/business-owner' :
+                        user?.role === 'business_manager' ? '/business-manager' :
+                            '/profile'
+                ) ? styles.active : ''}`}
+            >
                 <User size={24} />
                 <span>Account</span>
             </Link>

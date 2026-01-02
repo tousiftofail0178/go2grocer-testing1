@@ -1,0 +1,98 @@
+.dashboardContainer {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f9fafb 0%, #eff6ff 50%, #faf5ff 100%);
+    padding: 2rem;
+}
+
+.header {
+    margin-bottom: 2rem;
+}
+
+.headerTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.welcomeText h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #111827;
+    margin: 0;
+}
+
+.welcomeText p {
+    color: #6b7280;
+    margin-top: 0.5rem;
+}
+
+.metricsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.chartsSection {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.bottomSection {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+}
+
+.alertBox {
+    margin-top: 1.5rem;
+    background-color: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.alertText {
+    flex: 1;
+}
+
+.alertText p:first-child {
+    font-weight: 600;
+    color: #9a3412;
+    margin: 0 0 0.25rem 0;
+}
+
+.alertText p:last-child {
+    font-size: 0.875rem;
+    color: #c2410c;
+    margin: 0;
+}
+
+.alertText a {
+    margin-left: 0.25rem;
+    text-decoration: underline;
+    font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dashboardContainer {
+        padding: 1rem;
+    }
+
+    .welcomeText h1 {
+        font-size: 1.5rem;
+    }
+
+    .metricsGrid,
+    .chartsSection,
+    .bottomSection {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,384 @@
+/* Procurement Terminal Styling */
+.procurement {
+    min-height: 100vh;
+    background: #F7F8FA;
+    color: #111111;
+}
+
+.breadcrumb {
+    background: white;
+    border-bottom: 1px solid #E0E3EB;
+    padding: 12px 24px;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: #4A4A4A;
+    letter-spacing: 0.5px;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 32px;
+}
+
+@media (min-width: 1024px) {
+    .container {
+        grid-template-columns: 3fr 5fr 4fr;
+    }
+}
+
+/* Left Column - Visuals */
+.visualColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.productImage {
+    width: 100%;
+    aspect-ratio: 1;
+    background: #E0E3EB;
+    border: 1px solid #d0d3db;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    font-size: 48px;
+}
+
+.trustBadges {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.trustBadge {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #f1f2f4;
+    padding: 12px 16px;
+    border-radius: 4px;
+    border: 1px solid #E0E3EB;
+}
+
+.trustBadge svg {
+    color: #4A4A4A;
+    flex-shrink: 0;
+}
+
+.trustBadge span {
+    font-size: 13px;
+    color: #4A4A4A;
+    font-weight: 500;
+}
+
+/* Center Column - Data */
+.dataColumn {
+    display: flex;
+    flex-direction: column;
+}
+
+.productTitle {
+    font-size: 28px;
+    font-weight: 700;
+    color: #111111;
+    margin-bottom: 8px;
+}
+
+.skuBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #f1f2f4;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: #4A4A4A;
+    margin-bottom: 24px;
+    width: fit-content;
+}
+
+.copyButton {
+    background: none;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+}
+
+.copyButton:hover {
+    color: #111;
+}
+
+.dataGrid {
+    border: 1px solid #E0E3EB;
+    border-radius: 4px;
+    overflow: hidden;
+    background: white;
+}
+
+.dataRow {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
+}
+
+.dataRow:last-child {
+    border-bottom: none;
+}
+
+.dataLabel {
+    background: #fafbfc;
+    padding: 12px 16px;
+    font-weight: 500;
+    color: #4A4A4A;
+    font-size: 13px;
+    border-right: 1px solid #f0f0f0;
+}
+
+.dataValue {
+    padding: 12px 16px;
+    color: #111111;
+    font-weight: 500;
+}
+
+.dataValue.highlight {
+    background: #f9fafb;
+}
+
+.dataValue.error {
+    color: #E53935;
+    font-weight: 700;
+}
+
+.dataValue.success {
+    color: #24A148;
+    font-weight: 600;
+}
+
+/* Right Column - Control Panel */
+.controlColumn {
+    position: relative;
+}
+
+.controlPanel {
+    position: sticky;
+    top: 24px;
+    background: white;
+    border: 1px solid #E0E3EB;
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.controlHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f0f0f0;
+    margin-bottom: 24px;
+}
+
+.controlTitle {
+    font-size: 14px;
+    font-weight: 700;
+    color: #111111;
+}
+
+.stockBadge {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: #4A4A4A;
+    background: #f1f2f4;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.section {
+    margin-bottom: 24px;
+}
+
+.sectionLabel {
+    font-size: 11px;
+    font-weight: 700;
+    color: #4A4A4A;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.variantOptions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.variantOption {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border: 1px solid #E0E3EB;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: white;
+}
+
+.variantOption:hover {
+    background: #f9fafb;
+    border-color: #4A4A4A;
+}
+
+.variantOption.selected {
+    background: #111111;
+    border-color: #111111;
+    color: white;
+}
+
+.variantOption input {
+    display: none;
+}
+
+.variantLabel {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.variantPrice {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.quantityControl {
+    display: flex;
+    align-items: center;
+    height: 40px;
+    width: 128px;
+    border: 1px solid #E0E3EB;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.quantityButton {
+    width: 40px;
+    height: 100%;
+    background: #f9fafb;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: #4A4A4A;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.quantityButton:hover:not(:disabled) {
+    background: #e8eaed;
+}
+
+.quantityButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.quantityValue {
+    flex: 1;
+    text-align: center;
+    font-weight: 700;
+    font-size: 16px;
+    background: white;
+}
+
+.actionButton {
+    width: 100%;
+    padding: 14px;
+    border-radius: 4px;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.actionButton.approve {
+    background: #24A148;
+    color: white;
+    border: none;
+}
+
+.actionButton.approve:hover {
+    background: #1d8439;
+    box-shadow: 0 2px 8px rgba(36, 161, 72, 0.3);
+}
+
+.actionButton.approve:active {
+    transform: scale(0.98);
+}
+
+.actionButton.review {
+    background: #FFCE3A;
+    color: #111111;
+    border: none;
+}
+
+.actionButton.review:hover {
+    background: #f5c520;
+    box-shadow: 0 2px 8px rgba(255, 206, 58, 0.4);
+}
+
+.actionButton.blocked {
+    background: #E0E3EB;
+    color: #999;
+    border: none;
+    cursor: not-allowed;
+}
+
+.alertBox {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    background: #fff5f5;
+    border: 1px solid #ffcaca;
+    padding: 12px;
+    border-radius: 4px;
+    margin-top: 12px;
+}
+
+.alertBox svg {
+    color: #E53935;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.alertText {
+    font-size: 12px;
+    color: #E53935;
+    line-height: 1.5;
+}
+
+.reviewNote {
+    font-size: 12px;
+    text-align: center;
+    color: #4A4A4A;
+    margin-top: 8px;
+}

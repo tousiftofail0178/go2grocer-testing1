@@ -1,7 +1,7 @@
 
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
-import { orders, orderItems, products, users } from '@/db/schema';
+import { orders, orderItems, globalCatalog, customerProfiles } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
@@ -12,61 +12,62 @@ export async function GET(
 ) {
     try {
         const { orderId } = await params;
+        const orderIdNum = parseInt(orderId);
 
-        // Fetch order details with user
+        // Fetch order details with customer profile
         const orderResult = await db
             .select({
                 order: orders,
-                user: users,
+                customer: customerProfiles,
             })
             .from(orders)
-            .leftJoin(users, eq(orders.userId, users.id))
-            .where(eq(orders.id, orderId))
+            .leftJoin(customerProfiles, eq(orders.customerId, customerProfiles.profileId))
+            .where(eq(orders.orderId, orderIdNum))
             .limit(1);
 
         if (orderResult.length === 0) {
             return NextResponse.json({ error: 'Order not found' }, { status: 404 });
         }
 
-        const { order, user } = orderResult[0];
+        const { order, customer } = orderResult[0];
 
         // Fetch order items with product details
         const itemsResult = await db
             .select({
                 item: orderItems,
-                product: products,
+                product: globalCatalog,
             })
             .from(orderItems)
-            .leftJoin(products, eq(orderItems.productId, products.id))
-            .where(eq(orderItems.orderId, orderId));
+            .leftJoin(globalCatalog, eq(orderItems.productId, globalCatalog.globalProductId))
+            .where(eq(orderItems.orderId, orderIdNum));
 
         // Format response
         const formattedOrder = {
-            id: order.id,
-            date: order.date,
-            email: user?.email || 'No email',
-            phone: user?.phone || 'No phone',
-            shippingAddress: order.shippingAddress || 'No address provided',
-            billingAddress: order.shippingAddress || 'Same as shipping', // Assuming same for now
-            status: order.status,
-            paymentMethod: order.paymentMethod,
-            total: order.total,
-            subtotal: order.total, // Simplified
-            tax: 0, // Simplified
-            shipping: order.deliveryFee,
+            id: order.orderId.toString(),
+            date: order.createdAt,
+            email: customer?.email || 'No email',
+            phone: customer?.phoneNumber || 'No phone',
+            shippingAddress: 'Address lookup needed', // TODO: Join with addresses table
+            billingAddress: 'Same as shipping',
+            status: 'Processing',
+            paymentMethod: order.paymentStatus === 'paid' ? 'Paid' : 'Pending',
+            total: parseFloat(order.totalAmountGross || '0'),
+            subtotal: parseFloat(order.totalAmountGross || '0'),
+            tax: 0,
+            shipping: parseFloat(order.platformFee || '0'),
             items: itemsResult.map(({ item, product }) => ({
-                id: item.id,
+                id: item.itemId.toString(),
                 name: product?.name || 'Unknown Product',
-                sku: 'SKU-123', // Placeholder
-                price: item.priceAtPurchase || product?.price || 0,
+                sku: product?.skuBarcode || 'N/A',
+                price: parseFloat(item.priceAtPurchase || '0'),
                 quantity: item.quantity,
-                image: product?.image,
-                total: (item.priceAtPurchase || product?.price || 0) * item.quantity
+                image: product?.baseImageUrl,
+                total: parseFloat(item.priceAtPurchase || '0') * item.quantity
             })),
             customer: {
-                id: user?.id,
-                name: user?.name || 'No customer',
-                ordersCount: 1, // Placeholder, would need another query
+                id: customer?.profileId,
+                name: customer ? `${customer.firstName} ${customer.lastName}` : 'No customer',
+                ordersCount: 1,
             }
         };
 
@@ -88,7 +89,6 @@ export async function PATCH(
         const { status, paymentStatus } = body;
 
         const updateData: any = {};
-        if (status) updateData.status = status; // Map to 'status' column, check schema if it's fulfillmentStatus
         if (paymentStatus) updateData.paymentStatus = paymentStatus;
 
         if (Object.keys(updateData).length === 0) {
@@ -102,7 +102,7 @@ export async function PATCH(
         await db
             .update(orders)
             .set(updateData)
-            .where(eq(orders.id, orderId));
+            .where(eq(orders.orderId, parseInt(orderId)));
 
         return NextResponse.json({ success: true, message: 'Order updated successfully' });
     } catch (error) {

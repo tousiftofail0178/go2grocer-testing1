@@ -9,41 +9,69 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 3rem;
-  padding: 3rem 1rem;
-  background: linear-gradient(to right, #f0fdf4, #ffffff);
-  max-width: 1440px;
-  margin: 0 auto;
+  gap: 4rem;
+  padding: 5rem 3rem;
+  background: linear-gradient(135deg, #064e3b 0%, #047857 50%, #059669 100%);
+  max-width: 100%;
+  margin: 0;
   width: 100%;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -10%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
 }
 
 .heroContent {
   flex: 1;
-  max-width: 600px;
+  max-width: 650px;
+  z-index: 1;
 }
 
 .heroTitle {
-  font-size: 3rem;
-  font-weight: 800;
-  line-height: 1.2;
-  margin-bottom: 1rem;
-  color: var(--text-black);
+  font-size: 3.5rem;
+  font-weight: 900;
+  line-height: 1.15;
+  margin-bottom: 1.5rem;
+  color: white;
+  letter-spacing: -0.02em;
 }
 
 .highlight {
-  color: var(--primary-green);
+  background: linear-gradient(135deg, #a7f3d0 0%, #6ee7b7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: inline-block;
 }
 
 .heroSubtitle {
   font-size: 1.125rem;
-  color: var(--text-grey);
-  margin-bottom: 2rem;
-  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.95);
+  margin-bottom: 2.5rem;
+  line-height: 1.7;
+  max-width: 550px;
+}
+
+.heroSubtitle strong {
+  color: #a7f3d0;
+  font-weight: 700;
 }
 
 .heroButtons {
   display: flex;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .heroImageWrapper {
@@ -434,5 +462,220 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 0.75rem;
     /* Reduced gap */
+  }
+}
+
+/* Append new styles to page.module.css */
+
+/* B2B Hero Specific Styles */
+.heroBadge {
+  display: inline-block;
+  background-color: rgba(6, 78, 59, 0.5);
+  border: 1px solid rgba(16, 185, 129, 0.5);
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+  backdrop-filter: blur(4px);
+}
+
+.heroCard {
+  flex: 0 0 auto;
+  width: 400px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 2rem;
+  border-radius: 1rem;
+  backdrop-filter: blur(12px);
+  position: relative;
+}
+
+.heroCard::before {
+  content: "";
+  position: absolute;
+  inset: -1rem;
+  background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.2), transparent);
+  border-radius: 1.5rem;
+  filter: blur(40px);
+  z-index: -1;
+}
+
+.heroCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+}
+
+.heroCardLabel {
+  font-size: 0.75rem;
+  font-family: 'Courier New', monospace;
+  color: #a7f3d0;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.25rem;
+}
+
+.heroCardPrice {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: white;
+}
+
+.heroCardUnit {
+  font-size: 0.875rem;
+  color: #d1fae5;
+}
+
+.heroCardIcon {
+  background-color: rgba(16, 185, 129, 0.2);
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  color: #a7f3d0;
+}
+
+.heroCardProgress {
+  height: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.heroCardProgressBar {
+  height: 100%;
+  width: 75%;
+  background-color: #10b981;
+}
+
+.heroCardFooter {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  font-family: 'Courier New', monospace;
+  color: #a7f3d0;
+}
+
+.primaryButton {
+  background-color: #10b981;
+  color: #064e3b;
+  padding: 1rem 2rem;
+  border-radius: 0.5rem;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.2s;
+  box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.2);
+}
+
+.primaryButton:hover {
+  background-color: #34d399;
+  transform: translateY(-2px);
+}
+
+.secondaryButtonAlt {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 1rem 2rem;
+  border-radius: 0.5rem;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.2s;
+  backdrop-filter: blur(4px);
+}
+
+.secondaryButtonAlt:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.sectionSubtitle {
+  color: #64748b;
+  margin-top: 0.75rem;
+  text-align: center;
+  font-size: 1rem;
+}
+
+.categoriesGridB2B {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1.5rem;
+}
+
+.categoryCardB2B {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  background-color: white;
+  border-radius: 1rem;
+  border: 2px solid #e2e8f0;
+  text-decoration: none;
+  transition: all 0.3s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.categoryCardB2B:hover {
+  border-color: #10b981;
+  box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.1);
+  transform: translateY(-4px);
+}
+
+.categoryIconWrapper {
+  width: 64px;
+  height: 64px;
+  background-color: #f1f5f9;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s;
+}
+
+.categoryCardB2B:hover .categoryIconWrapper {
+  background-color: #d1fae5;
+  color: #047857;
+  transform: scale(1.1);
+}
+
+.categoryName {
+  font-weight: 700;
+  color: #334155;
+  text-align: center;
+  line-height: 1.4;
+  transition: color 0.3s;
+}
+
+.categoryCardB2B:hover .categoryName {
+  color: #047857;
+}
+
+@media (max-width: 1024px) {
+  .heroCard {
+    display: none;
+  }
+
+  .hero {
+    padding: 3rem 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: 2rem 1rem;
+    text-align: center;
+  }
+
+  .heroButtons {
+    justify-content: center;
+  }
+
+  .categoriesGridB2B {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
   }
 }

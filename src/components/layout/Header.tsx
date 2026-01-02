@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Search, MapPin, ShoppingCart, User, LogOut, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -11,12 +11,16 @@ import styles from './Header.module.css';
 import { AddressModal } from '@/components/ui/AddressModal';
 import { BusinessSelectionModal } from '@/components/ui/BusinessSelectionModal';
 import { LocationSelectionModal } from '@/components/ui/LocationSelectionModal';
-import { categories } from '@/lib/data';
 
 export default function Header() {
     const { user, isAuthenticated, logout, selectedAddress, selectedBusiness } = useAuthStore();
     const { getTotalItems } = useCartStore();
     const cartCount = getTotalItems();
+
+    // Fix hydration error: only show cart count on client
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => setMounted(true), []);
+
     const [isAddressModalOpen, setIsAddressModalOpen] = React.useState(false);
     const [isBusinessModalOpen, setIsBusinessModalOpen] = React.useState(false);
     const [isLocationModalOpen, setIsLocationModalOpen] = React.useState(false);
@@ -96,13 +100,20 @@ export default function Header() {
                                 {/* Account */}
                                 {isAuthenticated ? (
                                     <div className={styles.accountWrapper}>
-                                        <Link href="/profile" className={styles.accountLink}>
+                                        <Link
+                                            href={
+                                                user?.role === 'business_owner' ? '/business-owner' :
+                                                    user?.role === 'business_manager' ? '/business-manager' :
+                                                        '/profile'
+                                            }
+                                            className={styles.accountLink}
+                                        >
                                             <User size={20} />
                                             <span className={styles.accountText}>{user?.name || 'Profile'}</span>
                                         </Link>
 
-                                        {/* Admin Dashboard Link - Only for G2G-001 or System Admin */}
-                                        {(user?.id === 'G2G-001' || user?.name === 'System Admin') && (
+                                        {/* Admin Dashboard Link - Only for admin role */}
+                                        {user?.role === 'admin' && (
                                             <>
                                                 <div className={styles.divider} />
                                                 <Link href="/admin" className={styles.accountLink} title="Admin Dashboard">
@@ -147,7 +158,7 @@ export default function Header() {
                                 <Link href="/cart">
                                     <div className={styles.cartButton} role="button" aria-label="Cart">
                                         <ShoppingCart size={22} />
-                                        {cartCount > 0 && <span className={styles.cartBadge}>{cartCount}</span>}
+                                        {mounted && cartCount > 0 && <span className={styles.cartBadge}>{cartCount}</span>}
                                     </div>
                                 </Link>
                             </div>
@@ -156,23 +167,44 @@ export default function Header() {
                 </div>
             </header>
 
-            {/* Category Navigation Bar */}
+            {/* CATEGORY NAVIGATION BAR */}
             <div className={styles.categoryBar}>
                 <div className={styles.container}>
-                    <ul className={styles.categoryList}>
-                        <li className={`${styles.categoryItem} ${styles.active}`}>
-                            <Link href="/shop" style={{ textDecoration: 'none', color: 'inherit' }}>
-                                All
-                            </Link>
-                        </li>
-                        {categories.map((category) => (
-                            <li key={category.id} className={styles.categoryItem}>
-                                <Link href={`/shop?category=${category.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                                    {category.name}
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
+                    <div className={`${styles.categoryList} ${styles.scrollbarHide}`}>
+                        <Link href="/shop?category=1" className={styles.categoryItem}>
+                            Rice & Flour
+                        </Link>
+                        <Link href="/shop?category=2" className={styles.categoryItem}>
+                            Oils & Ghee
+                        </Link>
+                        <Link href="/shop?category=3" className={styles.categoryItem}>
+                            Lentils, Sugar & Salt
+                        </Link>
+                        <Link href="/shop?category=4" className={styles.categoryItem}>
+                            Spices & Masala
+                        </Link>
+                        <Link href="/shop?category=5" className={styles.categoryItem}>
+                            Raw Staples (Veg)
+                        </Link>
+                        <Link href="/shop?category=6" className={styles.categoryItem}>
+                            Sauces & Baking
+                        </Link>
+                        <Link href="/shop?category=7" className={styles.categoryItem}>
+                            Noodles & Snacks
+                        </Link>
+                        <Link href="/shop?category=8" className={styles.categoryItem}>
+                            Frozen & Dairy
+                        </Link>
+                        <Link href="/shop?category=9" className={styles.categoryItem}>
+                            Cleaning
+                        </Link>
+
+                        <div className={styles.navDivider}></div>
+
+                        <Link href="/shop" className={styles.wholesaleLink}>
+                            View All
+                        </Link>
+                    </div>
                 </div>
             </div>
 

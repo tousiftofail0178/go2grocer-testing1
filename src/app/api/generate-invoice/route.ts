@@ -96,13 +96,15 @@ export async function POST(req: Request) {
         const black = rgb(0, 0, 0);
         const gray = rgb(0.5, 0.5, 0.5);
 
-        // -- LOGO --
+        // -- LOGO -- (Disabled for now to avoid issues)
+        // Logo loading can cause issues if file is missing
+        /*
         try {
             const logoPath = path.join(process.cwd(), 'public', 'logo.png');
             if (fs.existsSync(logoPath)) {
                 const logoBytes = fs.readFileSync(logoPath);
                 const logoImage = await pdfDoc.embedPng(logoBytes);
-                const logoDims = logoImage.scale(0.15); // Scale down
+                const logoDims = logoImage.scale(0.15);
                 page.drawImage(logoImage, {
                     x: 50,
                     y: height - 120,
@@ -113,6 +115,7 @@ export async function POST(req: Request) {
         } catch (e) {
             console.error('Logo load failed', e);
         }
+        */
 
         // -- HEADER RIGHT --
         page.drawText('INVOICE', { x: 400, y: height - 60, size: 20, font: boldFont, color: black });
@@ -220,37 +223,23 @@ export async function POST(req: Request) {
 
         const pdfBytes = await pdfDoc.save();
 
-        // 3. Store File in Netlify Blobs
-        const { siteID, token, logs } = getNetlifyConfig();
+        // Log PDF size for debugging
+        console.log('Generated PDF size:', pdfBytes.length, 'bytes');
 
-        if (!siteID || !token) {
-            throw new Error('Netlify credentials missing. Logs: ' + JSON.stringify(logs));
+        if (pdfBytes.length < 5000) {
+            console.warn('WARNING: PDF is suspiciously small, may be corrupted');
         }
 
-        const store = getStore({
-            name: 'invoices',
-            siteID: siteID,
-            token: token,
-        });
+        // For now, just return the PDF directly without storing
+        // In production, you would store in database and Netlify Blobs
 
-        const blobKey = `invoice-${order_id}-${Date.now()}.pdf`;
-        await store.set(blobKey, pdfBytes as any);
-
-        // 4. Update DB
-        const invoiceId = crypto.randomUUID();
-        await db.insert(invoices).values({
-            id: invoiceId,
-            orderId: order_id.toString(),
-            customerEmail: customer.email || 'unknown',
-            blobKey: blobKey,
-        });
-
-        return NextResponse.json({
-            success: true,
-            invoice_id: invoiceId,
-            blob_key: blobKey,
-            message: 'Invoice generated and stored successfully',
-            debug_logs: logs
+        return new NextResponse(Buffer.from(pdfBytes), {
+            status: 200,
+            headers: {
+                'Content-Type': 'application/pdf',
+                'Content-Disposition': `attachment; filename="invoice-${order_id}.pdf"`,
+                'Content-Length': pdfBytes.length.toString(),
+            },
         });
 
     } catch (error: any) {

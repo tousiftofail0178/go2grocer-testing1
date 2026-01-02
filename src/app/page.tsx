@@ -1,180 +1,120 @@
-"use client";
-
-import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { MapPin, ArrowRight, Download, Star, ShieldCheck, Truck, Clock } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { CategoryCard } from '@/components/ui/CategoryCard';
-import { ProductCard } from '@/components/ui/ProductCard';
-import { useCartStore } from '@/store/useCartStore';
-import { productApi } from '@/lib/api';
-import { Product, Category } from '@/lib/data';
-import { useAuthStore } from '@/store/useAuthStore';
+import { db } from "@/db";
+import { categories, globalCatalog } from "@/db/schema";
+import Link from "next/link";
+import { eq } from "drizzle-orm";
+import {
+  Wheat, Droplet, Cookie, Utensils,
+  Carrot, ChefHat, Soup, IceCream, Sparkles, Box,
+  Truck, ShieldCheck, Clock
+} from "lucide-react";
 import styles from './page.module.css';
+import { LiveMarketCard } from '@/components/homepage/LiveMarketCard';
 
-export default function Home() {
-  const { user } = useAuthStore();
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [popularProducts, setPopularProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+export const dynamic = 'force-dynamic';
 
-  const { addItem, items, updateQuantity } = useCartStore();
+// Icon Mapper
+const getCategoryIcon = (id: number) => {
+  switch (id) {
+    case 1: return <Wheat size={32} />;
+    case 2: return <Droplet size={32} />;
+    case 3: return <Cookie size={32} />;
+    case 4: return <Utensils size={32} />;
+    case 5: return <Carrot size={32} />;
+    case 6: return <ChefHat size={32} />;
+    case 7: return <Soup size={32} />;
+    case 8: return <IceCream size={32} />;
+    case 9: return <Sparkles size={32} />;
+    default: return <Box size={32} />;
+  }
+};
 
-  const getQuantity = (productId: string) => {
-    return items.find(item => item.id === productId)?.quantity || 0;
-  };
+export default async function HomePage() {
+  // 1. Fetch Categories
+  const categoryList = await db.select().from(categories).orderBy(categories.categoryId);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [cats, prods] = await Promise.all([
-          productApi.getCategories(),
-          productApi.getProducts({ limit: 10, sort: 'popular' })
-        ]);
-        setCategories(Array.isArray(cats) ? cats : cats.data || []);
-        setPopularProducts(Array.isArray(prods) ? prods : prods.data || []);
-      } catch (error) {
-        console.error('Failed to fetch home data:', error);
-        // Fallback
-        const { categories: mockCats, products: mockProds } = await import('@/lib/data');
-        setCategories(mockCats);
-        setPopularProducts(mockProds.slice(0, 10));
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  // 2. Fetch Hero Product (Safe Select Method)
+  const heroProducts = await db.select()
+    .from(globalCatalog)
+    .where(eq(globalCatalog.skuBarcode, 'RICE-MIN-50'))
+    .limit(1);
 
-    fetchData();
-  }, []);
+  const heroProduct = heroProducts[0] || null;
 
   return (
     <div className={styles.container}>
 
-
-      {/* Hero Section */}
+      {/* HERO SECTION */}
       <section className={styles.hero}>
         <div className={styles.heroContent}>
+          <div className={styles.heroBadge}>
+            🚀 Now Live in Chittagong
+          </div>
           <h1 className={styles.heroTitle}>
-            Fresh Groceries <br />
-            <span className={styles.highlight}>Delivered in Minutes</span>
+            Wholesale Supply <br />
+            <span className={styles.highlight}>Simplified.</span>
           </h1>
-          <p className={styles.heroSubtitle}>
-            Get fresh vegetables, fruits, fish, meat, and daily essentials delivered to your doorstep in Chittagong.
-          </p>
           <div className={styles.heroButtons}>
-            <Link href="/shop">
-              <Button icon={<ArrowRight size={20} />}>Shop Now</Button>
+            <Link href="/shop" className={styles.primaryButton}>
+              Start Ordering
             </Link>
-            <Link href="/app-download">
-              <Button variant="secondary" icon={<Download size={20} />}>Download App</Button>
+            {/* FIXED LINK: Points to Shop Catalog */}
+            <Link href="/shop" className={styles.secondaryButtonAlt}>
+              Browse Catalog
             </Link>
           </div>
         </div>
-        <div className={styles.heroImageWrapper}>
-          <div className={styles.heroImage}>
-            {/* Placeholder for Hero Image */}
-            <div style={{ width: '100%', height: '100%', background: '#E8F5E9', borderRadius: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Image src="/images/hero-basket.png" alt="Grocery Basket" width={400} height={300} style={{ objectFit: 'contain' }} />
-            </div>
-          </div>
-        </div>
+
+        {/* Dynamic Hero Visual Card - Rotates every minute */}
+        <LiveMarketCard initialProduct={heroProduct} />
       </section>
 
-      {/* Categories Grid */}
+      {/* CATEGORY GRID */}
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>Shop by Category</h2>
-          <Link href="/shop" className={styles.viewAll}>View All</Link>
+          <h2 className={styles.sectionTitle}>Explore Our Catalog</h2>
+          <p className={styles.sectionSubtitle}>Everything your kitchen needs, organized for speed.</p>
         </div>
-        <div className={styles.categoriesGrid}>
-          {isLoading
-            ? Array(8).fill(0).map((_, i) => (
-              <div key={i} className={styles.categorySkeleton} />
-            ))
-            : categories.map((category) => (
-              <CategoryCard key={category.id} category={category} />
-            ))
-          }
-        </div>
-      </section>
 
-      {/* Popular Products */}
-      <section className={styles.section}>
-        <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>Popular Right Now</h2>
-          <Link href="/shop" className={styles.viewAll}>View All</Link>
-        </div>
-        <div className={styles.productsGrid}>
-          {isLoading
-            ? Array(4).fill(0).map((_, i) => (
-              <div key={i} className={styles.productSkeleton} />
-            ))
-            : popularProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onAdd={addItem}
-                quantity={getQuantity(product.id)}
-                onUpdateQuantity={(q) => updateQuantity(product.id, q)}
-              />
-            ))
-          }
+        <div className={styles.categoriesGridB2B}>
+          {categoryList.map((cat) => (
+            <Link
+              key={cat.categoryId}
+              href={`/shop?category=${cat.categoryId}`}
+              className={styles.categoryCardB2B}
+            >
+              <div className={styles.categoryIconWrapper}>
+                {getCategoryIcon(cat.categoryId)}
+              </div>
+              <span className={styles.categoryName}>{cat.name}</span>
+            </Link>
+          ))}
         </div>
       </section>
 
       {/* Features */}
       <section className={styles.features}>
         <div className={styles.featureCard}>
-          <div className={styles.featureIconWrapper}><Truck size={32} /></div>
-          <h3>Super Fast Delivery</h3>
-          <p>Get your order delivered within 30-60 minutes.</p>
+          <div className={styles.featureIconWrapper}>
+            <Truck size={32} />
+          </div>
+          <h3>Bulk Delivery</h3>
+          <p>Order 50kg sacks, drums, and wholesale packs delivered to your business.</p>
         </div>
         <div className={styles.featureCard}>
-          <div className={styles.featureIconWrapper}><ShieldCheck size={32} /></div>
-          <h3>Freshness Guaranteed</h3>
-          <p>100% fresh and organic produce directly from farmers.</p>
+          <div className={styles.featureIconWrapper}>
+            <ShieldCheck size={32} />
+          </div>
+          <h3>Margin Protection</h3>
+          <p>Smart pricing ensures your business maintains healthy profit margins.</p>
         </div>
         <div className={styles.featureCard}>
-          <div className={styles.featureIconWrapper}><Clock size={32} /></div>
-          <h3>24/7 Support</h3>
-          <p>We are here to help you anytime, anywhere.</p>
+          <div className={styles.featureIconWrapper}>
+            <Clock size={32} />
+          </div>
+          <h3>SLA Guaranteed</h3>
+          <p>Business-critical supply chain with delivery guarantees.</p>
         </div>
       </section>
-
-      {/* Loyalty Promo */}
-      {user?.role !== 'b2b' && (
-        <section className={styles.loyaltySection}>
-          <div className={styles.loyaltyContent}>
-            <div className={styles.loyaltyIconWrapper}>
-              <Star size={40} className={styles.loyaltyIconMain} />
-              <div className={styles.loyaltyIconDecoration}></div>
-            </div>
-            <div className={styles.loyaltyText}>
-              <h2>Join Go2Points</h2>
-              <p>Earn points on every order and redeem them for exclusive rewards.</p>
-            </div>
-            <Link href="/loyalty" className={styles.loyaltyButtonWrapper}>
-              <button className={styles.joinButton}>
-                <Star size={18} fill="currentColor" /> Join Now
-              </button>
-            </Link>
-          </div>
-        </section>
-      )}
-
-      {/* App Download */}
-      {/* App Download */}
-      <section className={styles.appSection}>
-        <div className={styles.appContent}>
-          <h2 className={styles.appTitle}>Shop on the Go</h2>
-          <p className={styles.appSubtitle}>Download the Go2Grocer app for a better shopping experience.</p>
-          <div className={styles.appButtons}>
-            <Button variant="primary" icon={<Download size={20} />}>App Store</Button>
-            <Button variant="primary" icon={<Download size={20} />}>Google Play</Button>
-          </div>
-        </div>
-      </section>
-    </div >
+    </div>
   );
 }

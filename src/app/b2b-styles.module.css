@@ -1,0 +1,216 @@
+/* Append new styles to page.module.css */
+
+/* B2B Hero Specific Styles */
+.heroBadge {
+    display: inline-block;
+    background-color: rgba(6, 78, 59, 0.5);
+    border: 1px solid rgba(16, 185, 129, 0.5);
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+    backdrop-filter: blur(4px);
+}
+
+.heroCard {
+    flex: 0 0 auto;
+    width: 400px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 2rem;
+    border-radius: 1.5rem;
+    backdrop-filter: blur(20px);
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+.heroCard::before {
+    content: "";
+    position: absolute;
+    inset: -1rem;
+    background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.25), transparent 60%);
+    border-radius: 2rem;
+    filter: blur(40px);
+    z-index: -1;
+}
+
+.heroCardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+}
+
+.heroCardLabel {
+    font-size: 0.75rem;
+    font-family: 'Courier New', monospace;
+    color: #a7f3d0;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.25rem;
+}
+
+.heroCardPrice {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: white;
+}
+
+.heroCardUnit {
+    font-size: 0.875rem;
+    color: #d1fae5;
+}
+
+.heroCardIcon {
+    background-color: rgba(16, 185, 129, 0.2);
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    color: #a7f3d0;
+}
+
+.heroCardProgress {
+    height: 0.5rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 9999px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.heroCardProgressBar {
+    height: 100%;
+    width: 75%;
+    background-color: #10b981;
+}
+
+.heroCardFooter {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    font-family: 'Courier New', monospace;
+    color: #a7f3d0;
+}
+
+.primaryButton {
+    background-color: #10b981;
+    color: #064e3b;
+    padding: 1rem 2rem;
+    border-radius: 0.5rem;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.2s;
+    box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.2);
+}
+
+.primaryButton:hover {
+    background-color: #34d399;
+    transform: translateY(-2px);
+}
+
+.secondaryButtonAlt {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 1rem 2rem;
+    border-radius: 0.5rem;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.2s;
+    backdrop-filter: blur(4px);
+}
+
+.secondaryButtonAlt:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.sectionSubtitle {
+    color: #64748b;
+    margin-top: 0.75rem;
+    text-align: center;
+    font-size: 1rem;
+}
+
+.categoriesGridB2B {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1.5rem;
+}
+
+.categoryCardB2B {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    background-color: white;
+    border-radius: 1rem;
+    border: 2px solid #e2e8f0;
+    text-decoration: none;
+    transition: all 0.3s;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.categoryCardB2B:hover {
+    border-color: #10b981;
+    box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.1);
+    transform: translateY(-4px);
+}
+
+.categoryIconWrapper {
+    width: 64px;
+    height: 64px;
+    background-color: #f1f5f9;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s;
+}
+
+.categoryCardB2B:hover .categoryIconWrapper {
+    background-color: #d1fae5;
+    color: #047857;
+    transform: scale(1.1);
+}
+
+.categoryName {
+    font-weight: 700;
+    color: #334155;
+    text-align: center;
+    line-height: 1.4;
+    transition: color 0.3s;
+}
+
+.categoryCardB2B:hover .categoryName {
+    color: #047857;
+}
+
+@media (max-width: 1024px) {
+    .heroCard {
+        display: none;
+    }
+
+    .hero {
+        padding: 3rem 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero {
+        padding: 2rem 1rem;
+        text-align: center;
+    }
+
+    .heroButtons {
+        justify-content: center;
+    }
+
+    .categoriesGridB2B {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+}
