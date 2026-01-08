@@ -7,8 +7,9 @@ import { eq } from 'drizzle-orm';
 // Approves a business application and creates business profile
 export async function POST(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    props: { params: Promise<{ id: string }> }
 ) {
+    const params = await props.params;
     try {
         const applicationId = parseInt(params.id);
 
@@ -26,7 +27,7 @@ export async function POST(
             );
         }
 
-        if (application.applicationStatus === 'hired') {
+        if (application.status === 'verified') {
             return NextResponse.json(
                 { error: 'Application already approved' },
                 { status: 400 }
@@ -37,7 +38,8 @@ export async function POST(
         const [newBusiness] = await db
             .insert(businessProfiles)
             .values({
-                userId: application.userId, // Correct mapping from businessApplications
+                ownerId: application.userId, // Required: Business Owner FK
+                userId: application.userId, // Backward compatibility
                 businessName: application.businessName || 'New Business',
                 legalName: application.businessName || 'New Business',
                 addressId: application.addressId, // FIX: Map addressId
