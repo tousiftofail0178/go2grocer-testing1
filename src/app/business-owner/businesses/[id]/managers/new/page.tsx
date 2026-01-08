@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import styles from './new.module.css';
+import { toast } from 'react-hot-toast';
 
 export default function NewManagerPage({ params }: { params: { id: string } }) {
     const router = useRouter();
@@ -39,7 +40,7 @@ export default function NewManagerPage({ params }: { params: { id: string } }) {
             const data = await response.json();
 
             if (response.ok) {
-                alert('✅ Manager request submitted! Awaiting admin approval.');
+                toast.success('✅ Manager request submitted! Awaiting admin approval.');
                 router.push('/business-owner');
             } else {
                 setError(data.error || 'Failed to submit manager request');

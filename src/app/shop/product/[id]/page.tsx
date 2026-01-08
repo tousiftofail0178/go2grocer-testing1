@@ -4,11 +4,12 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Star, ChevronRight, Loader2, Minus, Plus, Package, CheckCircle, XCircle } from 'lucide-react';
+import { Star, ChevronRight, Loader2, Minus, Plus, Package, CheckCircle, XCircle, BookmarkPlus } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { useCartStore } from '@/store/useCartStore';
 import { useAuthStore } from '@/store/useAuthStore';
+import { SaveToListModal } from '@/components/lists/SaveToListModal';
 import styles from './page.module.css';
 
 interface Product {
@@ -32,6 +33,7 @@ export default function ProductDetailPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
     const [quantity, setQuantity] = useState(1);
+    const [isListModalOpen, setIsListModalOpen] = useState(false);
 
     const { addItem, items } = useCartStore();
     const { isAuthenticated } = useAuthStore();
@@ -217,6 +219,22 @@ export default function ProductDetailPage() {
                                 >
                                     Add to Cart
                                 </Button>
+                                <Button
+                                    variant="secondary"
+                                    onClick={() => setIsListModalOpen(true)}
+                                    className={styles.addToListButton}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.5rem',
+                                        border: '2px solid #d1d5db',
+                                        backgroundColor: 'white',
+                                        color: '#374151'
+                                    }}
+                                >
+                                    <BookmarkPlus size={20} />
+                                    Add to List
+                                </Button>
                             </div>
 
                             {cartItem && (
@@ -264,6 +282,13 @@ export default function ProductDetailPage() {
                     to meet your business needs.
                 </p>
             </div>
+
+            {/* Add to List Modal */}
+            <SaveToListModal
+                isOpen={isListModalOpen}
+                onClose={() => setIsListModalOpen(false)}
+                productId={product.globalProductId}
+            />
         </div>
     );
 }

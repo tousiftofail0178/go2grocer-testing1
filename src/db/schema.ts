@@ -16,7 +16,9 @@ export const roleTypeEnum = pgEnum('role_type', [
 
 export const verificationStatusEnum = pgEnum('verification_status', ['pending', 'verified', 'rejected']);
 export const documentTypeEnum = pgEnum('document_type', ['trade_license', 'tax_cert', 'health_permit']);
-export const paymentStatusEnum = pgEnum('payment_status', ['pending', 'paid', 'failed']);
+export const paymentStatusEnum = pgEnum('payment_status', ['pending', 'unpaid', 'partial', 'paid', 'overdue', 'failed']); // Added new statuses, kept old for safety
+export const paymentMethodEnum = pgEnum('payment_method_enum', ['cash', 'cheque', 'bank_transfer', 'bkash', 'nagad']);
+export const paymentRecordStatusEnum = pgEnum('payment_record_status', ['pending_verification', 'verified', 'rejected']);
 export const discountTypeEnum = pgEnum('discount_type', ['percentage', 'fixed']);
 export const addressTypeEnum = pgEnum('address_type', ['home', 'work', 'store', 'hq']);
 export const vehicleTypeEnum = pgEnum('vehicle_type', ['bike', 'scooter', 'car']);
@@ -38,6 +40,24 @@ export const users = pgTable('users', {
     createdAt: timestamp('created_at').defaultNow(),
 });
 
+// --- 2.1.1 Centralized Address Entity: addresses ---
+export const addresses = pgTable('addresses', {
+    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    streetAddress: text('street_address').notNull(),
+    area: text('area').notNull(), // Critical for delivery zones (e.g., 'Gulshan 1', 'Uttara Sector 4')
+    city: text('city').default('Dhaka').notNull(),
+    postalCode: text('postal_code'),
+    country: text('country').default('Bangladesh').notNull(),
+    latitude: decimal('latitude', { precision: 10, scale: 7 }),
+    longitude: decimal('longitude', { precision: 10, scale: 7 }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const addressesRelations = relations(addresses, ({ many }) => ({
+    businesses: many(businessProfiles),
+    customers: many(customerProfiles),
+}));
+
 // --- 2.2 Customer Profile Entity: profiles_customer ---
 export const customerProfiles = pgTable('profiles_customer', {
     userId: bigint('user_id', { mode: 'number' }).references(() => users.id).primaryKey(), // Now PK instead of FK
@@ -46,13 +66,20 @@ export const customerProfiles = pgTable('profiles_customer', {
     firstName: text('first_name').notNull(),
     lastName: text('last_name').notNull(),
     dateOfBirth: date('date_of_birth'), // Nullable - not collected in registration
-    // address: handled in addresses table
+    addressId: bigint('address_id', { mode: 'number' }).references(() => addresses.id), // Link to centralized address
     phoneNumber: text('phone_number').notNull().unique(),
     email: text('email').notNull().unique(),
     nidPassportNumber: text('nid_passport_number'), // Nullable - optional field
     nidPassportImageUrl: text('nid_passport_image_url'), // Nullable - optional field
     loyaltyPoints: integer('loyalty_points').default(0),
 });
+
+export const customerProfilesRelations = relations(customerProfiles, ({ one }) => ({
+    address: one(addresses, {
+        fields: [customerProfiles.addressId],
+        references: [addresses.id],
+    }),
+}));
 
 // --- 2.3 Business Entity Profile: profiles_business ---
 export const businessProfiles = pgTable('profiles_business', {
@@ -61,7 +88,7 @@ export const businessProfiles = pgTable('profiles_business', {
     userId: bigint('user_id', { mode: 'number' }).references(() => users.id).notNull(), // Backward compatibility
     businessName: text('business_name').notNull(),
     legalName: text('legal_name').notNull(),
-    // address: handled in addresses table
+    addressId: bigint('address_id', { mode: 'number' }).references(() => addresses.id), // Link to centralized address
     phoneNumber: text('phone_number').notNull().unique(), // Business contact
     email: text('email').notNull().unique(), // Business email
     tradeLicenseNumber: text('trade_license_number').notNull(),
@@ -73,6 +100,13 @@ export const businessProfiles = pgTable('profiles_business', {
     // Assuming simple base fee for now from text:
     // delivery_fee: decimal('delivery_fee'), // Leaving out as it seems to be in delivery_zones usually, but text mentioned it here too.
 });
+
+export const businessProfilesRelations = relations(businessProfiles, ({ one }) => ({
+    address: one(addresses, {
+        fields: [businessProfiles.addressId],
+        references: [addresses.id],
+    }),
+}));
 
 // --- 2.4 Entity: vendor_documents ---
 export const vendorDocuments = pgTable('vendor_documents', {
@@ -90,6 +124,7 @@ export const businessApplications = pgTable('business_applications', {
     userId: bigint('user_id', { mode: 'number' }).references(() => users.id).notNull(),
     businessName: text('business_name').notNull(),
     legalName: text('legal_name').notNull(),
+    addressId: bigint('address_id', { mode: 'number' }).references(() => addresses.id), // New: Link to centralized address
     phoneNumber: text('phone_number').notNull(),
     email: text('email').notNull(),
     tradeLicenseNumber: text('trade_license_number').notNull(),
@@ -113,6 +148,8 @@ export const managerApplications = pgTable('manager_applications', {
     businessId: bigint('business_id', { mode: 'number' }).references(() => businessProfiles.businessId),
     // New: links to pending business application during Step 3 registration
     linkedApplicationId: bigint('linked_application_id', { mode: 'number' }).references(() => businessApplications.applicationId),
+    // New: Link to centralized address for the manager
+    addressId: bigint('address_id', { mode: 'number' }).references(() => addresses.id),
     managerEmail: text('manager_email').notNull(),
     managerPhone: text('manager_phone').notNull(),
     managerFirstName: text('manager_first_name').notNull(),
@@ -163,51 +200,69 @@ export const globalCatalog = pgTable('global_catalog', {
 });
 
 // --- 4.1 Entity: orders ---
-// Note: Spec says 'shipping_address_id' links to address table
 export const orders = pgTable('orders', {
     orderId: bigserial('order_id', { mode: 'number' }).primaryKey(),
-    customerId: bigint('customer_id', { mode: 'number' }).references(() => customerProfiles.profileId),
-    businessId: bigint('business_id', { mode: 'number' }).references(() => businessProfiles.businessId),
-    createdBy: bigint('created_by', { mode: 'number' }).references(() => customerProfiles.profileId),
-    shippingAddressId: bigint('shipping_address_id', { mode: 'number' }),
-    estimatedTotal: decimal('estimated_total', { precision: 10, scale: 2 }),
-    finalTotal: decimal('final_total', { precision: 10, scale: 2 }),
-    totalAmountGross: decimal('total_amount_gross', { precision: 10, scale: 2 }).notNull(),
-    platformFee: decimal('platform_fee', { precision: 10, scale: 2 }).notNull(),
-    paymentStatus: paymentStatusEnum('payment_status').default('pending'),
+    businessId: bigint('business_id', { mode: 'number' }).references(() => businessProfiles.businessId).notNull(),
+    userId: bigint('user_id', { mode: 'number' }).references(() => users.id).notNull(),
+    shippingAddressId: bigint('shipping_address_id', { mode: 'number' }).references(() => addresses.id).notNull(),
+    totalAmount: decimal('total_amount', { precision: 10, scale: 2 }).notNull(),
+    status: text('status').default('pending').notNull(),
+    paymentStatus: text('payment_status').default('unpaid').notNull(),
+    paymentMethod: text('payment_method'), // e.g., 'cash', 'bank'
+    poNumber: text('po_number'), // Nullable
+    orderNotes: text('order_notes'), // Nullable
     createdAt: timestamp('created_at').defaultNow().notNull(),
-    // New fields for full e-commerce support
-    orderStatus: text('order_status').default('pending'), // pending, processing, delivered, cancelled
-    deliveryFee: decimal('delivery_fee', { precision: 10, scale: 2 }).default('0'),
-    deliveryAddress: text('delivery_address'),
-    customerName: text('customer_name'),
-    customerPhone: text('customer_phone'),
-    paymentMethod: text('payment_method').default('cod'), // cod, bkash, card
 });
 
-// --- 4.2 Entity: order_items (Missing from original spec but necessary) ---
+// --- 4.2 Entity: order_items ---
 export const orderItems = pgTable('order_items', {
-    itemId: bigserial('item_id', { mode: 'number' }).primaryKey(),
+    itemId: bigserial('id', { mode: 'number' }).primaryKey(),
     orderId: bigint('order_id', { mode: 'number' }).references(() => orders.orderId).notNull(),
     productId: bigint('product_id', { mode: 'number' }).references(() => globalCatalog.globalProductId).notNull(),
-    quantity: integer('quantity').notNull(),
-    priceAtPurchase: decimal('price_at_purchase', { precision: 10, scale: 2 }).notNull(),
     productName: text('product_name').notNull(),
-    status: orderItemStatusEnum('status').default('PENDING'),
+    quantity: integer('quantity').notNull(),
+    unitPrice: decimal('unit_price', { precision: 10, scale: 2 }).notNull(),
+    totalPrice: decimal('total_price', { precision: 10, scale: 2 }).notNull(),
 });
 
 // --- 5.1 Entity: invoices ---
 export const invoices = pgTable('invoices', {
-    invoiceId: bigserial('invoice_id', { mode: 'number' }).primaryKey(),
-    invoiceNumber: text('invoice_number').unique(), // INV-2024-0001
-    orderId: bigint('order_id', { mode: 'number' }).references(() => orders.orderId),
-    businessId: bigint('business_id', { mode: 'number' }).references(() => businessProfiles.businessId),
-    customerId: bigint('customer_id', { mode: 'number' }).references(() => customerProfiles.profileId),
-    taxAmount: decimal('tax_amount', { precision: 10, scale: 2 }).notNull(),
-    totalAmount: decimal('total_amount', { precision: 10, scale: 2 }).notNull(),
-    pdfUrl: text('pdf_url'),
-    generatedAt: timestamp('generated_at').defaultNow(),
+    invoiceId: bigserial('id', { mode: 'number' }).primaryKey(),
+    orderId: bigint('order_id', { mode: 'number' }).references(() => orders.orderId).notNull(),
+    invoiceNumber: text('invoice_number').unique().notNull(),
+    status: text('status').default('Unpaid').notNull(),
+    amountDue: decimal('amount_due', { precision: 10, scale: 2 }).notNull(),
+    generatedAt: timestamp('generated_at').defaultNow().notNull(),
 });
+
+// --- 5.1.1 Entity: payments ---
+export const payments = pgTable('payments', {
+    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    orderId: bigint('order_id', { mode: 'number' }).references(() => orders.orderId),
+    invoiceId: bigint('invoice_id', { mode: 'number' }).references(() => invoices.invoiceId),
+    amount: decimal('amount', { precision: 10, scale: 2 }).notNull(),
+    method: paymentMethodEnum('method').notNull(),
+    transactionReference: text('transaction_reference'),
+    proofImageUrl: text('proof_image_url'),
+    status: paymentRecordStatusEnum('status').default('pending_verification'),
+    recordedBy: bigint('recorded_by', { mode: 'number' }).references(() => users.id),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const paymentsRelations = relations(payments, ({ one }) => ({
+    order: one(orders, {
+        fields: [payments.orderId],
+        references: [orders.orderId],
+    }),
+    invoice: one(invoices, {
+        fields: [payments.invoiceId],
+        references: [invoices.invoiceId],
+    }),
+    recorder: one(users, {
+        fields: [payments.recordedBy],
+        references: [users.id],
+    }),
+}));
 
 // --- 5.2 Entity: promotions ---
 export const promotions = pgTable('promotions', {
@@ -231,26 +286,12 @@ export const orderDiscounts = pgTable('order_discounts', {
 });
 
 // --- 6.1 Entity: addresses ---
-export const addresses = pgTable('addresses', {
-    addressId: bigserial('address_id', { mode: 'number' }).primaryKey(),
-    userId: bigint('user_id', { mode: 'number' }).references(() => users.id),
-    addressType: addressTypeEnum('address_type'),
-    streetLine1: text('street_line_1').notNull(),
-    city: text('city').notNull(),
-    postalCode: text('postal_code').notNull(),
-    // geoLocation: GEOGRAPHY(POINT, 4326) - Requires PostGIS extension.
-    // For now, storing as separate lat/long or json if extension not active, but User requested GEOGRAPHY.
-    // Drizzle has geometry types but needs setup.
-    // Fallback to simpler representation to ensure build passes without 'drizzle-orm/postgis' package if missing.
-    // We will assume lat/long columns for MVP or basic Point type if standard.
-    // Using simple text for 'POINT(lat long)' or custom type to avoid build errors if PostGIS types aren't explicitly imported
-    // or if the user env doesn't support it immediately. Use text for safety in this pass.
-    geoLocation: text('geo_location'), // Placeholder for PostGIS GEOGRAPHY(POINT, 4326)
-});
+// MOVED: Centralized addresses table is now defined after users table (line 42)
+// The new addresses table is "dumb" - entities link TO it via foreign keys
 
 // Add foreign key to orders for shipping address
 // Note: Circular reference order in definition. Drizzle handles this purely via runtime or we define relations.
-// orders.shippingAddressId references addresses.addressId
+// orders.shippingAddressId references addresses.id
 
 // --- 6.2 Entity: delivery_drivers ---
 export const deliveryDrivers = pgTable('delivery_drivers', {
@@ -274,7 +315,7 @@ export const jobPostings = pgTable('job_postings', {
     title: text('title').notNull(),
     description: text('description').notNull(),
     roleCategory: text('role_category').notNull(),
-    locationId: bigint('location_id', { mode: 'number' }).references(() => addresses.addressId), // Assuming links to address
+    locationId: bigint('location_id', { mode: 'number' }).references(() => addresses.id), // Link to centralized address
     status: jobStatusEnum('status').default('open'),
     salaryRange: text('salary_range'),
 });
@@ -334,3 +375,54 @@ export const reviews = pgTable('reviews', {
     comment: text('comment'),
     imageUrl: text('image_url'),
 });
+
+// --- Shopping Lists Feature (B2B) ---
+// Lists belong to businesses, not individual users
+export const shoppingLists = pgTable('shopping_lists', {
+    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    businessId: bigint('business_id', { mode: 'number' })
+        .references(() => businessProfiles.businessId)
+        .notNull(),
+    name: text('name').notNull(), // e.g., 'Weekly Restock', 'Monthly Order'
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const shoppingListItems = pgTable('shopping_list_items', {
+    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    listId: bigint('list_id', { mode: 'number' })
+        .references(() => shoppingLists.id)
+        .notNull(),
+    productId: bigint('product_id', { mode: 'number' })
+        .references(() => globalCatalog.globalProductId)
+        .notNull(),
+    quantity: integer('quantity').default(1).notNull(),
+    notes: text('notes'), // Optional notes for specific items
+});
+
+// --- Drizzle Relations for Shopping Lists ---
+
+// Business can have many shopping lists
+export const businessProfilesShoppingListsRelations = relations(businessProfiles, ({ many }) => ({
+    shoppingLists: many(shoppingLists),
+}));
+
+// Shopping list belongs to one business and has many items
+export const shoppingListsRelations = relations(shoppingLists, ({ one, many }) => ({
+    business: one(businessProfiles, {
+        fields: [shoppingLists.businessId],
+        references: [businessProfiles.businessId],
+    }),
+    items: many(shoppingListItems),
+}));
+
+// Shopping list item belongs to one list and one product
+export const shoppingListItemsRelations = relations(shoppingListItems, ({ one }) => ({
+    list: one(shoppingLists, {
+        fields: [shoppingListItems.listId],
+        references: [shoppingLists.id],
+    }),
+    product: one(globalCatalog, {
+        fields: [shoppingListItems.productId],
+        references: [globalCatalog.globalProductId],
+    }),
+}));

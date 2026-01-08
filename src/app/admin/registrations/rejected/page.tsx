@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { XCircle, Building2, Mail, Phone, Calendar, AlertCircle, RotateCcw } from 'lucide-react';
 import styles from '../registrations.module.css';
+import { toast } from 'react-hot-toast';
 
 interface RejectedRegistration {
     id: number;
@@ -72,15 +73,15 @@ export default function RejectedApplicationsPage() {
             const data = await response.json();
 
             if (response.ok && data.success) {
-                alert(`✅ ${businessName} has been reopened and moved back to Pending Registrations.`);
+                toast.success(`✅ ${businessName} has been reopened and moved back to Pending Registrations.`);
                 // Remove from rejected list
                 setRegistrations(prev => prev.filter(r => r.id !== registrationId));
             } else {
-                alert(`❌ Error: ${data.error || 'Failed to reopen application'}`);
+                toast.error(`❌ Error: ${data.error || 'Failed to reopen application'}`);
             }
         } catch (error) {
             console.error('Error reopening application:', error);
-            alert('❌ An error occurred while reopening the application');
+            toast.error('❌ An error occurred while reopening the application');
         } finally {
             setReopening(null);
         }

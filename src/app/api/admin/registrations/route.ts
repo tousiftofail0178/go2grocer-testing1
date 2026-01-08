@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { users, businessProfiles, businessApplications } from '@/db/schema';
+import { users, businessProfiles, businessApplications, addresses } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
 import crypto from 'crypto';
 
@@ -88,7 +88,8 @@ export async function POST(request: NextRequest) {
             legalName,
             email,
             phoneNumber,
-            address,
+            // businessAddress not 'address' - supporting both for now, but preferring businessAddress from new form
+            businessAddress,
             tradeLicenseNumber,
             taxCertificateNumber,
             licenseExpiryDate,
@@ -142,8 +143,7 @@ export async function POST(request: NextRequest) {
             numericOwnerId = ownerUser[0].id;
         }
 
-        // ✅ CRITICAL FIX: Insert into business_applications (NOT profiles_business)
-        // This ensures admin approval before going live
+        // Check for existing application
         const existingApplication = await db
             .select()
             .from(businessApplications)
@@ -157,13 +157,61 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Insert into business_applications buffer table
+        // --- Start Transaction for Address + Application ---
+        // Using a manual approach for "transaction" logic here since atomic transactions across these steps 
+        // are best handled by ensure the first step (address) works before the second.
+
+        let addressId = null;
+
+        // 1. Create Address Record
+        if (businessAddress) {
+            try {
+                // Ensure custom area is handled if "Other" logic was used on frontend
+                // The frontend AddressFormFields component handles standardizing "area" vs "customArea"
+                // logic: if businessAddress.area is "Other", we assume CustomArea text is passed, 
+                // but checking the type definition, businessAddress likely has { street, area, city, postalCode, customArea? }
+
+                // If the frontend passed "Other" as area, we should look for customArea or expect area to be the custom string already.
+                // Based on previous verification, AddressFormFields usually handles this upstream or we check here.
+                // Let's safe-guard:
+
+                let finalArea = businessAddress.area;
+                if (finalArea === 'Other' && businessAddress.customArea) {
+                    finalArea = businessAddress.customArea;
+                }
+
+                // Import 'addresses' is needed at top of file, ensuring it is imported
+                // Importing in this scope just to be explicit about what we are doing if not already available
+                // But generally 'db/schema' exports 'addresses'.
+
+                const [newAddress] = await db.insert(addresses).values({
+                    streetAddress: businessAddress.street,
+                    area: finalArea, // Use the resolved area name
+                    city: businessAddress.city || 'Dhaka',
+                    postalCode: businessAddress.postalCode,
+                    country: 'Bangladesh',
+                }).returning({ id: addresses.id });
+
+                addressId = newAddress.id;
+                console.log('✅ Created new address record:', addressId);
+            } catch (err: any) {
+                console.error('❌ Failed to create address:', err);
+                // If address creation fails, we SHOULD FAIL the whole request to maintain consistency
+                return NextResponse.json(
+                    { error: 'Failed to save address details. Please verify your address.' },
+                    { status: 500 }
+                );
+            }
+        }
+
+        // 2. Create Business Application linked to Address
         const newApplication = await db
             .insert(businessApplications)
             .values({
                 userId: numericOwnerId,
                 businessName,
                 legalName,
+                addressId: addressId, // Link to the new address
                 email,
                 phoneNumber,
                 tradeLicenseNumber,

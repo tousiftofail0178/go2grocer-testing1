@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { jobApplications, businessProfiles, vendorDocuments } from '@/db/schema';
+import { businessApplications, businessProfiles, vendorDocuments } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 // POST /api/admin/business-applications/[id]/approve
@@ -12,11 +12,11 @@ export async function POST(
     try {
         const applicationId = parseInt(params.id);
 
-        // 1. Get application (using job_applications table)
+        // 1. Get application (using business_applications table)
         const [application] = await db
             .select()
-            .from(jobApplications)
-            .where(eq(jobApplications.applicationId, applicationId))
+            .from(businessApplications)
+            .where(eq(businessApplications.applicationId, applicationId))
             .limit(1);
 
         if (!application) {
@@ -37,25 +37,26 @@ export async function POST(
         const [newBusiness] = await db
             .insert(businessProfiles)
             .values({
-                userId: application.applicantId,
+                userId: application.userId, // Correct mapping from businessApplications
                 businessName: application.businessName || 'New Business',
                 legalName: application.businessName || 'New Business',
+                addressId: application.addressId, // FIX: Map addressId
                 phoneNumber: application.phoneNumber,
                 email: application.email,
-                tradeLicenseNumber: 'PENDING',
-                taxCertificateNumber: 'PENDING',
-                expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // String date
+                tradeLicenseNumber: application.tradeLicenseNumber || 'PENDING',
+                taxCertificateNumber: application.taxCertificateNumber || 'PENDING',
+                expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
                 verificationStatus: 'verified',
             })
             .returning();
 
         // 3. Update application status
         await db
-            .update(jobApplications)
+            .update(businessApplications)
             .set({
-                applicationStatus: 'hired',
+                status: 'verified', // status column in businessApplications is 'status', not 'applicationStatus'
             })
-            .where(eq(jobApplications.applicationId, applicationId));
+            .where(eq(businessApplications.applicationId, applicationId));
 
         console.log('Business approved:', {
             applicationId,

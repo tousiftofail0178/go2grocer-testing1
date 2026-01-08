@@ -54,10 +54,10 @@ export default async function HomePage() {
             <span className={styles.highlight}>Simplified.</span>
           </h1>
           <div className={styles.heroButtons}>
-            <Link href="/shop" className={styles.primaryButton}>
+            <Link href="/dashboard/lists" className={styles.primaryButton}>
               Start Ordering
             </Link>
-            {/* FIXED LINK: Points to Shop Catalog */}
+            {/* Browse Catalog: Points to Shop Catalog */}
             <Link href="/shop" className={styles.secondaryButtonAlt}>
               Browse Catalog
             </Link>

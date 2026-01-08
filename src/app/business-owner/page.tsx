@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Building2, FileText, Users, LogOut } from 'lucide-react';
+import { Building2, FileText, Users, LogOut, History } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 
 export default function BusinessOwnerDashboard() {
@@ -254,6 +254,28 @@ export default function BusinessOwnerDashboard() {
                                 }}
                             >
                                 View Invoices
+                            </Link>
+                        </div>
+
+                        {/* Order History */}
+                        <div style={{ backgroundColor: 'white', padding: '2rem', borderRadius: '0.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+                            <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1rem' }}>Order History</h2>
+                            <p style={{ color: '#6b7280', marginBottom: '1.5rem' }}>
+                                View past orders and track order history for your businesses
+                            </p>
+                            <Link
+                                href="/dashboard/orders"
+                                style={{
+                                    display: 'inline-block',
+                                    padding: '0.75rem 1.5rem',
+                                    backgroundColor: '#ec4899',
+                                    color: 'white',
+                                    borderRadius: '0.375rem',
+                                    textDecoration: 'none',
+                                    fontWeight: 500
+                                }}
+                            >
+                                View Orders
                             </Link>
                         </div>
                     </div>

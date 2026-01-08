@@ -13,6 +13,7 @@ import {
     MapPin,
     PenLine
 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 interface Order {
     id: string;
@@ -141,7 +142,7 @@ export default function OrdersPage() {
         }
 
         if (ordersToExport.length === 0) {
-            alert("No orders to export.");
+            toast.error("No orders to export.");
             return;
         }
 

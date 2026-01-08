@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from './Button';
+import { toast } from 'react-hot-toast';
 import { BusinessEntity } from '@/lib/data';
 
 interface EditBusinessModalProps {
@@ -36,12 +37,12 @@ export const EditBusinessModal: React.FC<EditBusinessModalProps> = ({ isOpen, on
         setLoading(true);
         try {
             await onSave(business.id, { name, address, phone, tin, bin });
-            // Show alert as requested by user
-            alert("The changes are being verified by admin");
+            // Show toast as requested by user
+            toast.success("The changes are being verified by admin");
             onClose();
         } catch (error) {
             console.error("Failed to update business:", error);
-            alert("Failed to submit changes. Please try again.");
+            toast.error("Failed to submit changes. Please try again.");
         } finally {
             setLoading(false);
         }

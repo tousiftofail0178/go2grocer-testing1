@@ -3,11 +3,16 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Phone, Mail, User, Loader2, Building2, Lock } from 'lucide-react';
+import { Phone, Mail, User, Loader2, Building2, Lock, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useAuthStore } from '@/store/useAuthStore';
-import styles from './page.module.css';
+import { AddressFormFields } from '@/components/forms/AddressFormFields';
+import type { AddressData } from '@/components/forms/AddressFormFields';
+// REMOVED old styles import to prevent conflicts
+import styles from './Signup.module.css'; // Strictly use the new Layout CSS
+
+import { toast } from 'react-hot-toast';
 
 export default function SignupPage() {
     return (
@@ -22,7 +27,7 @@ function SignupForm() {
     const searchParams = useSearchParams();
     const redirectUrl = searchParams.get('redirect') || '/';
 
-    const { signupB2B, isLoading, error } = useAuthStore();
+    const { signupB2B, registerManager, isLoading, error } = useAuthStore();
     const [step, setStep] = useState(1); // Step 1: Personal, Step 2: Business, Step 3: Manager (Optional)
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [formData, setFormData] = useState({
@@ -65,6 +70,33 @@ function SignupForm() {
 
     // NEW: Store applicationId from Step 2
     const [applicationId, setApplicationId] = useState<number | null>(null);
+    const [addManager, setAddManager] = useState(false);
+
+    // Address States for all three sections
+    // FIX: Changed 'streetAddress' to 'street' to match AddressFormFields component
+    const [ownerAddress, setOwnerAddress] = useState<AddressData>({
+        street: '',
+        area: '',
+        customArea: '',
+        city: 'Chittagong',
+        postalCode: ''
+    });
+
+    const [businessAddress, setBusinessAddress] = useState<AddressData>({
+        street: '',
+        area: '',
+        customArea: '',
+        city: 'Chittagong',
+        postalCode: ''
+    });
+
+    const [managerAddress, setManagerAddress] = useState<AddressData>({
+        street: '',
+        area: '',
+        customArea: '',
+        city: 'Chittagong',
+        postalCode: ''
+    });
 
     useEffect(() => {
         // Auto-generate User ID in background
@@ -77,47 +109,99 @@ function SignupForm() {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleNext = async (e: React.FormEvent) => {
-        e.preventDefault();
+    // Address change handlers
+    const handleOwnerAddressChange = (field: keyof AddressData, value: string) => {
+        setOwnerAddress((prev: AddressData) => ({ ...prev, [field]: value }));
+    };
 
+    const handleBusinessAddressChange = (field: keyof AddressData, value: string) => {
+        setBusinessAddress((prev: AddressData) => ({ ...prev, [field]: value }));
+    };
+
+    const handleManagerAddressChange = (field: keyof AddressData, value: string) => {
+        setManagerAddress((prev: AddressData) => ({ ...prev, [field]: value }));
+    };
+
+
+
+    const handleNext = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
+
+        // --- STEP 1: Local Validation (Personal) ---
         if (step === 1) {
-            // Validate Step 1
             if (!formData.firstName || !formData.lastName || !formData.phone || !formData.email || !formData.password || !formData.dateOfBirth || !formData.nidPassportNumber) {
-                alert('Please fill in all required fields');
+                toast.error('Please fill in all required personal details');
                 return;
             }
-            setStep(2);
-        } else if (step === 2) {
-            // Validate Step 2
-            if (!formData.businessName || !formData.businessEmail || !formData.businessPhone || !formData.address) {
-                alert('Please fill in all required business fields');
+            // Note: Owner address is optional in some flows, but if we want to validate it:
+            // if (!ownerAddress.street || !ownerAddress.area || !ownerAddress.city) {
+            //    toast.error('Please fill in all required personal address fields');
+            //    return;
+            // }
+            setStep(2); // Just move to next UI step
+            return;
+        }
+
+        // --- STEP 2: Submission (Business) ---
+        if (step === 2) {
+            // 1. Validate Business Fields
+            if (!formData.businessName || !formData.businessEmail || !formData.businessPhone) {
+                toast.error('Please fill in all required business details');
+                return;
+            }
+            if (!businessAddress.street || !businessAddress.area || !businessAddress.city) {
+                toast.error('Please fill in all required business address fields');
                 return;
             }
 
-            // ✅ SUBMIT Step 1 & 2 together to get applicationId
+            // If area is 'Other', validate custom area
+            if (businessAddress.area === 'Other' && !businessAddress.customArea) {
+                toast.error('Please specify the custom area');
+                return;
+            }
+
             try {
-                const submissionData = {
+                // 2. MAP THE DATA (Crucial Fix)
+                // We must convert 'street' -> 'streetAddress' and handle the 'Other' area logic
+                const ownerFinalArea = ownerAddress.area === 'Other' ? ownerAddress.customArea : ownerAddress.area;
+                const businessFinalArea = businessAddress.area === 'Other' ? businessAddress.customArea : businessAddress.area;
+
+                const payload = {
                     ...formData,
-                    contactName: `${formData.firstName} ${formData.lastName}`
+                    contactName: `${formData.firstName} ${formData.lastName}`, // Ensure contactName is sent
+                    // Owner Address Mapping
+                    ownerAddress: {
+                        streetAddress: ownerAddress.street,
+                        area: ownerFinalArea,
+                        city: ownerAddress.city,
+                        postalCode: ownerAddress.postalCode,
+                        country: 'Bangladesh'
+                    },
+                    // Business Address Mapping
+                    businessAddress: {
+                        streetAddress: businessAddress.street,
+                        area: businessFinalArea,
+                        city: businessAddress.city,
+                        postalCode: businessAddress.postalCode,
+                        country: 'Bangladesh'
+                    }
                 };
 
-                await signupB2B(submissionData);
+                // 3. Call Server Action
+                const newApplicationId = await signupB2B(payload);
 
-                console.log('✅ Business application submitted, checking localStorage for applicationId...');
-
-                // Wait briefly for localStorage to be set
-                await new Promise(resolve => setTimeout(resolve, 500));
-
-                const storedAppId = localStorage.getItem('pendingApplicationId');
-                if (!storedAppId) {
-                    console.warn('⚠️ ApplicationId not found in localStorage, but continuing to Step 3');
+                if (newApplicationId) {
+                    setApplicationId(newApplicationId);
+                    console.log('✅ Business application submitted, ID:', newApplicationId);
+                    toast.success('Business registered successfully!');
+                    setStep(3);
+                } else {
+                    throw new Error('No application ID returned from registration.');
                 }
 
-                // Move to Step 3
-                setStep(3);
-            } catch (err) {
+            } catch (err: any) {
                 console.error('Step 2 submission failed:', err);
-                alert('Failed to submit business application. Please try again.');
+                toast.error(err.message || 'Failed to submit business application.');
             }
         }
     };
@@ -131,453 +215,522 @@ function SignupForm() {
 
         // Step 3: Submit manager application (if manager details provided)
         try {
-            // Check if manager details are filled
-            const hasManagerData = formData.managerFirstName && formData.managerLastName &&
-                formData.managerEmail && formData.managerPhone;
-
-            if (hasManagerData) {
-                // Get applicationId from localStorage (set by signupB2B)
-                const storedAppId = localStorage.getItem('pendingApplicationId');
-                const storedUserId = localStorage.getItem('pendingUserId');
-
-                if (!storedAppId || !storedUserId) {
-                    alert('Error: Application data not found. Your business application was submitted, but we could not register the manager. You can add managers later from your dashboard.');
-
-                    // Clear and show success anyway
-                    localStorage.removeItem('pendingApplicationId');
-                    localStorage.removeItem('pendingUserId');
-                    setShowSuccessModal(true);
+            if (addManager) {
+                // Validate Manager Details
+                if (!formData.managerFirstName || !formData.managerLastName || !formData.managerEmail ||
+                    !formData.managerPhone || !formData.managerPassword) {
+                    toast.error('Please fill in all required manager details.');
                     return;
                 }
 
-                // Call new Step 3 endpoint
-                const response = await fetch('/api/register-manager-step3', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        applicationId: parseInt(storedAppId),
-                        businessOwnerId: parseInt(storedUserId),
-                        managerEmail: formData.managerEmail,
-                        managerPhone: formData.managerPhone,
-                        managerFirstName: formData.managerFirstName,
-                        managerLastName: formData.managerLastName,
-                    }),
+                // Validate Manager Address
+                if (!managerAddress.street || !managerAddress.area || !managerAddress.city) {
+                    toast.error('Please fill in required manager address fields.');
+                    return;
+                }
+
+                // Ensure we have the applicationId from Step 2
+                if (!applicationId) {
+                    toast.error('Error: Application ID missing. Please go back and resubmit.');
+                    return;
+                }
+
+                // Get final manager area value
+                const managerFinalArea = managerAddress.area === 'Other' ? managerAddress.customArea : managerAddress.area;
+
+                await registerManager({
+                    linkedApplicationId: applicationId,
+                    managerFirstName: formData.managerFirstName,
+                    managerLastName: formData.managerLastName,
+                    managerEmail: formData.managerEmail,
+                    managerPhone: formData.managerPhone,
+                    managerPassword: formData.managerPassword,
+                    managerDateOfBirth: formData.managerDateOfBirth,
+                    managerNidPassportNumber: formData.managerNidPassportNumber,
+                    managerNidPassportImageUrl: formData.managerNidPassportImageUrl,
+                    managerAddress: {
+                        streetAddress: managerAddress.street,
+                        area: managerFinalArea,
+                        city: managerAddress.city,
+                        postalCode: managerAddress.postalCode
+                    }
                 });
 
-                const data = await response.json();
-
-                if (!response.ok) {
-                    console.error('Manager registration failed:', data);
-                    alert(`Manager registration failed: ${data.error}. Your business application is still pending approval.`);
-                } else {
-                    console.log('✅ Manager registered:', data);
-                }
+                toast.success('Manager registered successfully!');
             }
-
-            // Clear localStorage
-            localStorage.removeItem('pendingApplicationId');
-            localStorage.removeItem('pendingUserId');
 
             // Show success modal
             setShowSuccessModal(true);
-        } catch (err) {
+        } catch (err: any) {
             console.error('Step 3 failed:', err);
-            alert('Failed to complete registration. Your business application may have been submitted. Please contact support.');
-
-            // Clear localStorage and show success anyway since business app was submitted
-            localStorage.removeItem('pendingApplicationId');
-            localStorage.removeItem('pendingUserId');
-            setShowSuccessModal(true);
+            toast.error(err.message || 'Failed to complete registration.');
         }
     };
 
     return (
-        <div className={styles.container}>
-            <div className={styles.card}>
-                <h1 className={styles.title}>Business Registration</h1>
-                <p className={styles.subtitle}>
-                    {step === 1 && 'Step 1: Personal Details'}
-                    {step === 2 && 'Step 2: Business Details'}
-                    {step === 3 && 'Step 3: Manager Account (Optional)'}
-                </p>
+        <div className={styles.pageWrapper}>
+            <div className={styles.container}>
+                <div className={styles.header}>
+                    <h1 className={styles.title}>Business Registration</h1>
+                    <p className={styles.subtitle}>
+                        {step === 1 && 'Step 1: Personal Details'}
+                        {step === 2 && 'Step 2: Business Details'}
+                        {step === 3 && 'Step 3: Manager Account (Optional)'}
+                    </p>
+                </div>
 
-                {error && <div className={styles.error}>{error}</div>}
+                {error && <div className="text-red-500 text-center mb-4">{error}</div>}
 
-                <form onSubmit={step === 3 ? handleSubmit : handleNext} className={styles.form}>
+                <form onSubmit={step === 3 ? handleSubmit : handleNext}>
 
                     {step === 1 && (
                         <>
-                            <Input
-                                name="firstName"
-                                label="First Name"
-                                placeholder="John"
-                                value={formData.firstName}
-                                onChange={handleChange}
-                                icon={<User size={18} />}
-                                required
-                            />
-                            <Input
-                                name="lastName"
-                                label="Last Name"
-                                placeholder="Doe"
-                                value={formData.lastName}
-                                onChange={handleChange}
-                                icon={<User size={18} />}
-                                required
-                            />
-                            <Input
-                                name="email"
-                                label="Email Address"
-                                placeholder="john@company.com"
-                                value={formData.email}
-                                onChange={handleChange}
-                                icon={<Mail size={18} />}
-                                type="email"
-                                required
-                            />
-                            <Input
-                                name="phone"
-                                label="Phone Number"
-                                placeholder="01XXXXXXXXX"
-                                value={formData.phone}
-                                onChange={handleChange}
-                                icon={<Phone size={18} />}
-                                type="tel"
-                                required
-                            />
-                            <Input
-                                name="password"
-                                label="Create Password"
-                                placeholder="******"
-                                value={formData.password}
-                                onChange={handleChange}
-                                icon={<Lock size={18} />}
-                                type="password"
-                                required
-                            />
+                            {/* STRICT LAYOUT: Split View */}
+                            <div className={styles.splitLayout}>
+                                {/* Left Column: Personal Inputs */}
+                                <div className={styles.column}>
+                                    <h3 className={styles.sectionHeader}>Personal Details</h3>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                        <Input
+                                            name="firstName"
+                                            label="First Name"
+                                            placeholder="John"
+                                            value={formData.firstName}
+                                            onChange={handleChange}
+                                            icon={<User size={18} />}
+                                            required
+                                        />
+                                        <Input
+                                            name="lastName"
+                                            label="Last Name"
+                                            placeholder="Doe"
+                                            value={formData.lastName}
+                                            onChange={handleChange}
+                                            icon={<User size={18} />}
+                                            required
+                                        />
+                                    </div>
+                                    <Input
+                                        name="email"
+                                        label="Email Address"
+                                        placeholder="john@company.com"
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                        icon={<Mail size={18} />}
+                                        type="email"
+                                        required
+                                    />
+                                    <Input
+                                        name="phone"
+                                        label="Phone Number"
+                                        placeholder="01XXXXXXXXX"
+                                        value={formData.phone}
+                                        onChange={handleChange}
+                                        icon={<Phone size={18} />}
+                                        type="tel"
+                                        required
+                                    />
+                                    <Input
+                                        name="password"
+                                        label="Create Password"
+                                        placeholder="******"
+                                        value={formData.password}
+                                        onChange={handleChange}
+                                        icon={<Lock size={18} />}
+                                        type="password"
+                                        required
+                                    />
 
-                            {/* New NID/Passport and DOB Fields */}
-                            <Input
-                                name="dateOfBirth"
-                                label="Date of Birth"
-                                value={formData.dateOfBirth}
-                                onChange={handleChange}
-                                type="date"
-                                required
-                            />
+                                    {/* New NID/Passport and DOB Fields */}
+                                    <Input
+                                        name="dateOfBirth"
+                                        label="Date of Birth"
+                                        value={formData.dateOfBirth}
+                                        onChange={handleChange}
+                                        type="date"
+                                        required
+                                    />
 
-                            <Input
-                                name="nidPassportNumber"
-                                label="NID / Passport Number"
-                                placeholder="Enter your NID or Passport number"
-                                value={formData.nidPassportNumber}
-                                onChange={handleChange}
-                                required
-                            />
+                                    <Input
+                                        name="nidPassportNumber"
+                                        label="NID / Passport Number"
+                                        placeholder="Enter your NID or Passport number"
+                                        value={formData.nidPassportNumber}
+                                        onChange={handleChange}
+                                        required
+                                    />
 
-                            <Input
-                                name="nidPassportImageUrl"
-                                label="NID / Passport Image URL (Optional)"
-                                placeholder="https://example.com/nid-image.jpg"
-                                value={formData.nidPassportImageUrl}
-                                onChange={handleChange}
-                                type="url"
-                            />
+                                    <Input
+                                        name="nidPassportImageUrl"
+                                        label="NID / Passport Image URL (Optional)"
+                                        placeholder="https://example.com/nid-image.jpg"
+                                        value={formData.nidPassportImageUrl}
+                                        onChange={handleChange}
+                                        type="url"
+                                    />
+                                </div>
 
-                            <Button fullWidth type="submit">
-                                Next Step
-                            </Button>
-                        </>
-                    )}
-
-                    {step === 2 && (
-                        <>
-                            <Input
-                                name="businessName"
-                                label="Business Name"
-                                placeholder="Company Ltd."
-                                value={formData.businessName}
-                                onChange={handleChange}
-                                icon={<Building2 size={18} />}
-                                required
-                            />
-                            <Input
-                                name="businessEmail"
-                                label="Business Email"
-                                placeholder="business@company.com"
-                                value={formData.businessEmail}
-                                onChange={handleChange}
-                                icon={<Mail size={18} />}
-                                type="email"
-                                required
-                            />
-                            <Input
-                                name="businessPhone"
-                                label="Business Phone"
-                                placeholder="+8801XXXXXXXXX"
-                                value={formData.businessPhone}
-                                onChange={handleChange}
-                                icon={<Phone size={18} />}
-                                type="tel"
-                                required
-                            />
-                            <Input
-                                name="address"
-                                label="Business Address"
-                                placeholder="123 Example St, City"
-                                value={formData.address}
-                                onChange={handleChange}
-                                required
-                            />
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                <Input
-                                    name="bin"
-                                    label="BIN Number"
-                                    placeholder="BIN-123..."
-                                    value={formData.bin}
-                                    onChange={handleChange}
-                                />
-                                <Input
-                                    name="tin"
-                                    label="TIN Number"
-                                    placeholder="TIN-456..."
-                                    value={formData.tin}
-                                    onChange={handleChange}
-                                />
+                                {/* Right Column: Address Details */}
+                                <div className={styles.column}>
+                                    <h3 className={styles.sectionHeader}>Address</h3>
+                                    <AddressFormFields
+                                        prefix="owner"
+                                        data={ownerAddress}
+                                        onChange={handleOwnerAddressChange}
+                                    />
+                                </div>
                             </div>
-                            <Input
-                                name="vat"
-                                label="VAT Number"
-                                placeholder="VAT-789..."
-                                value={formData.vat}
-                                onChange={handleChange}
-                            />
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                <Input
-                                    name="bankName"
-                                    label="Bank Name"
-                                    placeholder="Bank Name"
-                                    value={formData.bankName}
-                                    onChange={handleChange}
-                                />
-                                <Input
-                                    name="bankBranch"
-                                    label="Branch"
-                                    placeholder="Branch Name"
-                                    value={formData.bankBranch}
-                                    onChange={handleChange}
-                                />
-                            </div>
-                            <Input
-                                name="bankAccount"
-                                label="Bank Account Number"
-                                placeholder="Account Number"
-                                value={formData.bankAccount}
-                                onChange={handleChange}
-                            />
 
-                            <div style={{ display: 'flex', gap: '1rem' }}>
-                                <Button
-                                    type="button"
-                                    variant="secondary"
-                                    onClick={handleBack}
-                                    style={{ flex: 1 }}
-                                >
-                                    Back
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    style={{ flex: 1 }}
-                                    disabled={isLoading}
-                                >
+                            <div className={styles.formActions}>
+                                <Button fullWidth type="submit">
                                     Next Step
                                 </Button>
                             </div>
                         </>
                     )}
 
-                    {/* Step 3: Manager Account (Optional) */}
-                    {step === 3 && (
+                    {step === 2 && (
                         <>
-                            <div style={{
-                                marginBottom: '1.5rem',
-                                padding: '1rem',
-                                background: '#f3f4f6',
-                                borderRadius: '0.5rem'
-                            }}>
-                                <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600 }}>
-                                    Optional: Add Manager Account
-                                </h3>
-                                <p style={{ margin: '0.5rem 0 0', fontSize: '0.875rem', color: '#6b7280' }}>
-                                    You can add a manager now or skip this step and add managers later from your dashboard.
-                                </p>
+                            <div className={styles.splitLayout}>
+                                {/* Left Column: Business Details */}
+                                <div className={styles.column}>
+                                    <h3 className={styles.sectionHeader}>Business Details</h3>
+                                    <Input
+                                        name="businessName"
+                                        label="Business Name"
+                                        placeholder="Company Ltd."
+                                        value={formData.businessName}
+                                        onChange={handleChange}
+                                        icon={<Building2 size={18} />}
+                                        required
+                                    />
+                                    <Input
+                                        name="businessEmail"
+                                        label="Business Email"
+                                        placeholder="business@company.com"
+                                        value={formData.businessEmail}
+                                        onChange={handleChange}
+                                        icon={<Mail size={18} />}
+                                        type="email"
+                                        required
+                                    />
+                                    <Input
+                                        name="businessPhone"
+                                        label="Business Phone"
+                                        placeholder="+8801XXXXXXXXX"
+                                        value={formData.businessPhone}
+                                        onChange={handleChange}
+                                        icon={<Phone size={18} />}
+                                        type="tel"
+                                        required
+                                    />
+
+                                    <div style={{ marginTop: '2rem' }}>
+                                        <h3 className={styles.sectionHeader}>Financial Info</h3>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                            <Input
+                                                name="bin"
+                                                label="BIN Number"
+                                                placeholder="BIN-123..."
+                                                value={formData.bin}
+                                                onChange={handleChange}
+                                            />
+                                            <Input
+                                                name="tin"
+                                                label="TIN Number"
+                                                placeholder="TIN-456..."
+                                                value={formData.tin}
+                                                onChange={handleChange}
+                                            />
+                                        </div>
+                                        <Input
+                                            name="vat"
+                                            label="VAT Number"
+                                            placeholder="VAT-789..."
+                                            value={formData.vat}
+                                            onChange={handleChange}
+                                        />
+                                        <Input
+                                            name="bankName"
+                                            label="Bank Name"
+                                            placeholder="Bank Name"
+                                            value={formData.bankName}
+                                            onChange={handleChange}
+                                        />
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                            <Input
+                                                name="bankBranch"
+                                                label="Branch"
+                                                placeholder="Branch Name"
+                                                value={formData.bankBranch}
+                                                onChange={handleChange}
+                                            />
+                                            <Input
+                                                name="bankAccount"
+                                                label="Account Number"
+                                                placeholder="Account Number"
+                                                value={formData.bankAccount}
+                                                onChange={handleChange}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Right Column: Address & Banking */}
+                                <div className={styles.column}>
+                                    <h3 className={styles.sectionHeader}>Business Address</h3>
+                                    <AddressFormFields
+                                        prefix="business"
+                                        data={businessAddress}
+                                        onChange={handleBusinessAddressChange}
+                                    />
+                                </div>
                             </div>
 
-                            <Input
-                                name="managerFirstName"
-                                label="Manager First Name (Optional)"
-                                placeholder="John"
-                                value={formData.managerFirstName}
-                                onChange={handleChange}
-                                icon={<User size={18} />}
-                            />
-
-                            <Input
-                                name="managerLastName"
-                                label="Manager Last Name (Optional)"
-                                placeholder="Doe"
-                                value={formData.managerLastName}
-                                onChange={handleChange}
-                                icon={<User size={18} />}
-                            />
-
-                            <Input
-                                name="managerEmail"
-                                label="Manager Email (Optional)"
-                                placeholder="manager@company.com"
-                                value={formData.managerEmail}
-                                onChange={handleChange}
-                                icon={<Mail size={18} />}
-                                type="email"
-                            />
-
-                            <Input
-                                name="managerPhone"
-                                label="Manager Phone (Optional)"
-                                placeholder="+8801XXXXXXXXX"
-                                value={formData.managerPhone}
-                                onChange={handleChange}
-                                icon={<Phone size={18} />}
-                                type="tel"
-                            />
-
-                            <Input
-                                name="managerPassword"
-                                label="Manager Password (Optional)"
-                                placeholder="******"
-                                value={formData.managerPassword}
-                                onChange={handleChange}
-                                icon={<Lock size={18} />}
-                                type="password"
-                            />
-
-                            <Input
-                                name="managerDateOfBirth"
-                                label="Manager Date of Birth (Optional)"
-                                placeholder="YYYY-MM-DD"
-                                value={formData.managerDateOfBirth}
-                                onChange={handleChange}
-                                icon={<User size={18} />}
-                                type="date"
-                            />
-
-                            <Input
-                                name="managerNidPassportNumber"
-                                label="Manager NID/Passport Number (Optional)"
-                                placeholder="A12345678"
-                                value={formData.managerNidPassportNumber}
-                                onChange={handleChange}
-                                icon={<User size={18} />}
-                            />
-
-                            <Input
-                                name="managerNidPassportImageUrl"
-                                label="Manager NID/Passport Image URL (Optional)"
-                                placeholder="https://example.com/id-image.jpg"
-                                value={formData.managerNidPassportImageUrl}
-                                onChange={handleChange}
-                                icon={<User size={18} />}
-                            />
-
-                            <div style={{ display: 'flex', gap: '1rem' }}>
-                                <Button type="button" onClick={handleBack} style={{ flex: 1 }}>
-                                    Back
-                                </Button>
-                                <Button fullWidth type="submit" style={{ flex: 2 }} disabled={isLoading}>
-                                    {isLoading ? <Loader2 className="animate-spin" /> : 'Complete Registration'}
-                                </Button>
+                            <div className={styles.formActions}>
+                                <div style={{ display: 'flex', gap: '1rem', width: '100%' }}>
+                                    <Button
+                                        type="button"
+                                        variant="secondary"
+                                        onClick={handleBack}
+                                        style={{ flex: 1 }}
+                                    >
+                                        Back
+                                    </Button>
+                                    <Button
+                                        type="submit"
+                                        style={{ flex: 1 }}
+                                        disabled={isLoading}
+                                    >
+                                        Next Step
+                                    </Button>
+                                </div>
                             </div>
                         </>
                     )}
 
-                    <div className={styles.footerLink}>
-                        Already have an account? <Link href={`/login${redirectUrl !== '/' ? `?redirect=${redirectUrl}` : ''}`}>Login</Link>
-                    </div>
+                    {/* Step 3: Manager Account */}
+                    {step === 3 && (
+                        <>
+                            <div className={styles.splitLayout}>
+                                {/* LEFT COLUMN: Manager Personal Details */}
+                                <div className={styles.column}>
+                                    <h3 className={styles.sectionHeader}>Manager Details (Optional)</h3>
+
+                                    {/* Manager Toggle Info Box */}
+                                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                                        <label className="flex items-center space-x-3 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={addManager}
+                                                onChange={(e) => setAddManager(e.target.checked)}
+                                                className="h-5 w-5 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                                            />
+                                            <div>
+                                                <span className="text-sm font-semibold text-gray-900">Create a Manager Account?</span>
+                                                <p className="text-xs text-gray-500">Managers can place orders but cannot change business settings.</p>
+                                            </div>
+                                        </label>
+                                    </div>
+
+                                    {/* Inputs (Only show if toggle is ON) */}
+                                    {addManager && (
+                                        <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <Input
+                                                    label="First Name"
+                                                    name="managerFirstName"
+                                                    value={formData.managerFirstName}
+                                                    onChange={handleChange}
+                                                    icon={<User size={18} />}
+                                                    placeholder="John"
+                                                />
+                                                <Input
+                                                    label="Last Name"
+                                                    name="managerLastName"
+                                                    value={formData.managerLastName}
+                                                    onChange={handleChange}
+                                                    icon={<User size={18} />}
+                                                    placeholder="Doe"
+                                                />
+                                            </div>
+
+                                            <Input
+                                                label="Manager Email"
+                                                name="managerEmail"
+                                                type="email"
+                                                value={formData.managerEmail}
+                                                onChange={handleChange}
+                                                icon={<Mail size={18} />}
+                                                placeholder="manager@company.com"
+                                            />
+
+                                            <Input
+                                                label="Manager Phone"
+                                                name="managerPhone"
+                                                type="tel"
+                                                value={formData.managerPhone}
+                                                onChange={handleChange}
+                                                icon={<Phone size={18} />}
+                                                placeholder="+8801XXXXXXXXX"
+                                            />
+
+                                            <Input
+                                                label="Manager Password"
+                                                name="managerPassword"
+                                                type="password"
+                                                value={formData.managerPassword}
+                                                onChange={handleChange}
+                                                icon={<Lock size={18} />}
+                                                placeholder="******"
+                                            />
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <Input
+                                                    label="Date of Birth"
+                                                    name="managerDateOfBirth"
+                                                    type="date"
+                                                    value={formData.managerDateOfBirth}
+                                                    onChange={handleChange}
+                                                    icon={<Calendar size={18} />}
+                                                />
+                                                <Input
+                                                    label="NID / Passport Number"
+                                                    name="managerNidPassportNumber"
+                                                    value={formData.managerNidPassportNumber}
+                                                    onChange={handleChange}
+                                                    icon={<User size={18} />}
+                                                    placeholder="A12345678"
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* RIGHT COLUMN: Manager Address */}
+                                <div className={styles.column}>
+                                    {addManager ? (
+                                        <div className="animate-in fade-in slide-in-from-right-2 duration-500 delay-100">
+                                            {/* Reuse the Manager Address State we created earlier */}
+                                            <AddressFormFields
+                                                prefix="manager"
+                                                data={managerAddress}
+                                                onChange={handleManagerAddressChange}
+                                            />
+                                        </div>
+                                    ) : (
+                                        /* Empty State Placeholder to keep layout balanced if manager is off */
+                                        <div className="h-full flex items-center justify-center p-8 border-2 border-dashed border-gray-200 rounded-lg text-center">
+                                            <p className="text-gray-400 text-sm">Enable "Create Manager Account" to add address details.</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            <div className={styles.formActions}>
+                                <div style={{ display: 'flex', gap: '1rem', width: '100%' }}>
+                                    <Button
+                                        type="button"
+                                        variant="secondary"
+                                        onClick={handleBack}
+                                        style={{ flex: 1 }}
+                                    >
+                                        Back
+                                    </Button>
+                                    <Button
+                                        fullWidth
+                                        type="submit"
+                                        style={{ flex: 2 }}
+                                        disabled={isLoading}
+                                    >
+                                        {isLoading ? <Loader2 className="animate-spin" /> : 'Complete Registration'}
+                                    </Button>
+                                </div>
+                            </div>
+                        </>
+                    )}
                 </form>
+                <div className={styles.footerSection}>
+                    <p className={styles.footerText}>
+                        Already have an account?
+                        <Link href={`/login${redirectUrl !== '/' ? `?redirect=${redirectUrl}` : ''}`} className={styles.loginLink}>
+                            Login here
+                        </Link>
+                    </p>
+                </div>
+
 
                 {/* Success Modal */}
-                {showSuccessModal && (
-                    <div style={{
-                        position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        background: 'rgba(0,0,0,0.6)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        zIndex: 9999
-                    }}>
+                {
+                    showSuccessModal && (
                         <div style={{
-                            background: 'white',
-                            padding: '2.5rem',
-                            borderRadius: '1rem',
-                            maxWidth: '420px',
-                            width: '90%',
-                            textAlign: 'center',
-                            boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            background: 'rgba(0,0,0,0.6)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            zIndex: 9999
                         }}>
                             <div style={{
-                                width: '80px',
-                                height: '80px',
-                                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                                borderRadius: '50%',
-                                margin: '0 auto 1.5rem',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                fontSize: '3rem',
-                                color: 'white',
-                                boxShadow: '0 8px 16px rgba(16, 185, 129, 0.3)'
+                                background: 'white',
+                                padding: '2.5rem',
+                                borderRadius: '1rem',
+                                maxWidth: '420px',
+                                width: '90%',
+                                textAlign: 'center',
+                                boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
                             }}>
-                                ✓
-                            </div>
-                            <h2 style={{
-                                margin: '0 0 0.75rem',
-                                fontSize: '1.75rem',
-                                fontWeight: 700,
-                                color: '#1f2937'
-                            }}>
-                                Registration Submitted!
-                            </h2>
-                            <p style={{
-                                color: '#6b7280',
-                                margin: '0 0 2rem',
-                                fontSize: '1rem',
-                                lineHeight: '1.6'
-                            }}>
-                                Your business registration is pending admin approval.
-                                You'll receive an email notification once your account is verified.
-                            </p>
-                            <Button
-                                fullWidth
-                                onClick={() => router.push('/login?message=pending')}
-                                style={{
-                                    padding: '0.875rem',
+                                <div style={{
+                                    width: '80px',
+                                    height: '80px',
+                                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                    borderRadius: '50%',
+                                    margin: '0 auto 1.5rem',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '3rem',
+                                    color: 'white',
+                                    boxShadow: '0 8px 16px rgba(16, 185, 129, 0.3)'
+                                }}>
+                                    ✓
+                                </div>
+                                <h2 style={{
+                                    margin: '0 0 0.75rem',
+                                    fontSize: '1.75rem',
+                                    fontWeight: 700,
+                                    color: '#1f2937'
+                                }}>
+                                    Registration Submitted!
+                                </h2>
+                                <p style={{
+                                    color: '#6b7280',
+                                    margin: '0 0 2rem',
                                     fontSize: '1rem',
-                                    fontWeight: 600
-                                }}
-                            >
-                                Go to Login
-                            </Button>
+                                    lineHeight: '1.6'
+                                }}>
+                                    Your business registration is pending admin approval.
+                                    You'll receive an email notification once your account is verified.
+                                </p>
+                                <Button
+                                    fullWidth
+                                    onClick={() => router.push('/login?message=pending')}
+                                    style={{
+                                        padding: '0.875rem',
+                                        fontSize: '1rem',
+                                        fontWeight: 600
+                                    }}
+                                >
+                                    Go to Login
+                                </Button>
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )
+                }
 
-                <div className={styles.footer}>
-                    <p>By continuing, you agree to our Terms & Privacy Policy.</p>
-                </div>
             </div>
         </div>
     );

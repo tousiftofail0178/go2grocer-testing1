@@ -28,34 +28,56 @@ interface AuthState {
     signup: (data: { name: string; email: string; phone: string }) => Promise<void>;
     signupB2B: (data: {
         // Step 1: Personal details
-        firstName?: string;
-        lastName?: string;
-        dateOfBirth?: string;
-        nidPassportNumber?: string;
+        firstName: string;
+        lastName: string;
+        dateOfBirth: string;
+        nidPassportNumber: string;
         nidPassportImageUrl?: string;
+        ownerAddress: {
+            streetAddress: string;
+            area: string;
+            city: string;
+            postalCode: string;
+        };
+
         // Step 2: Business details
         businessName: string;
-        userId: string;
+        businessEmail: string;
+        businessPhone: string;
         password: string;
         contactName: string;
         phone: string;
         email: string;
-        address: string;
+        businessAddress: {
+            streetAddress: string;
+            area: string;
+            city: string;
+            postalCode: string;
+        };
         bin?: string;
         tin?: string;
         vat?: string;
         bankName?: string;
         bankAccount?: string;
         bankBranch?: string;
-        // Step 3: Manager fields
-        managerFirstName?: string;
-        managerLastName?: string;
-        managerEmail?: string;
-        managerPhone?: string;
-        managerPassword?: string;
-        managerDateOfBirth?: string;
-        managerNidPassportNumber?: string;
+    }) => Promise<number | undefined>;
+
+    registerManager: (data: {
+        linkedApplicationId: number;
+        managerFirstName: string;
+        managerLastName: string;
+        managerEmail: string;
+        managerPhone: string;
+        managerPassword: string;
+        managerDateOfBirth: string;
+        managerNidPassportNumber: string;
         managerNidPassportImageUrl?: string;
+        managerAddress: {
+            streetAddress: string;
+            area: string;
+            city: string;
+            postalCode: string;
+        };
     }) => Promise<void>;
     updateProfile: (data: { name: string; email: string }) => Promise<void>;
     verifyOtp: (phone: string, otp: string) => Promise<void>;
@@ -215,90 +237,58 @@ export const useAuthStore = create<AuthState>()(
                 }
             },
 
-            signupB2B: async (data: {
-                businessName: string;
-                userId: string;
-                password: string;
-                contactName: string;
-                phone: string;
-                email: string;
-                address: string;
-            }) => {
+            signupB2B: async (data) => {
                 set({ isLoading: true, error: null });
                 try {
-                    // Import dynamically to avoid server-on-client issues if not careful, 
-                    // though Next.js handles 'use server' imports well usually.
-                    const { registerOwnerStep1, registerBusinessStep2, registerManagerStep3 } = await import('@/app/actions/auth');
+                    // Call the NEW strict registerBusiness action
+                    const { registerBusiness } = await import('@/app/actions/auth');
 
-                    // Extract name parts from contactName
-                    const nameParts = (data.contactName || '').split(' ');
-                    const firstName = nameParts[0] || 'Business';
-                    const lastName = nameParts.slice(1).join(' ') || 'Owner';
-
-                    // STEP 1: Create owner account
-                    const step1Result = await registerOwnerStep1({
+                    const result = await registerBusiness({
+                        // Owner
+                        firstName: data.firstName || 'Business',
+                        lastName: data.lastName || 'Owner',
                         email: data.email,
-                        password: data.password,
                         phone: data.phone,
-                        firstName,
-                        lastName,
-                        // Include Step 1 personal details
-                        dateOfBirth: data.dateOfBirth,
-                        nidPassportNumber: data.nidPassportNumber,
+                        password: data.password,
+                        dateOfBirth: data.dateOfBirth || '',
+                        nidPassportNumber: data.nidPassportNumber || '',
                         nidPassportImageUrl: data.nidPassportImageUrl,
-                    });
+                        ownerAddress: data.ownerAddress,
 
-                    if (!step1Result.success || !step1Result.user) {
-                        throw new Error(step1Result.error || 'Step 1 failed');
-                    }
-
-                    // STEP 2: Create business application
-                    const step2Result = await registerBusinessStep2({
-                        userId: step1Result.user.id,
+                        // Business
                         businessName: data.businessName,
-                        address: data.address,
-                        bin: data.bin,
-                        tin: data.tin,
+                        businessEmail: data.businessEmail,
+                        businessPhone: data.businessPhone,
+                        businessAddress: data.businessAddress,
+                        tradeLicenseNumber: data.bin,
+                        taxCertificateNumber: data.tin,
                         vat: data.vat,
                         bankName: data.bankName,
                         bankAccount: data.bankAccount,
                         bankBranch: data.bankBranch,
                     });
 
-                    if (!step2Result.success) {
-                        throw new Error(step2Result.error || 'Step 2 failed');
+                    if (!result.success) {
+                        throw new Error(result.error || 'B2B Registration failed');
                     }
 
-                    // ✅ CRITICAL: Save applicationId & userId for Step 3 frontend
-                    if (typeof window !== 'undefined' && step2Result.applicationId && step1Result.user.id) {
-                        localStorage.setItem('pendingApplicationId', step2Result.applicationId.toString());
-                        localStorage.setItem('pendingUserId', step1Result.user.id.toString());
-                        console.log('✅ Saved applicationId to localStorage:', step2Result.applicationId);
-                    }
-
-                    // STEP 3: Complete registration with manager data
-                    const step3Result = await registerManagerStep3({
-                        userId: step1Result.user.id,
-                        applicationId: step2Result.applicationId,
-                        // Pass manager details from form
-                        managerFirstName: data.managerFirstName,
-                        managerLastName: data.managerLastName,
-                        managerEmail: data.managerEmail,
-                        managerPhone: data.managerPhone,
-                        managerPassword: data.managerPassword,
-                        managerDateOfBirth: data.managerDateOfBirth,
-                        managerNidPassportNumber: data.managerNidPassportNumber,
-                        managerNidPassportImageUrl: data.managerNidPassportImageUrl,
-                    });
-
-                    if (!step3Result.success) {
-                        throw new Error(step3Result.error || 'Step 3 failed');
+                    // Store pending ID if needed (though UI handles success flow now)
+                    if (typeof window !== 'undefined' && result.applicationId) {
+                        localStorage.setItem('pendingApplicationId', result.applicationId.toString());
                     }
 
                     set({ isLoading: false, error: null });
+                    return result.applicationId;
                 } catch (error: unknown) {
                     const message = error instanceof Error ? error.message : 'Failed to register business';
-                    set({ isLoading: false, error: message });
+
+                    // Specific check for existing email
+                    if (message.includes('Email already exists')) {
+                        set({ isLoading: false, error: 'This email is already registered. Please login or use a different email.' });
+                    } else {
+                        set({ isLoading: false, error: message });
+                    }
+
                     throw error;
                 }
             },
@@ -321,6 +311,23 @@ export const useAuthStore = create<AuthState>()(
                     }));
                 } catch (error: unknown) {
                     const message = error instanceof Error ? error.message : 'Failed to update profile';
+                    set({ isLoading: false, error: message });
+                    throw error;
+                }
+            },
+
+            registerManager: async (data) => {
+                set({ isLoading: true, error: null });
+                try {
+                    const { registerManager } = await import('@/app/actions/auth');
+                    const result = await registerManager(data);
+
+                    if (!result.success) {
+                        throw new Error(result.error || 'Manager Registration failed');
+                    }
+                    set({ isLoading: false, error: null });
+                } catch (error: unknown) {
+                    const message = error instanceof Error ? error.message : 'Failed to register manager';
                     set({ isLoading: false, error: message });
                     throw error;
                 }

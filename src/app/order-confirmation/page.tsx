@@ -68,7 +68,7 @@ function OrderConfirmationContent() {
                     <Button onClick={() => router.push('/shop')} icon={<ShoppingBag size={18} />}>
                         Continue Shopping
                     </Button>
-                    <Button variant="secondary" onClick={() => router.push('/profile')} icon={<ArrowRight size={18} />}>
+                    <Button variant="secondary" onClick={() => router.push('/dashboard/orders')} icon={<ArrowRight size={18} />}>
                         View Order History
                     </Button>
                 </div>

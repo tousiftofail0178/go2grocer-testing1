@@ -6,6 +6,7 @@ import { db } from '@/db';
 import { businessApplications } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import styles from './resubmit.module.css';
+import { toast } from 'react-hot-toast';
 
 interface ResubmitFormProps {
     applicationId: number;
@@ -66,7 +67,7 @@ export default function ResubmitApplicationPage({
             }
         } catch (error) {
             console.error('Error fetching application:', error);
-            alert('Failed to load application data');
+            toast.error('Failed to load application data');
         } finally {
             setLoading(false);
         }
@@ -86,14 +87,14 @@ export default function ResubmitApplicationPage({
             const data = await response.json();
 
             if (response.ok && data.success) {
-                alert('✅ Application resubmitted successfully! It will be reviewed by our admin team.');
+                toast.success('✅ Application resubmitted successfully! It will be reviewed by our admin team.');
                 router.push('/business-owner/dashboard');
             } else {
-                alert(`❌ Error: ${data.error || 'Failed to resubmit application'}`);
+                toast.error(`❌ Error: ${data.error || 'Failed to resubmit application'}`);
             }
         } catch (error) {
             console.error('Error resubmitting application:', error);
-            alert('❌ An error occurred while resubmitting');
+            toast.error('❌ An error occurred while resubmitting');
         } finally {
             setSubmitting(false);
         }

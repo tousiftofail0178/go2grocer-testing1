@@ -13,6 +13,7 @@ import { AddressModal } from '@/components/ui/AddressModal';
 import { OrderDetailsModal } from '@/components/ui/OrderDetailsModal';
 import { EditBusinessModal } from '@/components/ui/EditBusinessModal';
 import { useOrderStore, Order } from '@/store/useOrderStore';
+import { toast } from 'react-hot-toast';
 
 // Basic modal for editing profile
 const EditProfileModal = ({ isOpen, onClose, user, onSave }: any) => {
@@ -138,7 +139,7 @@ const BusinessRegistrationModal = ({ isOpen, onClose, onRegister, sendOtp, verif
         e.preventDefault();
         setLoading(true);
         if (!name || !address || !phone) {
-            alert("Please fill required fields (Name, Address, Phone)");
+            toast.error("Please fill required fields (Name, Address, Phone)");
             setLoading(false);
             return;
         }
@@ -147,7 +148,7 @@ const BusinessRegistrationModal = ({ isOpen, onClose, onRegister, sendOtp, verif
             setStep('otp');
         } catch (error) {
             console.error(error);
-            alert("Failed to send OTP");
+            toast.error("Failed to send OTP");
         } finally {
             setLoading(false);
         }
@@ -164,11 +165,11 @@ const BusinessRegistrationModal = ({ isOpen, onClose, onRegister, sendOtp, verif
                 // Reset form
                 setName(''); setAddress(''); setPhone(''); setTin(''); setBin(''); setOtp(''); setStep('details');
             } else {
-                alert("Invalid OTP");
+                toast.error("Invalid OTP");
             }
         } catch (error) {
             console.error(error);
-            alert("Verification failed");
+            toast.error("Verification failed");
         } finally {
             setLoading(false);
         }
@@ -346,11 +347,11 @@ export default function ProfilePage() {
             if (genRes.ok) {
                 window.open(`/api/invoices/${order.id}?t=${Date.now()}`, '_blank');
             } else {
-                alert('Failed to generate invoice. Please try again.');
+                toast.error('Failed to generate invoice. Please try again.');
             }
         } catch (err) {
             console.error(err);
-            alert('Error accessing invoice system.');
+            toast.error('Error accessing invoice system.');
         } finally {
             setGeneratingInvoice(null);
         }

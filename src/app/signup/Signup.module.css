@@ -1,0 +1,124 @@
+/* Full Page Wrapper */
+.pageWrapper {
+    min-height: 100vh;
+    width: 100%;
+    background-color: #f3f4f6;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    /* Start at top */
+    padding: 40px 20px;
+}
+
+/* The Card Container - MOBILE DEFAULT */
+.container {
+    background: #ffffff;
+    width: 100%;
+    max-width: 500px;
+    /* Default narrow width */
+    border-radius: 16px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+    margin: 0 auto;
+    transition: max-width 0.3s ease-in-out;
+}
+
+/* DESKTOP OVERRIDE - The Critical Fix */
+@media (min-width: 1024px) {
+    .container {
+        max-width: 1200px !important;
+        /* Force wide width */
+        padding: 48px;
+    }
+}
+
+/* Header Section */
+.header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.title {
+    font-size: 1.875rem;
+    font-weight: 800;
+    color: #111827;
+    letter-spacing: -0.025em;
+}
+
+.subtitle {
+    margin-top: 8px;
+    color: #6b7280;
+}
+
+/* The Grid Layout */
+.splitLayout {
+    display: grid;
+    grid-template-columns: 1fr;
+    /* Mobile: Stack */
+    gap: 32px;
+}
+
+@media (min-width: 1024px) {
+    .splitLayout {
+        grid-template-columns: 1fr 1fr;
+        /* Desktop: Split */
+        gap: 64px;
+        /* Wide gap */
+        align-items: start;
+    }
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.sectionHeader {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e5e7eb;
+    margin-bottom: 24px;
+}
+
+/* Form Actions */
+.formActions {
+    margin-top: 40px;
+    display: flex;
+    justify-content: flex-end;
+    /* This was default behavior, flex-end aligns buttons right */
+    border-top: 1px solid #e5e7eb;
+    padding-top: 24px;
+}
+
+/* Footer Section */
+.footerSection {
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid #e5e7eb;
+    /* Subtle gray line */
+    text-align: center;
+    width: 100%;
+}
+
+.footerText {
+    font-size: 0.95rem;
+    color: #6b7280;
+}
+
+.loginLink {
+    color: #10b981;
+    /* Brand Green */
+    font-weight: 600;
+    text-decoration: none;
+    margin-left: 5px;
+    transition: color 0.2s;
+}
+
+.loginLink:hover {
+    color: #047857;
+    /* Darker Green */
+    text-decoration: underline;
+}

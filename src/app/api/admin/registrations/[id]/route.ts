@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { users, businessProfiles, businessApplications, managerApplications } from '@/db/schema';
+import { users, businessProfiles, businessApplications, managerApplications, customerProfiles } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 // PATCH /api/admin/registrations/[id] - Reject application with feedback
@@ -200,12 +200,14 @@ export async function PUT(
             .where(eq(users.id, app.userId))
             .limit(1);
 
-        const isExistingOwner = existingUser.length > 0 && existingUser[0].role === 'business_owner';
+        const isExistingOwner = existingUser.length > 0 &&
+            existingUser[0].role === 'business_owner' &&
+            existingUser[0].isVerified === true; // ✅ FIX: Only skip if ALREADY verified
 
         if (isExistingOwner) {
             console.log(`✅ User ${app.userId} is already a verified business owner. Skipping role update.`);
         } else {
-            // 1. Update user role and verification status (only for new users)
+            // 1. Update user role and verification status
             await db
                 .update(users)
                 .set({
@@ -214,7 +216,7 @@ export async function PUT(
                 })
                 .where(eq(users.id, app.userId));
 
-            console.log(`✅ Updated user ${app.userId} to business_owner role`);
+            console.log(`✅ Updated user ${app.userId} to verified business_owner`);
         }
 
         // 2. CREATE business profile from application data (always done)
@@ -239,6 +241,16 @@ export async function PUT(
             .returning();
 
         console.log(`✅ Created business profile: ${newBusiness[0].businessId}`);
+
+        // 2a. LINK Owner Profile to Business (The Gap Fix)
+        await db
+            .update(customerProfiles)
+            .set({
+                employerBusinessId: newBusiness[0].businessId
+            })
+            .where(eq(customerProfiles.userId, app.userId));
+
+        console.log(`✅ Linked Owner ${app.userId} to Business ${newBusiness[0].businessId}`);
 
         // 3. Update application status
         await db

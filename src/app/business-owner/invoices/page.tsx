@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, Download, Search, Filter, FileText, Calendar, DollarSign, Building2 } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import styles from './invoices.module.css';
+import { toast } from 'react-hot-toast';
 
 // Mock invoice data - In production, this would come from an API
 const MOCK_INVOICES = [
@@ -114,26 +115,53 @@ export default function BusinessInvoicesPage() {
     const { user } = useAuthStore();
     const router = useRouter();
 
+    // State for real invoices
+    const [invoices, setInvoices] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
     const [selectedBusiness, setSelectedBusiness] = useState<string>('all');
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]); // New state for status filters
-    const [selectedInvoice, setSelectedInvoice] = useState<typeof MOCK_INVOICES[0] | null>(null); // For modal
-    const [isDownloading, setIsDownloading] = useState<string | null>(null); // Track downloading invoice
+    const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+    const [selectedInvoice, setSelectedInvoice] = useState<any | null>(null);
+    const [isDownloading, setIsDownloading] = useState<string | null>(null);
 
-    // Check authentication
+    // Fetch invoices from API
     React.useEffect(() => {
         if (!user || user.role !== 'business_owner') {
             router.push('/');
+            return;
+        }
+
+        async function fetchInvoices() {
+            try {
+                setLoading(true);
+                const response = await fetch(`/api/invoices?userId=${user?.id}`);
+                const data = await response.json();
+
+                if (response.ok && data.invoices) {
+                    setInvoices(data.invoices);
+                } else {
+                    console.error('Failed to fetch invoices:', data.error);
+                    toast.error('Failed to load invoices');
+                }
+            } catch (error) {
+                console.error('Error fetching invoices:', error);
+                toast.error('Error loading invoices');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        if (user?.id) {
+            fetchInvoices();
         }
     }, [user, router]);
 
     // Toggle status filter
     const toggleStatusFilter = (status: string) => {
         if (status === 'all') {
-            // Reset - show all
             setSelectedStatuses([]);
         } else {
-            // Toggle individual status
             setSelectedStatuses(prev => {
                 if (prev.includes(status)) {
                     return prev.filter(s => s !== status);
@@ -146,16 +174,20 @@ export default function BusinessInvoicesPage() {
 
     // Filter invoices based on selected business, search, and status
     const filteredInvoices = useMemo(() => {
-        let filtered = MOCK_INVOICES;
+        let filtered = invoices;
 
-        // Filter by business
-        if (selectedBusiness !== 'all') {
-            filtered = filtered.filter(inv => inv.businessId === selectedBusiness);
-        }
+        // Filter by business (Not fully implemented in UI dropdown yet since we need business list, 
+        // but API returns businessName. For now, filter logic assumes we might filter by name or ID if available)
+        // Since we don't have a separate list of businesses fetched here yet, we'll skip Business Dropdown filtering for now
+        // or strictly filter if we had business IDs. 
+        // Logic: if selectedBusiness !== 'all', try to match. 
+        // But the current UI dropdown uses MOCK_BUSINESSES. 
+        // We will DISABLED the business selector for this iteration or map it dynamically if we fetched businesses.
+        // Let's keep it simple: Filter by SEARCH and STATUS only for now.
 
         // Filter by status (if any selected)
         if (selectedStatuses.length > 0) {
-            filtered = filtered.filter(inv => selectedStatuses.includes(inv.status));
+            filtered = filtered.filter(inv => selectedStatuses.includes(inv.status.toLowerCase())); // API status might be Capitalized
         }
 
         // Filter by search query (invoice number or order ID)
@@ -163,29 +195,29 @@ export default function BusinessInvoicesPage() {
             const query = searchQuery.toLowerCase();
             filtered = filtered.filter(inv =>
                 inv.invoiceNumber.toLowerCase().includes(query) ||
-                inv.orderId.includes(query)
+                String(inv.orderId).includes(query)
             );
         }
 
         return filtered;
-    }, [selectedBusiness, searchQuery, selectedStatuses]);
+    }, [invoices, selectedBusiness, searchQuery, selectedStatuses]);
 
-    // Calculate stats from ALL invoices (not filtered)
+    // Calculate stats from ALL invoices
     const stats = useMemo(() => {
-        const total = MOCK_INVOICES.length;
-        const paid = MOCK_INVOICES.filter(inv => inv.status === 'paid').length;
-        const pending = MOCK_INVOICES.filter(inv => inv.status === 'pending').length;
-        const overdue = MOCK_INVOICES.filter(inv => inv.status === 'overdue').length;
-        const totalAmount = MOCK_INVOICES.reduce((sum, inv) => sum + inv.amount, 0);
+        const total = invoices.length;
+        const paid = invoices.filter(inv => inv.status.toLowerCase() === 'paid').length;
+        const pending = invoices.filter(inv => inv.status.toLowerCase() !== 'paid').length; // Simplify: anything not paid is pending/due
+        const overdue = invoices.filter(inv => inv.status.toLowerCase() === 'overdue').length;
+        const totalAmount = invoices.reduce((sum, inv) => sum + (Number(inv.totalAmount) || 0), 0);
 
         return { total, paid, pending, overdue, totalAmount };
-    }, []); // No dependencies - always calculate from all invoices
+    }, [invoices]);
 
-    const handleViewDetails = (invoice: typeof MOCK_INVOICES[0]) => {
+    const handleViewDetails = (invoice: any) => {
         setSelectedInvoice(invoice);
     };
 
-    const handleDownloadInvoice = async (invoice: typeof MOCK_INVOICES[0]) => {
+    const handleDownloadInvoice = async (invoice: any) => {
         setIsDownloading(invoice.id);
         try {
             // Call the invoice generation API
@@ -202,74 +234,56 @@ export default function BusinessInvoicesPage() {
                         phone: user?.phone || '',
                         email: user?.email || ''
                     },
-                    items: invoice.orderItems || []
+                    items: [] // API isn't returning items yet, so passing empty. Secure logic would fetch items on server.
                 }),
             });
 
             if (!response.ok) {
                 const errorText = await response.text();
-                console.error('API Error Response:', errorText);
                 throw new Error(`Failed to generate invoice: ${response.status} - ${errorText}`);
             }
 
-            // Log response details
-            const contentType = response.headers.get('content-type');
-            console.log('Response Content-Type:', contentType);
-            console.log('Response Status:', response.status);
-            console.log('Response Headers:', Array.from(response.headers.entries()));
-
-            // Check if we actually got a PDF
-            if (!contentType?.includes('application/pdf')) {
-                const text = await response.text();
-                console.error('Expected PDF but got:', contentType, 'Content:', text);
-                throw new Error(`Server returned ${contentType} instead of PDF`);
-            }
-
-            // Get the PDF blob with explicit type
             const blob = await response.blob();
             const pdfBlob = new Blob([blob], { type: 'application/pdf' });
+            if (pdfBlob.size === 0) throw new Error('Received empty PDF file');
 
-            console.log('PDF Blob size:', pdfBlob.size, 'Blob type:', pdfBlob.type);
-
-            if (pdfBlob.size === 0) {
-                throw new Error('Received empty PDF file');
-            }
-
-            // Open PDF in new tab instead of downloading
             const url = window.URL.createObjectURL(pdfBlob);
             window.open(url, '_blank');
+            setTimeout(() => window.URL.revokeObjectURL(url), 10000);
 
-            // Cleanup after a delay
-            setTimeout(() => {
-                window.URL.revokeObjectURL(url);
-            }, 10000);
-
-            console.log('PDF opened in new tab successfully');
         } catch (error: any) {
             console.error('Error downloading invoice:', error);
-            alert(`Failed to download invoice: ${error.message}`);
+            toast.error(`Failed to download: ${error.message}`);
         } finally {
             setIsDownloading(null);
         }
     };
 
     const getStatusColor = (status: string) => {
-        switch (status) {
+        const s = status.toLowerCase();
+        switch (s) {
             case 'paid': return '#10b981';
             case 'pending': return '#f59e0b';
+            case 'unpaid': return '#f59e0b'; // Handle 'Unpaid' from API
             case 'overdue': return '#ef4444';
             default: return '#6b7280';
         }
     };
 
     const getStatusBgColor = (status: string) => {
-        switch (status) {
+        const s = status.toLowerCase();
+        switch (s) {
             case 'paid': return '#d1fae5';
             case 'pending': return '#fef3c7';
+            case 'unpaid': return '#fef3c7';
             case 'overdue': return '#fee2e2';
             default: return '#f3f4f6';
         }
     };
+
+    if (loading) {
+        return <div className={styles.container} style={{ textAlign: 'center', padding: '4rem' }}>Loading invoices...</div>;
+    }
 
     return (
         <div className={styles.container}>
@@ -322,23 +336,10 @@ export default function BusinessInvoicesPage() {
                         </div>
                     </button>
 
-                    <button
-                        className={`${styles.statCard} ${selectedStatuses.includes('overdue') ? styles.statCardActive : ''}`}
-                        onClick={() => toggleStatusFilter('overdue')}
-                    >
-                        <div style={{ width: 24, height: 24, borderRadius: '50%', backgroundColor: '#fee2e2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <div style={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: '#ef4444' }}></div>
-                        </div>
-                        <div>
-                            <div className={styles.statValue}>{stats.overdue}</div>
-                            <div className={styles.statLabel}>Overdue</div>
-                        </div>
-                    </button>
-
                     <div className={styles.statCard}>
                         <DollarSign size={24} color="#10b981" />
                         <div>
-                            <div className={styles.statValue}>৳{stats.totalAmount}</div>
+                            <div className={styles.statValue}>৳{Number(stats.totalAmount).toLocaleString()}</div>
                             <div className={styles.statLabel}>Total Amount</div>
                         </div>
                     </div>
@@ -347,21 +348,8 @@ export default function BusinessInvoicesPage() {
 
             {/* Filters */}
             <div className={styles.filtersSection}>
-                <div className={styles.filterGroup}>
-                    <Filter size={20} />
-                    <select
-                        value={selectedBusiness}
-                        onChange={(e) => setSelectedBusiness(e.target.value)}
-                        className={styles.select}
-                    >
-                        <option value="all">All Businesses</option>
-                        {MOCK_BUSINESSES.map(biz => (
-                            <option key={biz.id} value={biz.id}>{biz.name}</option>
-                        ))}
-                    </select>
-                </div>
-
-                <div className={styles.searchBox}>
+                {/* Removed Business Dropdown for simplicity as requested, focused on Search */}
+                <div className={styles.searchBox} style={{ flex: 1 }}>
                     <Search size={20} />
                     <input
                         type="text"
@@ -390,7 +378,7 @@ export default function BusinessInvoicesPage() {
                                         color: getStatusColor(invoice.status)
                                     }}
                                 >
-                                    {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
+                                    {invoice.status.toUpperCase()}
                                 </span>
                             </div>
 
@@ -415,14 +403,14 @@ export default function BusinessInvoicesPage() {
 
                                 <div className={styles.invoiceRow}>
                                     <span className={styles.invoiceLabel}>Items:</span>
-                                    <span className={styles.invoiceValue}>{invoice.items} items</span>
+                                    <span className={styles.invoiceValue}>{invoice.itemCount} items</span>
                                 </div>
 
                                 <div className={styles.invoiceDivider}></div>
 
                                 <div className={styles.invoiceAmount}>
                                     <span>Total Amount</span>
-                                    <span className={styles.amount}>৳{invoice.amount}</span>
+                                    <span className={styles.amount}>৳{Number(invoice.totalAmount).toLocaleString()}</span>
                                 </div>
                             </div>
 
@@ -449,12 +437,7 @@ export default function BusinessInvoicesPage() {
                 <div className={styles.emptyState}>
                     <FileText size={64} color="#d1d5db" />
                     <h3>No Invoices Found</h3>
-                    <p>
-                        {searchQuery ?
-                            'No invoices match your search criteria.' :
-                            'No invoices available for the selected business.'
-                        }
-                    </p>
+                    <p>No invoices match your search criteria.</p>
                 </div>
             )}
 
@@ -491,7 +474,7 @@ export default function BusinessInvoicesPage() {
                             </div>
                             <div className={styles.detailRow}>
                                 <span className={styles.detailLabel}>Number of Items:</span>
-                                <span className={styles.detailValue}>{selectedInvoice.items} items</span>
+                                <span className={styles.detailValue}>{selectedInvoice.itemCount} items</span>
                             </div>
                             <div className={styles.detailRow}>
                                 <span className={styles.detailLabel}>Status:</span>
@@ -502,38 +485,23 @@ export default function BusinessInvoicesPage() {
                                         color: getStatusColor(selectedInvoice.status)
                                     }}
                                 >
-                                    {selectedInvoice.status.charAt(0).toUpperCase() + selectedInvoice.status.slice(1)}
+                                    {selectedInvoice.status.toUpperCase()}
                                 </span>
                             </div>
 
                             <div className={styles.divider}></div>
 
-                            {/* Order Items */}
+                            {/* Disabled Item List since API doesn't return Items yet */}
                             <div className={styles.orderItemsSection}>
                                 <h3 className={styles.sectionTitle}>Order Items</h3>
-                                <div className={styles.itemsTable}>
-                                    <div className={styles.tableHeader}>
-                                        <span>Product</span>
-                                        <span>Qty</span>
-                                        <span>Price</span>
-                                        <span>Total</span>
-                                    </div>
-                                    {selectedInvoice.orderItems?.map((item, index) => (
-                                        <div key={index} className={styles.tableRow}>
-                                            <span className={styles.productName}>{item.name}</span>
-                                            <span className={styles.quantity}>{item.quantity}</span>
-                                            <span className={styles.price}>৳{item.price}</span>
-                                            <span className={styles.itemTotal}>৳{item.quantity * item.price}</span>
-                                        </div>
-                                    ))}
-                                </div>
+                                <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>Item details are available in Order History.</p>
                             </div>
 
                             <div className={styles.divider}></div>
 
                             <div className={styles.totalRow}>
                                 <span className={styles.totalLabel}>Total Amount:</span>
-                                <span className={styles.totalValue}>৳{selectedInvoice.amount}</span>
+                                <span className={styles.totalValue}>৳{Number(selectedInvoice.totalAmount).toLocaleString()}</span>
                             </div>
                         </div>
 

@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { Building2, Save, X } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import styles from './apply.module.css';
+import { AddressFormFields, AddressData } from '@/components/forms/AddressFormFields';
+import { toast } from 'react-hot-toast';
 
 export default function ApplyBusinessPage() {
     const router = useRouter();
@@ -14,11 +16,20 @@ export default function ApplyBusinessPage() {
         legalName: '',
         email: '',
         phoneNumber: '',
-        address: '',
+        // address field removed, replaced by businessAddress state
         tradeLicenseNumber: '',
         taxCertificateNumber: '',
         licenseExpiryDate: '',
     });
+
+    const [businessAddress, setBusinessAddress] = useState<AddressData>({
+        street: '',
+        area: '',
+        city: 'Chittagong',
+        postalCode: '',
+        customArea: ''
+    });
+
     const [submitting, setSubmitting] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -28,11 +39,15 @@ export default function ApplyBusinessPage() {
         });
     };
 
+    const handleAddressChange = (newAddress: AddressData) => {
+        setBusinessAddress(newAddress);
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!user) {
-            alert('Please log in to register a business');
+            toast.error('Please log in to register a business');
             return;
         }
 
@@ -43,6 +58,7 @@ export default function ApplyBusinessPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ...formData,
+                    businessAddress, // Send structured address object
                     ownerId: user.id, // Will be converted to numeric ID by API
                 }),
             });
@@ -50,14 +66,14 @@ export default function ApplyBusinessPage() {
             const data = await response.json();
 
             if (response.ok) {
-                alert('✅ Business registration submitted successfully! Awaiting admin approval.');
+                toast.success('✅ Business registration submitted successfully! Awaiting admin approval.');
                 router.push('/business-owner/applications');
             } else {
-                alert(`❌ Error: ${data.error || 'Failed to submit registration'}`);
+                toast.error(`❌ Error: ${data.error || 'Failed to submit registration'}`);
             }
         } catch (error) {
             console.error('Error submitting registration:', error);
-            alert('An error occurred while submitting your registration');
+            toast.error('An error occurred while submitting your registration');
         } finally {
             setSubmitting(false);
         }
@@ -142,17 +158,12 @@ export default function ApplyBusinessPage() {
                             </div>
                         </div>
 
-                        <div className={styles.formGroup}>
-                            <label>Business Address *</label>
-                            <textarea
-                                name="address"
-                                value={formData.address}
-                                onChange={handleChange}
-                                placeholder="Full business address..."
-                                rows={3}
-                                required
-                            />
-                        </div>
+                        {/* Replace textarea with AddressFormFields */}
+                        <AddressFormFields
+                            prefix="business"
+                            data={businessAddress}
+                            onChange={handleAddressChange}
+                        />
                     </div>
 
                     <div className={styles.section}>

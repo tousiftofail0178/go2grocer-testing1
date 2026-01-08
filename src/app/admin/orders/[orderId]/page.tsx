@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
+import { toast } from 'react-hot-toast';
 
 interface OrderItems {
     id: number;
@@ -68,7 +69,7 @@ export default function OrderDetailsPage() {
     }, [params.orderId]);
 
     const handleAction = (action: string) => {
-        alert(`${action} functionality is coming soon!`);
+        toast.success(`${action} functionality is coming soon!`);
     };
 
     const handleFulfill = () => {
@@ -88,11 +89,11 @@ export default function OrderDetailsPage() {
                 setIsFulfilled(true);
                 setIsFulfillModalOpen(false);
             } else {
-                alert('Failed to update order');
+                toast.error('Failed to update order');
             }
         } catch (error) {
             console.error('Error updating order:', error);
-            alert('Error updating order');
+            toast.error('Error updating order');
         } finally {
             setIsProcessing(false);
         }
@@ -100,7 +101,7 @@ export default function OrderDetailsPage() {
 
     const handlePostComment = () => {
         if (!comment.trim()) return;
-        alert(`Comment posted: "${comment}"`);
+        toast.success(`Comment posted: "${comment}"`);
         setComment('');
     };
 

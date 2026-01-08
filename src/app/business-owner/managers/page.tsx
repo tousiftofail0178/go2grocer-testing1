@@ -5,6 +5,8 @@ import { User, Mail, Phone, Plus, Clock, CheckCircle, XCircle } from 'lucide-rea
 import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter } from 'next/navigation';
 import styles from './managers.module.css';
+import { AddressFormFields, AddressData } from '@/components/forms/AddressFormFields';
+import { toast } from 'react-hot-toast';
 
 interface Manager {
     source: 'application' | 'profile';
@@ -30,6 +32,8 @@ export default function ManagersPage() {
     const [selectedBusinessId, setSelectedBusinessId] = useState<number | null>(null);
     const [loading, setLoading] = useState(true);
     const [showRequestModal, setShowRequestModal] = useState(false);
+
+    // Form Data
     const [formData, setFormData] = useState({
         businessId: '',
         firstName: '',
@@ -38,6 +42,16 @@ export default function ManagersPage() {
         phone: '',
         password: '',
     });
+
+    // Address State
+    const [managerAddress, setManagerAddress] = useState<AddressData>({
+        street: '',
+        area: '',
+        city: 'Chittagong',
+        postalCode: '',
+        customArea: ''
+    });
+
     const [submitting, setSubmitting] = useState(false);
 
     // Ensure component is mounted (client-side only)
@@ -110,6 +124,10 @@ export default function ManagersPage() {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const handleAddressChange = (newAddress: AddressData) => {
+        setManagerAddress(newAddress);
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -120,7 +138,7 @@ export default function ManagersPage() {
 
         // Validation
         if (!formData.businessId || !formData.firstName || !formData.lastName || !formData.email || !formData.phone || !formData.password) {
-            alert('Please fill in all fields');
+            toast.error('Please fill in all fields');
             return;
         }
 
@@ -137,14 +155,16 @@ export default function ManagersPage() {
                     email: formData.email,
                     phone: formData.phone,
                     password: formData.password,
+                    managerAddress, // Send structured address object
                 }),
             });
 
             const data = await response.json();
 
             if (response.ok && data.success) {
-                alert('✅ Manager request submitted successfully! Awaiting admin approval.');
+                toast.success('✅ Manager request submitted successfully! Awaiting admin approval.');
                 setShowRequestModal(false);
+                // Reset form
                 setFormData({
                     businessId: businesses[0]?.businessId.toString() || '',
                     firstName: '',
@@ -153,12 +173,19 @@ export default function ManagersPage() {
                     phone: '',
                     password: ''
                 });
+                setManagerAddress({
+                    street: '',
+                    area: '',
+                    city: 'Chittagong',
+                    postalCode: '',
+                    customArea: ''
+                });
             } else {
-                alert(`❌ Error: ${data.error || 'Failed to submit request'}`);
+                toast.error(`❌ Error: ${data.error || 'Failed to submit request'}`);
             }
         } catch (error) {
             console.error('Error submitting request:', error);
-            alert('An error occurred while submitting the request');
+            toast.error('An error occurred while submitting the request');
         } finally {
             setSubmitting(false);
         }
@@ -355,6 +382,12 @@ export default function ManagersPage() {
                                     required
                                 />
                             </div>
+
+                            <AddressFormFields
+                                prefix="manager"
+                                data={managerAddress}
+                                onChange={handleAddressChange}
+                            />
 
                             <div className={styles.formGroup}>
                                 <label>Initial Password *</label>

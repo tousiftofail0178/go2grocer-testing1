@@ -7,6 +7,7 @@ import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { getProduct, updateProduct } from '@/app/actions/products';
+import { toast } from 'react-hot-toast';
 
 export default function EditProductPage() {
     const router = useRouter();
@@ -44,7 +45,7 @@ export default function EditProductPage() {
                     discount: ''
                 });
             } else {
-                alert('Product not found');
+                toast.error('Product not found');
                 router.push('/admin/products');
             }
             setIsLoading(false);
@@ -72,11 +73,11 @@ export default function EditProductPage() {
             if (res.success) {
                 router.push('/admin/products');
             } else {
-                alert('Failed to update product: ' + res.error);
+                toast.error('Failed to update product: ' + res.error);
             }
         } catch (error) {
             console.error(error);
-            alert('An error occurred');
+            toast.error('An error occurred');
         } finally {
             setIsSaving(false);
         }

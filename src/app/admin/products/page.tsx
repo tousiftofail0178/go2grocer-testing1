@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Plus, Edit, Trash2, Loader2, Package, Search, ChevronDown, ChevronRight } from 'lucide-react';
 import { getGroupedProducts, getVariantsByGroupId, deleteProductGroup } from '@/app/actions/products';
+import { toast } from 'react-hot-toast';
 import styles from '../admin.module.css';
 
 interface GroupedProduct {
@@ -80,7 +81,7 @@ export default function AdminProductsPage() {
         if (res.success) {
             setProducts(products.filter(p => p.variantGroupId !== groupId));
         } else {
-            alert('Failed to delete product');
+            toast.error('Failed to delete product');
         }
         setIsDeleting(null);
     };

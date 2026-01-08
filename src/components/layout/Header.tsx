@@ -2,10 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Search, MapPin, ShoppingCart, User, LogOut, UserPlus } from 'lucide-react';
+import { Search, MapPin, ShoppingCart, User, LogOut, UserPlus, ClipboardList } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useCartStore } from '@/store/useCartStore';
+import { getUserName } from '@/lib/actions/users';
 import styles from './Header.module.css';
 
 import { AddressModal } from '@/components/ui/AddressModal';
@@ -19,12 +20,28 @@ export default function Header() {
 
     // Fix hydration error: only show cart count on client
     const [mounted, setMounted] = useState(false);
+    const [userName, setUserName] = useState<string | null>(null);
     useEffect(() => setMounted(true), []);
 
     const [isAddressModalOpen, setIsAddressModalOpen] = React.useState(false);
     const [isBusinessModalOpen, setIsBusinessModalOpen] = React.useState(false);
     const [isLocationModalOpen, setIsLocationModalOpen] = React.useState(false);
     const [guestLocation, setGuestLocation] = React.useState<string>('');
+
+    // Fetch user's real name
+    useEffect(() => {
+        async function fetchUserName() {
+            if (isAuthenticated && user) {
+                const result = await getUserName();
+                if (result.success && result.name) {
+                    setUserName(result.name);
+                }
+            } else {
+                setUserName(null);
+            }
+        }
+        fetchUserName();
+    }, [isAuthenticated, user]);
 
     // Determine what to show in the location/business picker
     const businessRoles = ['b2b', 'owner', 'manager', 'admin'];
@@ -109,7 +126,7 @@ export default function Header() {
                                             className={styles.accountLink}
                                         >
                                             <User size={20} />
-                                            <span className={styles.accountText}>{user?.name || 'Profile'}</span>
+                                            <span className={styles.accountText}>{userName || user?.name || 'User'}</span>
                                         </Link>
 
                                         {/* Admin Dashboard Link - Only for admin role */}
@@ -121,6 +138,13 @@ export default function Header() {
                                                 </Link>
                                             </>
                                         )}
+
+                                        {/* My Lists Link - For all authenticated users */}
+                                        <div className={styles.divider} />
+                                        <Link href="/dashboard/lists" className={styles.accountLink} title="My Shopping Lists">
+                                            <ClipboardList size={20} />
+                                            <span>My Lists</span>
+                                        </Link>
 
                                         <div className={styles.divider} />
                                         <button

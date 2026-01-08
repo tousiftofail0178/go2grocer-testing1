@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { managerApplications, businessProfiles, businessApplications, users } from '@/db/schema';
+import { managerApplications, businessProfiles, businessApplications, users, addresses } from '@/db/schema';
 import { eq, or } from 'drizzle-orm';
 
 // POST /api/business-profile/managers/request - Submit manager request
@@ -14,6 +14,7 @@ export async function POST(request: NextRequest) {
             email,
             phone,
             password,
+            managerAddress, // Structured address object
         } = await request.json();
 
         console.log('📝 Manager request received:', { businessId, requestedByUserId, email });
@@ -132,6 +133,38 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // --- NEW: Create Address Record to link with Manager Application ---
+        let addressId = null;
+        if (managerAddress) {
+            try {
+                // Ensure custom area is handled if "Other" logic was used on frontend
+
+                let finalArea = managerAddress.area;
+                if (finalArea === 'Other' && managerAddress.customArea) {
+                    finalArea = managerAddress.customArea;
+                }
+
+                // Import 'addresses' is needed at top of file
+
+                const [newAddress] = await db.insert(addresses).values({
+                    streetAddress: managerAddress.street,
+                    area: finalArea, // Use resolved area
+                    city: managerAddress.city || 'Dhaka',
+                    postalCode: managerAddress.postalCode,
+                    country: 'Bangladesh',
+                }).returning({ id: addresses.id });
+
+                addressId = newAddress.id;
+                console.log('✅ Created new address record for manager:', addressId);
+            } catch (err: any) {
+                console.error('❌ Failed to create manager address:', err);
+                return NextResponse.json(
+                    { error: 'Failed to save address details' },
+                    { status: 500 }
+                );
+            }
+        }
+
         // ✅ FIXED: Insert into manager_applications (not manager_requests)
         // Link via business_id (if approved) or linked_application_id (if pending)
         const [newManagerApp] = await db
@@ -140,6 +173,7 @@ export async function POST(request: NextRequest) {
                 businessOwnerId: numericRequesterId,
                 businessId: businessType === 'approved' ? numericBusinessId : null,
                 linkedApplicationId: businessType === 'pending' ? numericBusinessId : null,
+                addressId: addressId, // Link formatted address
                 managerFirstName: firstName,
                 managerLastName: lastName,
                 managerEmail: email,

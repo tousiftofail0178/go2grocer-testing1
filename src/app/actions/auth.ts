@@ -1,10 +1,11 @@
 'use server';
 
 import { db } from '@/db';
-import { users, customerProfiles, businessProfiles } from '@/db/schema';
+import { users, customerProfiles, businessProfiles, addresses, businessApplications, managerApplications } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { User } from '@/lib/data';
 import crypto from 'crypto';
+import { cookies } from 'next/headers';
 
 export async function authenticateUser(email: string, passwordAttempt: string) {
     try {
@@ -57,6 +58,26 @@ export async function authenticateUser(email: string, passwordAttempt: string) {
             email: user.email,
             role: user.role as User['role'], // Return ACTUAL role for RBAC
         };
+
+        // 5. Set authentication cookies for server actions
+        const cookieStore = await cookies();
+        const isProduction = process.env.NODE_ENV === 'production';
+
+        cookieStore.set('userId', user.id.toString(), {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: 'lax',
+            maxAge: 60 * 60 * 24 * 7, // 7 days
+            path: '/'
+        });
+
+        cookieStore.set('userEmail', user.email, {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: 'lax',
+            maxAge: 60 * 60 * 24 * 7, // 7 days
+            path: '/'
+        });
 
         return { success: true, user: authenticatedUser, businesses };
 
@@ -391,5 +412,249 @@ function mapRoleToLegacy(role: string): User['role'] {
         case 'consumer':
         default:
             return 'consumer';
+    }
+}
+
+// --- NEW UNIFIED REGISTRATION ACTION (STRICT ORDER) ---
+// --- REVISED STRICT registerBusiness ACTION (Owner + Business Only) ---
+export async function registerBusiness(data: {
+    // Owner Details
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    password: string;
+    dateOfBirth: string;
+    nidPassportNumber: string;
+    nidPassportImageUrl?: string;
+    ownerAddress: {
+        streetAddress: string;
+        area: string;
+        city: string;
+        postalCode: string;
+    };
+
+    // Business Details
+    businessName: string;
+    businessEmail: string;
+    businessPhone: string;
+    tradeLicenseNumber?: string; // bin
+    taxCertificateNumber?: string; // tin
+    vat?: string;
+    bankName?: string;
+    bankAccount?: string;
+    bankBranch?: string;
+    businessAddress: {
+        streetAddress: string;
+        area: string;
+        city: string;
+        postalCode: string;
+    };
+}) {
+    console.log('🚀 Starting STRICT registerBusiness Action (Owner + Business)...');
+
+    try {
+        // Validation: Verify Owner Email Unique
+        const existingOwner = await db.select().from(users).where(eq(users.email, data.email));
+        if (existingOwner.length > 0) {
+            return { success: false, error: 'Email already exists' };
+        }
+
+        // --- STEP 1: CREATE ADDRESSES (The Priority) ---
+        // CRITICAL: Fail if any address creation fails.
+
+        let ownerAddressId: number;
+        let businessAddressId: number;
+
+        try {
+            // 1a. Owner Address
+            const [newOwnerAddr] = await db.insert(addresses).values({
+                streetAddress: data.ownerAddress.streetAddress,
+                area: data.ownerAddress.area,
+                city: data.ownerAddress.city,
+                postalCode: data.ownerAddress.postalCode,
+                country: 'Bangladesh',
+            }).returning({ id: addresses.id });
+            ownerAddressId = newOwnerAddr.id;
+            console.log('✅ Created Owner Address:', ownerAddressId);
+
+            // 1b. Business Address
+            const [newBusinessAddr] = await db.insert(addresses).values({
+                streetAddress: data.businessAddress.streetAddress,
+                area: data.businessAddress.area,
+                city: data.businessAddress.city,
+                postalCode: data.businessAddress.postalCode,
+                country: 'Bangladesh',
+            }).returning({ id: addresses.id });
+            businessAddressId = newBusinessAddr.id;
+            console.log('✅ Created Business Address:', businessAddressId);
+
+        } catch (addrError: any) {
+            console.error('❌ Address Creation Failed:', addrError);
+            throw new Error('Failed to save address details. Registration aborted.');
+        }
+
+        // --- STEP 2: CREATE APPLICATIONS / PROFILES ---
+
+        // 2a. Create Owner User & Profile
+        // Insert User
+        const [newUser] = await db.insert(users).values({
+            email: data.email,
+            phoneNumber: data.phone,
+            passwordHash: data.password, // TODO: Hash
+            role: 'business_owner',
+            isVerified: false,
+        }).returning({ id: users.id });
+
+        const ownerId = newUser.id;
+
+        // Insert Owner Profile (Linked to Address)
+        await db.insert(customerProfiles).values({
+            userId: ownerId,
+            roleType: 'OWNER',
+            firstName: data.firstName,
+            lastName: data.lastName,
+            email: data.email,
+            phoneNumber: data.phone,
+            dateOfBirth: data.dateOfBirth || null,
+            nidPassportNumber: data.nidPassportNumber || null,
+            nidPassportImageUrl: data.nidPassportImageUrl || null,
+            addressId: ownerAddressId, // ✅ LINKED
+            loyaltyPoints: 0
+        });
+        console.log('✅ Created Owner Profile linked to Address:', ownerAddressId);
+
+        // 2b. Create Business Application (Linked to Address)
+        const [newApp] = await db.insert(businessApplications).values({
+            userId: ownerId,
+            businessName: data.businessName,
+            legalName: data.businessName,
+            addressId: businessAddressId, // ✅ LINKED
+            phoneNumber: data.businessPhone,
+            email: data.businessEmail,
+            tradeLicenseNumber: data.tradeLicenseNumber || 'PENDING',
+            taxCertificateNumber: data.taxCertificateNumber || 'PENDING',
+            status: 'pending',
+        }).returning({ applicationId: businessApplications.applicationId });
+
+        const applicationId = newApp.applicationId;
+        console.log('✅ Created Business Application linked to Address:', businessAddressId);
+
+        return { success: true, applicationId: applicationId, userId: ownerId };
+
+    } catch (error: any) {
+        console.error('❌ STRICT Registration Failed:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// --- NEW STRICT registerManager ACTION (Step 3) ---
+export async function registerManager(data: {
+    linkedApplicationId: number; // Links to the pending business application
+    managerFirstName: string;
+    managerLastName: string;
+    managerEmail: string;
+    managerPhone: string;
+    managerPassword: string;
+    managerDateOfBirth: string;
+    managerNidPassportNumber: string;
+    managerNidPassportImageUrl?: string;
+    managerAddress: {
+        streetAddress: string;
+        area: string;
+        city: string;
+        postalCode: string;
+    };
+}) {
+    console.log('🚀 Starting STRICT registerManager Action...');
+
+    try {
+        // Validation: Verify Application Exists
+        const applicationCheck = await db
+            .select()
+            .from(businessApplications)
+            .where(eq(businessApplications.applicationId, data.linkedApplicationId));
+
+        if (applicationCheck.length === 0) {
+            return { success: false, error: 'Linked Business Application not found' };
+        }
+
+        const businessOwnerId = applicationCheck[0].userId;
+
+        // --- STEP 1: CREATE ADDRESS ---
+        let managerAddressId: number;
+
+        try {
+            const [newManagerAddr] = await db.insert(addresses).values({
+                streetAddress: data.managerAddress.streetAddress,
+                area: data.managerAddress.area,
+                city: data.managerAddress.city,
+                postalCode: data.managerAddress.postalCode,
+                country: 'Bangladesh',
+            }).returning({ id: addresses.id });
+            managerAddressId = newManagerAddr.id;
+            console.log('✅ Created Manager Address:', managerAddressId);
+        } catch (addrError: any) {
+            console.error('❌ Manager Address Creation Failed:', addrError);
+            throw new Error('Failed to save manager address details.');
+        }
+
+        // --- STEP 2: CREATE USER & PROFILE ---
+
+        // Check if manager email already exists
+        const existingManager = await db.select().from(users).where(eq(users.email, data.managerEmail));
+        let managerId: number;
+
+        if (existingManager.length > 0) {
+            // Manager user already exists
+            managerId = existingManager[0].id;
+            console.log('ℹ️ Manager User already exists, linking ID:', managerId);
+        } else {
+            // Create new manager user account
+            const [newManagerUser] = await db.insert(users).values({
+                email: data.managerEmail,
+                phoneNumber: data.managerPhone,
+                passwordHash: data.managerPassword || 'TEMP', // TODO: Hash
+                role: 'business_manager',
+                isVerified: false,
+            }).returning({ id: users.id });
+            managerId = newManagerUser.id;
+
+            // Create Manager Profile (Linked to Address)
+            await db.insert(customerProfiles).values({
+                userId: managerId,
+                roleType: 'MANAGER',
+                firstName: data.managerFirstName,
+                lastName: data.managerLastName,
+                email: data.managerEmail,
+                phoneNumber: data.managerPhone,
+                dateOfBirth: data.managerDateOfBirth || null,
+                nidPassportNumber: data.managerNidPassportNumber || null,
+                nidPassportImageUrl: data.managerNidPassportImageUrl || null,
+                addressId: managerAddressId, // ✅ LINKED
+                loyaltyPoints: 0,
+            });
+            console.log('✅ Created Manager User & Profile:', managerId);
+        }
+
+        // --- STEP 3: CREATE APPLICATION LINKED TO BUSINESS APP ---
+        await db.insert(managerApplications).values({
+            businessOwnerId: businessOwnerId, // Owner of the pending business app
+            linkedApplicationId: data.linkedApplicationId, // ✅ VALID: Linking to pending app
+            addressId: managerAddressId, // ✅ LINKED
+            managerFirstName: data.managerFirstName,
+            managerLastName: data.managerLastName,
+            managerEmail: data.managerEmail,
+            managerPhone: data.managerPhone,
+            status: 'pending',
+        });
+
+        console.log('✅ Created Manager Application linked to Business App:', data.linkedApplicationId);
+
+        return { success: true, message: 'Manager registered successfully' };
+
+    } catch (error: any) {
+        console.error('❌ STRICT Manager Registration Failed:', error);
+        return { success: false, error: error.message };
     }
 }

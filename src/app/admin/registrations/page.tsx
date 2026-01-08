@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { CheckCircle, XCircle, Clock, Building2, Mail, Phone, Calendar, User, Shield } from 'lucide-react';
 import styles from './registrations.module.css';
+import { toast } from 'react-hot-toast';
 
 interface Registration {
     id: number;
@@ -81,17 +82,17 @@ export default function RegistrationsPage() {
                 setSelectedRegistration(null);
 
                 // Show success message
-                alert(`✅ ${selectedRegistration.businessName} has been approved successfully!`);
+                toast.success(`✅ ${selectedRegistration.businessName} has been approved successfully!`);
 
                 // Refresh list
                 await fetchRegistrations();
             } else {
                 const errorMsg = data.details || data.error || 'Failed to approve registration';
-                alert(`❌ Error: ${errorMsg}`);
+                toast.error(`❌ Error: ${errorMsg}`);
             }
         } catch (error) {
             console.error('Error approving registration:', error);
-            alert('❌ An error occurred while approving the registration');
+            toast.error('❌ An error occurred while approving the registration');
         } finally {
             setIsProcessing(false);
         }
@@ -107,7 +108,7 @@ export default function RegistrationsPage() {
         if (!rejectingRegistration) return;
 
         if (!rejectionReason.trim()) {
-            alert('Please provide a rejection reason');
+            toast.error('Please provide a rejection reason');
             return;
         }
 
@@ -128,14 +129,14 @@ export default function RegistrationsPage() {
                 setRejectModalOpen(false);
                 setRejectionReason('');
                 setRejectingRegistration(null);
-                alert(`✅ ${rejectingRegistration.businessName} application has been rejected. Email notification sent.`);
+                toast.success(`✅ ${rejectingRegistration.businessName} application has been rejected. Email notification sent.`);
                 fetchRegistrations();
             } else {
-                alert(`❌ Error: ${data.error || 'Failed to reject application'}`);
+                toast.error(`❌ Error: ${data.error || 'Failed to reject application'}`);
             }
         } catch (error) {
             console.error('Error rejecting registration:', error);
-            alert('❌ An error occurred while rejecting the registration');
+            toast.error('❌ An error occurred while rejecting the registration');
         } finally {
             setIsProcessing(false);
         }
@@ -376,7 +377,7 @@ export default function RegistrationsPage() {
                                         <User size={18} />
                                         <div>
                                             <span className={styles.label}>User ID for Login:</span>
-                                            <span className={styles.userId}>{selectedRegistration.email}</span>
+                                            <span className={styles.userId}>{selectedRegistration.userEmail}</span>
                                         </div>
                                     </div>
                                 </>

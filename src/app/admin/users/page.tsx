@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Edit2, Check, X, Shield, User as UserIcon } from 'lucide-react';
 import styles from './users.module.css';
+import { toast } from 'react-hot-toast';
 
 interface User {
     id: number;
@@ -92,15 +93,15 @@ export default function AdminUsersPage() {
             const data = await response.json();
 
             if (response.ok) {
-                alert('✅ User updated successfully!');
+                toast.success('✅ User updated successfully!');
                 setEditingUser(null);
                 fetchUsers(); // Refresh the list
             } else {
-                alert(`❌ Error: ${data.error || 'Failed to update user'}`);
+                toast.error(`❌ Error: ${data.error || 'Failed to update user'}`);
             }
         } catch (error) {
             console.error('Error updating user:', error);
-            alert('An error occurred while updating the user');
+            toast.error('An error occurred while updating the user');
         }
     };
 

@@ -13,6 +13,7 @@ import {
     Trophy
 } from 'lucide-react';
 import styles from './businesses.module.css';
+import { toast } from 'react-hot-toast';
 
 interface User {
     id: number;
@@ -177,7 +178,7 @@ export default function BusinessesPage() {
                 if (response.ok) {
                     await fetchBusinesses();
                     handleCloseModal();
-                    alert('Business updated successfully!');
+                    toast.success('Business updated successfully!');
                 } else {
                     setErrorMessage(data.error || 'Failed to update business');
                 }
@@ -196,7 +197,7 @@ export default function BusinessesPage() {
                 if (response.ok) {
                     await fetchBusinesses();
                     handleCloseModal();
-                    alert('Business created successfully!');
+                    toast.success('Business created successfully!');
                 } else {
                     setErrorMessage(data.error || 'Failed to create business');
                 }

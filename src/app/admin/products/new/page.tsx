@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Save, Loader2, Plus, Trash2, AlertTriangle } from 'lucide-react';
 import { createB2BProduct } from '@/app/actions/createB2BProduct';
+import { toast } from 'react-hot-toast';
 import styles from '../../admin.module.css';
 
 interface Variant {
@@ -70,7 +71,7 @@ export default function NewB2BProductPage() {
 
     const removeVariant = (id: string) => {
         if (variants.length === 1) {
-            alert('At least one variant is required');
+            toast.error('At least one variant is required');
             return;
         }
         setVariants(prev => prev.filter(v => v.id !== id));
