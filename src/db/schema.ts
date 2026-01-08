@@ -426,3 +426,17 @@ export const shoppingListItemsRelations = relations(shoppingListItems, ({ one })
         references: [globalCatalog.globalProductId],
     }),
 }));
+
+// --- Legacy/Seed Support: products ---
+// Re-added to support legacy seed scripts that reference 'products'
+export const products = pgTable("products", {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    name: text("name").notNull(),
+    description: text("description"),
+    price: decimal("price", { precision: 10, scale: 2 }).default('0'),
+    image: text("image"),
+    category: text("category"),
+    packSize: text("pack_size"),
+    inStock: boolean("in_stock").default(true),
+    createdAt: timestamp("created_at").defaultNow()
+});
