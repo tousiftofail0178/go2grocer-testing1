@@ -38,7 +38,7 @@ async function runMigration() {
 
             try {
                 console.log(`\n📝 Executing: ${statement.substring(0, 60)}...`);
-                await sql(statement);
+                await (sql as any)(statement);
                 executed++;
                 console.log('✅ Success');
             } catch (error: any) {
