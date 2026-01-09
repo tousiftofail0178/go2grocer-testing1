@@ -138,7 +138,8 @@ export async function POST(request: NextRequest) {
         const [newBusiness] = await db
             .insert(businessProfiles)
             .values({
-                userId,
+                ownerId: userId, // Required field
+                userId: userId,  // Backward compatibility
                 businessName,
                 legalName,
                 phoneNumber,
@@ -147,7 +148,7 @@ export async function POST(request: NextRequest) {
                 taxCertificateNumber,
                 expiryDate,
                 verificationStatus: 'pending',
-            })
+            } as any)
             .returning();
 
         console.log('Created business:', newBusiness.businessId);

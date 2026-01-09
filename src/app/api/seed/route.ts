@@ -8,35 +8,50 @@ import { eq } from 'drizzle-orm';
 export async function GET() {
     try {
         // 1. Seed Users
-        const existingUsers = await db.select().from(users).where(eq(users.userId, 'G2G-001'));
+        const existingUsers = await db.select().from(users).where(eq(users.email, 'admin@go2grocer.com'));
 
         let usersCreated = 0;
         if (existingUsers.length === 0) {
             await db.insert(users).values([
-                { userId: 'G2G-001', name: 'System Admin', phone: '01000000000', role: 'admin', password: '1234' },
-                { userId: 'G2G-002', name: 'Business Owner', phone: '01000000000', role: 'owner', password: '1234' },
-                { userId: 'G2G-003', name: 'Store Manager', phone: '01000000000', role: 'manager', password: '1234' },
+                {
+                    email: 'admin@go2grocer.com',
+                    phoneNumber: '+8801000000000',
+                    role: 'admin',
+                    passwordHash: '$2a$10$abcdefg',
+                    isVerified: true
+                },
+                {
+                    email: 'owner@example.com',
+                    phoneNumber: '+8801000000001',
+                    role: 'business_owner',
+                    passwordHash: '$2a$10$abcdefg',
+                    isVerified: true
+                },
+                {
+                    email: 'manager@example.com',
+                    phoneNumber: '+8801000000002',
+                    role: 'business_manager',
+                    passwordHash: '$2a$10$abcdefg',
+                    isVerified: true
+                },
             ]);
             usersCreated = 3;
         }
 
-        // 2. Seed Products
+        // 2. Seed Products (Corrected types)
         let productsCreated = 0;
         for (const product of mockProducts) {
-            const existing = await db.select().from(products).where(eq(products.id, product.id));
+            // Check by name since ID types mismatch (string vs number)
+            const existing = await db.select().from(products).where(eq(products.name, product.name));
+
             if (existing.length === 0) {
                 await db.insert(products).values({
-                    id: product.id,
                     name: product.name,
-                    price: product.price,
-                    originalPrice: product.originalPrice,
-                    weight: product.weight,
+                    price: product.price?.toString() || '0',
+                    packSize: product.weight, // Map weight to packSize
                     image: product.image,
-                    rating: product.rating.toString(),
                     category: product.category,
                     inStock: product.inStock,
-                    isNew: product.isNew,
-                    discount: product.discount,
                 });
                 productsCreated++;
             }

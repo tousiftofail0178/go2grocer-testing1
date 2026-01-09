@@ -124,8 +124,11 @@ export default function ManagersPage() {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleAddressChange = (newAddress: AddressData) => {
-        setManagerAddress(newAddress);
+    const handleAddressChange = (field: keyof AddressData, value: string) => {
+        setManagerAddress(prev => ({
+            ...prev,
+            [field]: value
+        }));
     };
 
     const handleSubmit = async (e: React.FormEvent) => {

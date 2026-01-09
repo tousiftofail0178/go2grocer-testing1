@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
         // Fetch managers with MANAGER roleType for this business
         const managers = await db
             .select({
-                profileId: customerProfiles.profileId,
+                profileId: customerProfiles.userId, // Schema uses userId as PK
                 userId: customerProfiles.userId,
                 firstName: customerProfiles.firstName,
                 lastName: customerProfiles.lastName,
@@ -89,13 +89,12 @@ export async function POST(request: NextRequest) {
         const passwordHash = crypto.createHash('sha256').update(password).digest('hex');
 
         // 1. Create user account
+        // 1. Create user account
         const [newUser] = await db
             .insert(users)
             .values({
-                publicId: crypto.randomUUID(),
                 email: email,
-                phoneCountryCode: '+880',
-                phoneNumber: phone,
+                phoneNumber: phone, // phoneCountryCode removed
                 passwordHash: passwordHash,
                 role: 'business_manager',
                 isVerified: true,
@@ -116,14 +115,14 @@ export async function POST(request: NextRequest) {
             });
 
         console.log('Manager created:', {
-            userId: newUser.publicId,
+            userId: newUser.id,
             businessId,
             email,
         });
 
         return NextResponse.json({
             success: true,
-            userId: newUser.publicId,
+            userId: newUser.id,
             message: 'Manager created successfully',
         });
 

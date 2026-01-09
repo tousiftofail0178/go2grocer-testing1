@@ -21,7 +21,7 @@ export async function GET(
                 customer: customerProfiles,
             })
             .from(orders)
-            .leftJoin(customerProfiles, eq(orders.customerId, customerProfiles.profileId))
+            .leftJoin(customerProfiles, eq(orders.userId, customerProfiles.userId))
             .where(eq(orders.orderId, orderIdNum))
             .limit(1);
 
@@ -51,21 +51,22 @@ export async function GET(
             billingAddress: 'Same as shipping',
             status: 'Processing',
             paymentMethod: order.paymentStatus === 'paid' ? 'Paid' : 'Pending',
-            total: parseFloat(order.totalAmountGross || '0'),
-            subtotal: parseFloat(order.totalAmountGross || '0'),
-            tax: 0,
-            shipping: parseFloat(order.platformFee || '0'),
+            total: parseFloat(order.totalAmount),
+            subtotal: parseFloat(order.totalAmount), // Assuming no tax/fee logic yet
+            deliveryFee: 0,
+            platformFee: 0,
+            discount: 0,
             items: itemsResult.map(({ item, product }) => ({
                 id: item.itemId.toString(),
                 name: product?.name || 'Unknown Product',
                 sku: product?.skuBarcode || 'N/A',
-                price: parseFloat(item.priceAtPurchase || '0'),
+                price: parseFloat(item.unitPrice),
                 quantity: item.quantity,
                 image: product?.baseImageUrl,
-                total: parseFloat(item.priceAtPurchase || '0') * item.quantity
+                total: parseFloat(item.totalPrice)
             })),
             customer: {
-                id: customer?.profileId,
+                id: customer?.userId,
                 name: customer ? `${customer.firstName} ${customer.lastName}` : 'No customer',
                 ordersCount: 1,
             }

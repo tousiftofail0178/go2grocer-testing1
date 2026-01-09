@@ -39,8 +39,8 @@ export default function ApplyBusinessPage() {
         });
     };
 
-    const handleAddressChange = (newAddress: AddressData) => {
-        setBusinessAddress(newAddress);
+    const handleAddressChange = (field: keyof AddressData, value: string) => {
+        setBusinessAddress(prev => ({ ...prev, [field]: value }));
     };
 
     const handleSubmit = async (e: React.FormEvent) => {

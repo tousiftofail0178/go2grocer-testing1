@@ -18,7 +18,7 @@ export async function GET(req: Request, props: { params: Promise<{ orderId: stri
         }
 
         // 1. Find blob key from DB
-        const invoiceRecords = await db.select().from(invoices).where(eq(invoices.orderId, orderId));
+        const invoiceRecords = await db.select().from(invoices).where(eq(invoices.orderId, parseInt(orderId)));
         const invoice = invoiceRecords[0];
 
         if (!invoice) {
@@ -31,6 +31,10 @@ export async function GET(req: Request, props: { params: Promise<{ orderId: stri
             siteID: process.env.NETLIFY_SITE_ID,
             token: process.env.NETLIFY_AUTH_TOKEN,
         });
+
+        if (!invoice.blobKey) {
+            return NextResponse.json({ error: 'Invoice PDF not available' }, { status: 404 });
+        }
 
         const blob = await store.get(invoice.blobKey, { type: 'arrayBuffer' });
 

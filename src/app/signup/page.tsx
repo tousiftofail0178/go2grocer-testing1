@@ -163,8 +163,8 @@ function SignupForm() {
             try {
                 // 2. MAP THE DATA (Crucial Fix)
                 // We must convert 'street' -> 'streetAddress' and handle the 'Other' area logic
-                const ownerFinalArea = ownerAddress.area === 'Other' ? ownerAddress.customArea : ownerAddress.area;
-                const businessFinalArea = businessAddress.area === 'Other' ? businessAddress.customArea : businessAddress.area;
+                const ownerFinalArea = (ownerAddress.area === 'Other' ? ownerAddress.customArea : ownerAddress.area) || '';
+                const businessFinalArea = (businessAddress.area === 'Other' ? businessAddress.customArea : businessAddress.area) || '';
 
                 const payload = {
                     ...formData,
@@ -188,7 +188,7 @@ function SignupForm() {
                 };
 
                 // 3. Call Server Action
-                const newApplicationId = await signupB2B(payload);
+                const newApplicationId = await signupB2B(payload as any);
 
                 if (newApplicationId) {
                     setApplicationId(newApplicationId);
@@ -236,7 +236,7 @@ function SignupForm() {
                 }
 
                 // Get final manager area value
-                const managerFinalArea = managerAddress.area === 'Other' ? managerAddress.customArea : managerAddress.area;
+                const managerFinalArea = (managerAddress.area === 'Other' ? managerAddress.customArea : managerAddress.area) || '';
 
                 await registerManager({
                     linkedApplicationId: applicationId,

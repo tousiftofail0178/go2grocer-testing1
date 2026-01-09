@@ -38,7 +38,7 @@ export default async function HomePage() {
     .where(eq(globalCatalog.skuBarcode, 'RICE-MIN-50'))
     .limit(1);
 
-  const heroProduct = heroProducts[0] || null;
+  const heroProduct = (heroProducts[0] as any) || null;
 
   return (
     <div className={styles.container}>

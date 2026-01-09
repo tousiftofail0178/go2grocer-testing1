@@ -1,6 +1,7 @@
 
 import { db } from '../src/db';
-import { users, products, businesses } from '../src/db/schema';
+// import { businesses } from '../src/db/schema'; // Table removed
+import { users, products } from '../src/db/schema';
 import { products as mockProducts } from '../src/lib/data';
 import * as dotenv from 'dotenv';
 import { eq } from 'drizzle-orm';
@@ -10,68 +11,60 @@ dotenv.config({ path: '.env.local' });
 async function seed() {
     console.log('🌱 Seeding database...');
 
-    // 1. Seed Users
+    // 1. Seed Users (Corrected roles and fields)
     console.log('Creating users...');
+    const existingUsers = await db.select().from(users).where(eq(users.email, 'admin@go2grocer.com'));
 
-    const existingUsers = await db.select().from(users).where(eq(users.userId, 'G2G-001'));
     if (existingUsers.length === 0) {
         await db.insert(users).values([
-            { userId: 'G2G-001', name: 'System Admin', phone: '01000000000', role: 'admin', password: '1234' },
-            { userId: 'G2G-002', name: 'Business Owner', phone: '01000000000', role: 'owner', password: '1234' },
-            { userId: 'G2G-003', name: 'Store Manager', phone: '01000000000', role: 'manager', password: '1234' },
+            {
+                email: 'admin@go2grocer.com',
+                phoneNumber: '+8801000000000',
+                role: 'admin',
+                passwordHash: '$2a$10$abcdefg',
+                isVerified: true
+            },
+            {
+                email: 'owner@example.com',
+                phoneNumber: '+8801000000001',
+                role: 'business_owner',
+                passwordHash: '$2a$10$abcdefg',
+                isVerified: true
+            },
+            {
+                email: 'manager@example.com',
+                phoneNumber: '+8801000000002',
+                role: 'business_manager',
+                passwordHash: '$2a$10$abcdefg',
+                isVerified: true
+            },
         ]);
         console.log('✅ Users created.');
     } else {
         console.log('ℹ️ Users already exist.');
     }
 
+    /* 
+    // Legacy Business Seeding - Disabled as 'businesses' table is replaced by 'businessProfiles'
     // 1.5 Seed Businesses for G2G-002
     console.log('Creating businesses for G2G-002...');
-    const existingBusinesses = await db.select().from(businesses).where(eq(businesses.userId, 'G2G-002'));
-    if (existingBusinesses.length === 0) {
-        await db.insert(businesses).values([
-            {
-                userId: 'G2G-002',
-                name: 'Barcode',
-                address: 'Muradpur',
-                phone: '01705667747'
-            },
-            {
-                userId: 'G2G-002',
-                name: 'Errante',
-                address: 'Badshah Miah petrol pump',
-                phone: '01785997748'
-            },
-            {
-                userId: 'G2G-002',
-                name: 'Broast',
-                address: 'Lalkhan Bazaar',
-                phone: '01785887746'
-            }
-        ]);
-        console.log('✅ Businesses created for G2G-002.');
-    } else {
-        console.log('ℹ️ Businesses already exist.');
-    }
+    ...
+    */
 
     // 2. Seed Products
     console.log('Creating products...');
     for (const product of mockProducts) {
-        // Check if product exists
-        const existing = await db.select().from(products).where(eq(products.id, product.id));
+        // Check by name as ID types mismatch
+        const existing = await db.select().from(products).where(eq(products.name, product.name));
+
         if (existing.length === 0) {
             await db.insert(products).values({
-                id: product.id,
                 name: product.name,
-                price: product.price,
-                originalPrice: product.originalPrice,
-                weight: product.weight,
+                price: product.price?.toString() || '0',
+                packSize: product.weight, // Map weight to packSize
                 image: product.image,
-                rating: product.rating.toString(),
                 category: product.category,
                 inStock: product.inStock,
-                isNew: product.isNew,
-                discount: product.discount,
             });
         }
     }

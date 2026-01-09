@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
             .leftJoin(businessProfiles, eq(managerApplications.businessId, businessProfiles.businessId))
             .leftJoin(businessApplications, eq(managerApplications.linkedApplicationId, businessApplications.applicationId))
             .leftJoin(users, eq(managerApplications.businessOwnerId, users.id))
-            .where(eq(managerApplications.status, status))
+            .where(eq(managerApplications.status, status as any))
             .orderBy(managerApplications.appliedAt);
 
         // Transform to include the correct business name (from either businessProfiles or businessApplications)

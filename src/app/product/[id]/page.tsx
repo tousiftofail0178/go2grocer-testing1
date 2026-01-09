@@ -246,10 +246,15 @@ export default function ProductPage() {
                             return (
                                 <ProductCard
                                     key={item.id}
-                                    product={item}
-                                    onAdd={addItem}
+                                    product={{
+                                        ...item,
+                                        id: item.id.toString(),
+                                        image: item.image || '/images/placeholder.jpg',
+                                        price: Number(item.price || 0)
+                                    }}
+                                    onAdd={(p) => addItem({ ...item, ...p } as any)}
                                     quantity={cartItem?.quantity || 0}
-                                    onUpdateQuantity={(q) => updateQuantity(item.id, q)}
+                                    onUpdateQuantity={(q) => updateQuantity(item.id.toString() as any, q)}
                                 />
                             );
                         })}

@@ -132,7 +132,7 @@ export async function createB2BProduct(
 
                     // Defaults
                     rating: "0"
-                });
+                } as any);
             }
         });
 

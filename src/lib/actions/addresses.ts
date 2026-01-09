@@ -120,11 +120,11 @@ export async function getBusinessAddress(businessId: number) {
             };
         }
 
-        console.log('✅ [getBusinessAddress] Found business address:', business.address);
+        console.log('✅ [getBusinessAddress] Found business address:', (business as any).address);
 
         return {
             success: true,
-            address: business.address || null
+            address: (business as any).address || null
         };
 
     } catch (error) {

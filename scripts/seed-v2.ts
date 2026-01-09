@@ -8,8 +8,7 @@ async function seed() {
         // Create admin user
         const adminUsers = await db.insert(users).values({
             email: 'admin@go2grocer.com',
-            phoneCountryCode: '+880',
-            phoneNumber: '01712345678',
+            phoneNumber: '+88001712345678', // Full number
             passwordHash: '1234', // Plain text for testing (TODO: hash in production)
             role: 'admin',
             isVerified: true,
@@ -21,8 +20,7 @@ async function seed() {
         // Create a test customer
         const customerUsers = await db.insert(users).values({
             email: 'customer@test.com',
-            phoneCountryCode: '+880',
-            phoneNumber: '01798765432',
+            phoneNumber: '+88001798765432', // Full number
             passwordHash: '1234',
             role: 'consumer',
             isVerified: true,

@@ -46,7 +46,7 @@ export async function createProduct(data: any) {
             stockQuantity: data.inStock ? 100 : 0,
             baseImageUrl: data.image || '/placeholder.png',
             rating: '0',
-        });
+        } as any);
         revalidatePath("/admin/products");
         revalidatePath("/shop");
         return { success: true };
@@ -74,7 +74,7 @@ export async function updateProduct(id: number, data: any) {
             baseUnit: data.weight,
             stockQuantity: data.inStock ? 100 : 0,
             baseImageUrl: data.image,
-        }).where(eq(globalCatalog.globalProductId, id));
+        } as any).where(eq(globalCatalog.globalProductId, id));
 
         revalidatePath("/admin/products");
         revalidatePath("/shop");

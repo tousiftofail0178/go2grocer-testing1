@@ -1,15 +1,16 @@
 "use client";
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import styles from './new.module.css';
 import { toast } from 'react-hot-toast';
 
-export default function NewManagerPage({ params }: { params: { id: string } }) {
+export default function NewManagerPage() {
     const router = useRouter();
+    const params = useParams();
     const { user } = useAuthStore();
-    const businessId = params.id;
+    const businessId = params.id as string;
 
     const [formData, setFormData] = useState({
         firstName: '',

@@ -37,7 +37,7 @@ export async function GET() {
         console.log('PDF also saved to:', filePath);
 
         // Return as response
-        return new Response(pdfBytes, {
+        return new Response(pdfBytes as any, {
             status: 200,
             headers: {
                 'Content-Type': 'application/pdf',

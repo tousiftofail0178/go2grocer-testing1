@@ -1,5 +1,6 @@
 
 import { execSync } from 'child_process';
+import 'dotenv/config';
 
 console.log('🚀 Starting Deployment Script...');
 

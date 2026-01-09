@@ -284,7 +284,7 @@ function ShopContent() {
                                             discount: 0,
                                             rating: 5
                                         }}
-                                        onAdd={addItem}
+                                        onAdd={(p) => addItem({ ...product, ...p } as any)}
                                         quantity={cartItem?.quantity || 0}
                                         onUpdateQuantity={(qty) => updateQuantity(product.id, qty)}
                                     />

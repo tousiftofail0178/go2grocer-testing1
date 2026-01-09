@@ -11,21 +11,21 @@ export async function GET() {
             .select({
                 orderId: orders.orderId,
                 createdAt: orders.createdAt,
-                customerId: orders.customerId,
+                userId: orders.userId, // Use userId, not customerId
+                totalAmount: orders.totalAmount,
+                status: orders.status,
+                paymentStatus: orders.paymentStatus,
                 customerFirstName: customerProfiles.firstName,
                 customerLastName: customerProfiles.lastName,
                 customerEmail: customerProfiles.email,
-                totalAmountGross: orders.totalAmountGross,
-                platformFee: orders.platformFee,
-                paymentStatus: orders.paymentStatus,
             })
             .from(orders)
-            .leftJoin(customerProfiles, eq(orders.customerId, customerProfiles.profileId))
+            .leftJoin(customerProfiles, eq(orders.userId, customerProfiles.userId)) // Correct join on userId
             .orderBy(desc(orders.createdAt));
 
         // Format the data to match the UI needs
         const formattedOrders = result.map(order => ({
-            id: order.orderId?.toString() || '',
+            id: order.orderId.toString(),
             // Format date: "Tuesday at 09:40 pm"
             date: order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-US', {
                 weekday: 'long',
@@ -37,12 +37,12 @@ export async function GET() {
                 ? `${order.customerFirstName} ${order.customerLastName}`
                 : 'Guest',
             channel: 'Online Store',
-            total: `৳${parseFloat(order.totalAmountGross || '0').toFixed(2)}`,
-            payment: order.paymentStatus === 'paid' ? 'Paid' : 'Pending',
-            fulfillment: 'Processing', // Need to add fulfillment status to orders table
-            items: 'N/A', // Need to join with order_items
-            deliveryStatus: 'Pending',
-            deliveryMethod: 'Standard'
+            total: `৳${parseFloat(order.totalAmount || '0').toFixed(2)}`,
+            payment: order.paymentStatus === 'paid' ? 'Paid' : 'Pending', // Simple check, refine as needed
+            fulfillment: order.status, // Map status directly
+            items: 'N/A', // Placeholder as we aren't joining items here for list view performance
+            deliveryStatus: 'Pending', // Placeholder
+            deliveryMethod: 'Standard' // Placeholder
         }));
 
         return NextResponse.json(formattedOrders);

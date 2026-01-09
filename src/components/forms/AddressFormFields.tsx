@@ -38,7 +38,7 @@ export function AddressFormFields({ prefix, data, onChange }: AddressFormFieldsP
             onChange('customArea', '');
         } else {
             onChange('area', val);
-            onChange('customArea', undefined);
+            onChange('customArea', '');
         }
     };
 

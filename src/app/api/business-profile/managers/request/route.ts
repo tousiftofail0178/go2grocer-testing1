@@ -36,26 +36,13 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Convert requestedByUserId to numeric user ID if needed
-        let numericRequesterId = requestedByUserId;
-
-        if (typeof requestedByUserId === 'string' && requestedByUserId.includes('-')) {
-            // It's a UUID/publicId, convert to numeric ID
-            const [requester] = await db
-                .select({ id: users.id })
-                .from(users)
-                .where(eq(users.publicId, requestedByUserId))
-                .limit(1);
-
-            if (!requester) {
-                return NextResponse.json(
-                    { error: 'User not found' },
-                    { status: 404 }
-                );
-            }
-            numericRequesterId = requester.id;
-        } else {
-            numericRequesterId = parseInt(requestedByUserId);
+        // Convert requestedByUserId to numeric user ID
+        const numericRequesterId = parseInt(requestedByUserId);
+        if (isNaN(numericRequesterId)) {
+            return NextResponse.json(
+                { error: 'Invalid User ID' },
+                { status: 400 }
+            );
         }
 
         console.log('🔍 Parsed values:', {

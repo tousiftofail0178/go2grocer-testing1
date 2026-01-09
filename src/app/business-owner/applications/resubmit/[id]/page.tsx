@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { db } from '@/db';
 import { businessApplications } from '@/db/schema';
 import { eq } from 'drizzle-orm';
@@ -13,11 +13,8 @@ interface ResubmitFormProps {
     userId: number;
 }
 
-export default function ResubmitApplicationPage({
-    params
-}: {
-    params: { id: string }
-}) {
+export default function ResubmitApplicationPage() {
+    const params = useParams();
     const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);

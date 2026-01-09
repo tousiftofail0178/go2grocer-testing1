@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
         // Fetch customers with user data
         let query = db
             .select({
-                profileId: customerProfiles.profileId,
+                profileId: customerProfiles.userId, // Schema uses userId as PK
                 userId: customerProfiles.userId,
                 firstName: customerProfiles.firstName,
                 lastName: customerProfiles.lastName,
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
             })
             .from(customerProfiles)
             .leftJoin(users, eq(customerProfiles.userId, users.id))
-            .orderBy(desc(customerProfiles.profileId));
+            .orderBy(desc(customerProfiles.userId));
 
         // Apply search filter if provided
         if (search) {
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
 
         // Transform data for frontend
         const transformedCustomers = customers.map(customer => ({
-            id: customer.profileId,
+            id: customer.profileId, // Mapped from userId above
             userId: customer.userId,
             name: `${customer.firstName} ${customer.lastName}`,
             firstName: customer.firstName,
@@ -135,21 +135,16 @@ export async function POST(request: NextRequest) {
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Generate UUID for publicId
-        const publicId = crypto.randomUUID();
-
         // Extract country code and phone number (default to +880 for Bangladesh)
-        const phoneCountryCode = phone.startsWith('+') ? phone.substring(0, phone.indexOf(' ') > 0 ? phone.indexOf(' ') : 4) : '+880';
-        const phoneNumber = phone.replace(/[\s-]/g, '').replace(phoneCountryCode, '');
+        // Schema update: phoneNumber now allows full string including country code
+        const fullPhoneNumber = phone.startsWith('+') ? phone.replace(/[\s-]/g, '') : '+880' + phone.replace(/[\s-]/g, '');
 
         // Create user account
         const [newUser] = await db
             .insert(users)
             .values({
-                publicId,
                 email,
-                phoneCountryCode,
-                phoneNumber,
+                phoneNumber: fullPhoneNumber,
                 passwordHash: hashedPassword,
                 role: role as any, // Use the role from request body
             })
@@ -172,12 +167,12 @@ export async function POST(request: NextRequest) {
             })
             .returning();
 
-        console.log('Created customer profile:', newCustomer.profileId);
+        console.log('Created customer profile:', newCustomer.userId);
 
         return NextResponse.json({
             success: true,
             customer: {
-                id: newCustomer.profileId,
+                id: newCustomer.userId,
                 userId: newUser.id,
                 name: `${firstName} ${lastName}`,
                 firstName,

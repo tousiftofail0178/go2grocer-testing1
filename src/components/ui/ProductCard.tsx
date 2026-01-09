@@ -74,7 +74,7 @@ export function ProductCard({ product, onAdd, quantity = 0, onUpdateQuantity }: 
                     />
                     {discount > 0 && (
                         <div className={styles.badgeWrapper}>
-                            <Badge variant="discount">{discount}% OFF</Badge>
+                            <Badge variant="danger">{discount}% OFF</Badge>
                         </div>
                     )}
 

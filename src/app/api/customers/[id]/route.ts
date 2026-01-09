@@ -22,7 +22,7 @@ export async function GET(
         // Fetch customer with user data
         const customerData = await db
             .select({
-                profileId: customerProfiles.profileId,
+                profileId: customerProfiles.userId, // Map userId to profileId for frontend compatibility
                 userId: customerProfiles.userId,
                 firstName: customerProfiles.firstName,
                 lastName: customerProfiles.lastName,
@@ -35,7 +35,7 @@ export async function GET(
             })
             .from(customerProfiles)
             .leftJoin(users, eq(customerProfiles.userId, users.id))
-            .where(eq(customerProfiles.profileId, customerId))
+            .where(eq(customerProfiles.userId, customerId)) // Corrected: use userId
             .limit(1);
 
         if (customerData.length === 0) {
@@ -50,7 +50,7 @@ export async function GET(
         return NextResponse.json({
             success: true,
             customer: {
-                id: customer.profileId,
+                id: customer.userId,
                 userId: customer.userId,
                 firstName: customer.firstName,
                 lastName: customer.lastName,
@@ -102,7 +102,7 @@ export async function PUT(
         const existingCustomer = await db
             .select()
             .from(customerProfiles)
-            .where(eq(customerProfiles.profileId, customerId))
+            .where(eq(customerProfiles.userId, customerId))
             .limit(1);
 
         if (existingCustomer.length === 0) {
@@ -154,7 +154,7 @@ export async function PUT(
                 phoneNumber: phone,
                 dateOfBirth: dateOfBirth || null,
             })
-            .where(eq(customerProfiles.profileId, customerId))
+            .where(eq(customerProfiles.userId, customerId))
             .returning();
 
         // Update user email if changed
@@ -168,7 +168,7 @@ export async function PUT(
         return NextResponse.json({
             success: true,
             customer: {
-                id: updatedCustomer.profileId,
+                id: updatedCustomer.userId,
                 userId: updatedCustomer.userId,
                 firstName: updatedCustomer.firstName,
                 lastName: updatedCustomer.lastName,

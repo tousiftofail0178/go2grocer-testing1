@@ -233,6 +233,7 @@ export const invoices = pgTable('invoices', {
     status: text('status').default('Unpaid').notNull(),
     amountDue: decimal('amount_due', { precision: 10, scale: 2 }).notNull(),
     generatedAt: timestamp('generated_at').defaultNow().notNull(),
+    blobKey: text('blob_key'), // Key for Netlify Blobs storage
 });
 
 // --- 5.1.1 Entity: payments ---
