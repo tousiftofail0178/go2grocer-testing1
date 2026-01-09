@@ -6,8 +6,9 @@ import { eq } from 'drizzle-orm';
 // PUT /api/admin/businesses/[id] - Update business
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    props: { params: Promise<{ id: string }> }
 ) {
+    const params = await props.params;
     try {
         const businessId = parseInt(params.id);
         const body = await request.json();
@@ -72,8 +73,9 @@ export async function PUT(
 // DELETE /api/admin/businesses/[id] - Delete business
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    props: { params: Promise<{ id: string }> }
 ) {
+    const params = await props.params;
     try {
         const businessId = parseInt(params.id);
 
